@@ -1,4 +1,5 @@
 import { movementVerdict, volumeVerdict } from './attention.js';
+import { solPoolReading } from './poolLiquidity.js';
 import { scoutMark } from './asset.js';
 import { tokenTags } from './categories.js';
 import type { TokenHistoryView } from './coinHistory.js';
@@ -213,7 +214,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     row(wrap, 'Price', usd(token.priceUsd));
     if (token.priceChange5mPct !== null) row(wrap, 'Price 5m', `${token.priceChange5mPct.toFixed(1)}%`);
     row(wrap, 'Liquidity', usd(token.liquidityUsd));
-    if (token.liquiditySol !== null && token.liquiditySol !== undefined) row(wrap, 'SOL in pool', `${token.liquiditySol.toLocaleString('en-US', { maximumFractionDigits: 3 })} SOL`);
+    row(wrap, 'SOL in pool', solPoolReading(token).detail);
     if (token.liquidityChangePct !== null) row(wrap, 'Liquidity chg', `${token.liquidityChangePct.toFixed(1)}%`);
     row(wrap, '5m volume', hasActivity ? usd(a.volume5m) : 'Unknown');
     // The score is largely made of fields a new pair has not published yet, so how hard
@@ -384,6 +385,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     const dev = devStatus(assessment.token);
     const volume = volumeVerdict(assessment.token, assessment.analytics);
     const copies = history?.similar.length ?? 0;
+    const solPool = solPoolReading(assessment.token);
     // The vampire verdict names the count, and says plainly when none were found.
     const vamp = copies > 0
       ? verdictChip('Vamp', `${copies} ${copies === 1 ? 'copy' : 'copies'}`, copies >= 3 ? 'red' : 'orange', `${copies} other coin(s) trade under this name or ticker`)
@@ -391,7 +393,8 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     strip.append(
       verdictChip('Dev', dev.label, dev.tone, dev.reasons[0] ?? ''),
       verdictChip('Volume', volume.level, volume.tone),
-      vamp
+      vamp,
+      verdictChip('SOL pool', solPool.short, 'pool', solPool.detail)
     );
     return strip;
   }

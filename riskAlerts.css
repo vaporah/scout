@@ -106,6 +106,8 @@
 .scout-risk-verdict--red .scout-risk-verdict-value { color: #ffc3ca; }
 .scout-risk-verdict--neutral { border-color: #5a2a33; background: rgba(239, 64, 90, .1); }
 .scout-risk-verdict--neutral .scout-risk-verdict-value { color: #f0c6cd; }
+.scout-risk-verdict--pool { border-color: rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .07); }
+.scout-risk-verdict--pool .scout-risk-verdict-value { color: #f5f5f7; }
 .scout-risk-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
 .scout-risk-tag {
   --scout-tag: #e3b3bb;

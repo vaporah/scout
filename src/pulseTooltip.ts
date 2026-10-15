@@ -2,6 +2,7 @@ import { attentionSignals, movementVerdict, volumeVerdict } from './attention.js
 import { tokenTags } from './categories.js';
 import { devStatus } from './developerReputation.js';
 import { narrativeTags } from './narrative.js';
+import { solPoolReading } from './poolLiquidity.js';
 import { formatPulseLabels, stageLabel, type PulseLabels } from './pulseLabels.js';
 import type { RowReadings } from './rowReadings.js';
 import type { Assessment, Stage } from './types.js';
@@ -165,10 +166,12 @@ export function renderPulseTooltip(
     const dev = devStatus(current.token);
     const volume = volumeVerdict(current.token, current.analytics);
     const copies = rowInfo.similar ?? 0;
+    const solPool = solPoolReading(current.token);
     verdicts.append(
       verdictChip(doc, 'Dev', dev.label, dev.tone),
       verdictChip(doc, 'Volume', volume.level, volume.tone),
-      verdictChip(doc, 'Vamp', copies > 0 ? `\u00d7${copies} copies` : 'unique', copies > 0 ? 'orange' : 'green')
+      verdictChip(doc, 'Vamp', copies > 0 ? `\u00d7${copies} copies` : 'unique', copies > 0 ? 'orange' : 'green'),
+      verdictChip(doc, 'SOL pool', solPool.short, 'pool')
     );
     root.append(verdicts);
 
@@ -217,7 +220,7 @@ export function renderPulseTooltip(
     detail(root, 'Price', usd(t.priceUsd));
     if (t.priceChange5mPct !== null) detail(root, 'Price 5m', `${t.priceChange5mPct.toFixed(1)}%`);
     detail(root, 'Liquidity', usd(t.liquidityUsd));
-    if (t.liquiditySol !== null && t.liquiditySol !== undefined) detail(root, 'SOL in pool', `${t.liquiditySol.toLocaleString('en-US', { maximumFractionDigits: 3 })} SOL`);
+    detail(root, 'SOL in pool', solPoolReading(t).detail);
     if (t.liquidityChangePct !== null) detail(root, 'Liquidity chg', `${t.liquidityChangePct.toFixed(1)}%`);
     detail(root, '5m volume', hasActivity ? usd(a.volume5m) : 'Unknown');
     detail(root, 'Movement', movementVerdict(t, a).detail);
@@ -273,6 +276,7 @@ export function renderPulseTooltip(
     heading(root, 'Scout scan');
     if (mint) {
       detail(root, 'Status', rowInfo.attempted ? 'No pool or security data returned yet' : 'First lookup in flight');
+      detail(root, 'SOL in pool', rowInfo.attempted ? 'Exact reserve not published yet' : 'Checking exact mint');
       detail(root, 'Next check', `Every ${rowInfo.intervalSeconds ?? 15}s while this tab is open`);
     } else {
       detail(root, 'Mint', 'Not readable from this card');

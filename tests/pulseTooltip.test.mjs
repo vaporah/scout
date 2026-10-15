@@ -56,6 +56,20 @@ test('tooltip shows the exact SOL-side reserve when the pool source publishes it
     const tip = dom.window.document.getElementById('tip');
     renderPulseTooltip(tip, assessment, mint, 'assessed', now);
     assert.equal(values(tip).get('SOL in pool'), '123.457 SOL');
+    assert.match([...tip.querySelectorAll('.scout-risk-verdict')].map(node => node.textContent).join(' '), /SOL pool123\.457 SOL/);
+  } finally { dom.window.close(); }
+});
+
+test('tooltip keeps the SOL pool result visible when a reserve is not published', async () => {
+  const now = Date.now();
+  const assessment = await example(now);
+  assessment.token = { ...assessment.token, dexName: 'pumpfun', quoteSymbol: 'SOL', liquidityUsd: null, liquiditySol: null };
+  const dom = new JSDOM('<div id="tip"></div>');
+  try {
+    const tip = dom.window.document.getElementById('tip');
+    renderPulseTooltip(tip, assessment, mint, 'assessed', now);
+    assert.equal(values(tip).get('SOL in pool'), 'Pre-migration bonding curve; no liquidity pool yet');
+    assert.match([...tip.querySelectorAll('.scout-risk-verdict')].map(node => node.textContent).join(' '), /SOL poolPre-LP/);
   } finally { dom.window.close(); }
 });
 
