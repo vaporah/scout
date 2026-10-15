@@ -117,15 +117,15 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
       handle: panel,
       resize: resizeHandle,
       minWidth: 260,
-      minHeight: 180,
+      minHeight: 220,
       maxWidth: 720,
-      resizeAxis: 'width',
-      isBlocked: target => !!target.closest('button, details, summary, a'),
+      maxHeight: 760,
+      resizeAxis: 'both',
+      isBlocked: target => !target.closest('.scout-risk-head') || !!target.closest('button'),
       onCommit: rect => { void saveOverlayRect('risk', rect); }
     });
     doc.body?.append(panel);
-    // Never restore a remembered height: the panel has to grow when a section opens.
-    void loadOverlayRects().then(saved => { if (panel && saved.risk) applyOverlayRect(panel, saved.risk, { height: false }); });
+    void loadOverlayRects().then(saved => { if (panel && saved.risk) applyOverlayRect(panel, saved.risk); });
     void loadOverlayFlags().then(flags => {
       collapsed = flags.riskCollapsed ?? false;
       short = flags.riskShort ?? false;
@@ -146,7 +146,12 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     if (target?.closest('[data-scout-action="collapse"]')) {
       collapsed = !collapsed;
       panel.classList.toggle('is-collapsed', collapsed);
-      panel.style.height = '';
+      if (collapsed) {
+        panel.dataset.scoutExpandedHeight = panel.style.height;
+        panel.style.height = '';
+      } else {
+        panel.style.height = panel.dataset.scoutExpandedHeight ?? '';
+      }
       void saveOverlayFlag('riskCollapsed', collapsed);
       syncButtons();
       return;
@@ -155,9 +160,8 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
       short = !short;
       void saveOverlayFlag('riskShort', short);
       syncButtons();
-      // Force a fresh build so the sections are re-evaluated, and let the panel
-      // size itself again instead of staying at an old fixed height.
-      panel.style.height = '';
+      // Force a fresh build so the sections are re-evaluated while keeping the
+      // size the person explicitly selected.
       signature = '';
       if (lastRender) render(lastRender.assessment, lastRender.view, lastRender.history);
     }

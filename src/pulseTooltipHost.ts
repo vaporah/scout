@@ -171,7 +171,8 @@ export function createPulseTooltipHost(options: PulseTooltipHostOptions) {
       minWidth: 240,
       minHeight: 140,
       maxWidth: 640,
-      resizeAxis: 'width',
+      maxHeight: 680,
+      resizeAxis: 'both',
       isBlocked: target => !!target.closest('button'),
       onCommit: rect => { void saveOverlayRect('tooltip', rect); }
     });
@@ -184,15 +185,13 @@ export function createPulseTooltipHost(options: PulseTooltipHostOptions) {
       short = !short;
       syncShortButton();
       void saveOverlayFlag('tooltipShort', short);
-      if (element) element.style.height = '';
       update();
     });
     void loadOverlayFlags().then(flags => {
       short = flags.tooltipShort ?? false;
       syncShortButton();
     });
-    // Never restore a remembered height: the panel has to grow when a section opens.
-    void loadOverlayRects().then(saved => { if (element && saved.tooltip) applyOverlayRect(element, saved.tooltip, { height: false }); });
+    void loadOverlayRects().then(saved => { if (element && saved.tooltip) applyOverlayRect(element, saved.tooltip); });
     doc.addEventListener('mouseover', onRowEnter);
     doc.addEventListener('mouseout', onRowLeave);
     doc.addEventListener('focusin', onRowEnter);

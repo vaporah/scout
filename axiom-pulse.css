@@ -94,7 +94,7 @@
   right: 16px;
   bottom: 42px;
   width: min(352px, calc(100vw - 24px));
-  max-height: min(460px, 65vh);
+  max-height: calc(100vh - 24px);
   flex-direction: column;
   border: 1px solid #5a2a33;
   border-radius: 12px;
@@ -105,7 +105,7 @@
   pointer-events: auto;
   overflow: hidden;
 }
-.scout-pulse-tooltip.is-visible { display: flex; }
+.scout-pulse-tooltip.is-visible { display: flex; flex-direction: column; }
 .scout-pulse-tooltip-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 6px 5px 9px; cursor: move; user-select: none; border-bottom: 1px solid rgba(239, 64, 90, .3); background: rgba(239, 64, 90, .06); }
 .scout-pulse-tooltip-brand { display: flex; align-items: center; gap: 7px; min-width: 0; }
 /* Verdict badge: the Scout mascot in a circle coloured by the row verdict. */
@@ -136,8 +136,8 @@
 .scout-pulse-tooltip-btn:hover { background: rgba(239, 64, 90, .28); color: #fff; }
 .scout-pulse-tooltip-close { border: 1px solid rgba(239, 64, 90, .3); background: rgba(239, 64, 90, .14); color: #ffbcc4; font-size: 13px; line-height: 1; padding: 2px 7px; border-radius: 7px; cursor: pointer; }
 .scout-pulse-tooltip-close:hover { background: rgba(239, 64, 90, .28); color: #fff; }
-.scout-pulse-tooltip-body { overflow: auto; padding: 11px 14px 12px; }
-.scout-pulse-tooltip-resize { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: ew-resize; }
+.scout-pulse-tooltip-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 11px 14px 12px; }
+.scout-pulse-tooltip-resize { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; }
 .scout-pulse-tooltip-resize::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 8px; height: 8px; border-right: 2px solid #7a3a46; border-bottom: 2px solid #7a3a46; }
 .scout-pulse-tooltip .scout-pulse-tooltip-heading { display: block; margin: 0; color: #fff6f7; font-size: 13px; font-weight: 800; letter-spacing: .01em; }
 .scout-pulse-tooltip .scout-pulse-tooltip-token { display: flex; align-items: baseline; gap: 7px; margin: 2px 0 8px; min-width: 0; }

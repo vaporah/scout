@@ -6,7 +6,7 @@
   top: 16px;
   right: 16px;
   width: min(340px, calc(100vw - 32px));
-  max-height: min(78vh, 660px);
+  max-height: calc(100vh - 24px);
   border: 1px solid #5a2a33;
   border-radius: 12px;
   background: rgba(9, 7, 8, .98);
@@ -15,7 +15,7 @@
   font: 12px/1.45 system-ui, sans-serif;
   overflow: hidden;
 }
-.scout-risk.is-visible { display: block; animation: scout-risk-in .18s ease-out; }
+.scout-risk.is-visible { display: flex; flex-direction: column; animation: scout-risk-in .18s ease-out; }
 @keyframes scout-risk-in {
   from { opacity: 0; transform: translateY(-6px); }
   to { opacity: 1; transform: none; }
@@ -74,7 +74,7 @@
 }
 .scout-risk-btn:hover { background: rgba(239, 64, 90, .28); color: #fff; }
 
-.scout-risk-body { padding: 10px 12px 12px; max-height: min(70vh, 580px); overflow: auto; }
+.scout-risk-body { flex: 1 1 auto; min-height: 0; padding: 10px 12px 12px; max-height: none; overflow: auto; }
 .scout-risk.is-collapsed .scout-risk-body { display: none; }
 .scout-risk-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
 .scout-risk-meta-chip {
@@ -143,5 +143,5 @@
 .scout-risk-holder-wallet:hover { text-decoration: underline; }
 .scout-risk-holder-band { color: #cf9ba4; font-size: 10.5px; font-weight: 650; white-space: nowrap; }
 .scout-risk-disclaimer { margin: 8px 0 0; color: #a8848c; font-size: 10px; }
-.scout-risk-resize { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; cursor: ew-resize; z-index: 2; }
+.scout-risk-resize { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; z-index: 2; }
 .scout-risk-resize::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 8px; height: 8px; border-right: 2px solid #7a3a46; border-bottom: 2px solid #7a3a46; }

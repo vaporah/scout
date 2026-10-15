@@ -45,6 +45,7 @@ export function attachOverlayFrame(element: HTMLElement, options: OverlayFrameOp
   const minWidth = options.minWidth ?? 220;
   const minHeight = options.minHeight ?? 130;
   const maxWidth = options.maxWidth ?? 720;
+  const maxHeight = options.maxHeight ?? 760;
   type DragState = { mode: 'move' | 'resize'; startX: number; startY: number; left: number; top: number; width: number; height: number };
   let drag: DragState | null = null;
 
@@ -76,8 +77,10 @@ export function attachOverlayFrame(element: HTMLElement, options: OverlayFrameOp
       element.style.left = `${clamp(drag.left + dx, 0, Math.max(0, viewW - 48))}px`;
       element.style.top = `${clamp(drag.top + dy, 0, Math.max(0, viewH - 28))}px`;
     } else {
-      element.style.width = `${clamp(drag.width + dx, minWidth, Math.min(maxWidth, Math.max(minWidth, viewW - 16)))}px`;
-      if (options.resizeAxis !== 'width') element.style.height = `${clamp(drag.height + dy, minHeight, Math.max(minHeight, viewH - 16))}px`;
+      const availableWidth = Math.max(minWidth, viewW - drag.left - 12);
+      const availableHeight = Math.max(minHeight, viewH - drag.top - 12);
+      element.style.width = `${clamp(drag.width + dx, minWidth, Math.min(maxWidth, availableWidth))}px`;
+      if (options.resizeAxis !== 'width') element.style.height = `${clamp(drag.height + dy, minHeight, Math.min(maxHeight, availableHeight))}px`;
     }
   }
 
