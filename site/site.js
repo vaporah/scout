@@ -38,7 +38,7 @@
 
     const downloadUrl = secureUrl(config.downloadUrl);
     if (config.released !== true || !downloadUrl) return;
-    if (!/^\d+\.\d+\.\d+$/.test(config.version || '')) return;
+    const version = /^\d+\.\d+\.\d+$/.test(config.version || '') ? config.version : null;
 
     const button = document.getElementById('download-button');
     if (button) button.hidden = true;
@@ -46,15 +46,16 @@
     const link = document.getElementById('release-link');
     if (link) {
       link.href = downloadUrl;
+      link.textContent = 'Add to Chrome';
       link.hidden = false;
     }
 
-    setText('release-badge', `Public release · v${config.version}`);
-    setText('release-description', 'Scout is available. Install it from the Chrome Web Store, then open Axiom or GMGN and carry on as usual.');
-    setText('availability', `Version ${config.version} available`);
+    setText('release-badge', version ? `Public release · v${version}` : 'Available on Chrome Web Store');
+    setText('release-description', 'Scout is available on the Chrome Web Store. Add it to Chrome, then open Axiom or GMGN and carry on as usual.');
+    setText('availability', version ? `Version ${version} available` : 'Available on Chrome Web Store');
 
     const heading = document.querySelector('.release h2');
-    if (heading) heading.textContent = 'Meet your new research companion.';
+    if (heading) heading.textContent = 'Your research edge is ready.';
   };
   try { applyRelease(); } catch { /* leave the shipped copy exactly as written */ }
 
