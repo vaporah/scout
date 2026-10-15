@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { axiomPageMint, mintFromAxiomUrl, mintCandidates, mintFromPulseRow, rowText } from '../dist/src/axiomMint.js';
+import { axiomDocumentMint, axiomPageMint, mintFromAxiomUrl, mintCandidates, mintFromPulseRow, rowText } from '../dist/src/axiomMint.js';
 
 const mint = '11111111111111111111111111111111';
 const other = '22222222222222222222222222222222';
@@ -64,6 +64,18 @@ test('a mint is found in any attribute or short text node, never a whole table',
     assert.equal(mintCandidates(document.querySelector('#many')).size, 2, 'conflicting attributes stay ambiguous');
     assert.equal(mintCandidates(document.querySelector('#none')).size, 0);
   } finally { dom.window.close(); }
+});
+
+test('Axiom token pages can use one explicit contract attribute when the route has no mint', () => {
+  const dom = new JSDOM(`<main data-token-address="${mint}"><button data-copy-value="${mint}">Copy contract</button></main>`, { url: 'https://axiom.trade/chart' });
+  try {
+    assert.equal(axiomDocumentMint(dom.window.document, dom.window.location.href), mint);
+  } finally { dom.window.close(); }
+
+  const conflict = new JSDOM(`<main data-mint="${mint}" data-token-address="${other}"></main>`, { url: 'https://axiom.trade/chart' });
+  try {
+    assert.equal(axiomDocumentMint(conflict.window.document, conflict.window.location.href), null, 'conflicting page identities remain unscanned');
+  } finally { conflict.window.close(); }
 });
 
 test("Scout's own badge, tags and data attributes are never read back as identity", () => {

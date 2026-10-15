@@ -66,6 +66,43 @@ export function axiomPageMint(href: string, base = 'https://axiom.trade/'): stri
   return candidates.length === 1 ? candidates[0] ?? null : null;
 }
 
+/**
+ * Axiom's SPA sometimes keeps the active token address only in the chart header's
+ * explicit contract/copy attributes. That is still a safer identity than scanning
+ * arbitrary page text: only known token-address fields are considered, and a page
+ * with more than one candidate stays unscanned rather than choosing a wallet or a
+ * row from a side panel.
+ */
+export function axiomDocumentMint(doc: Document, href: string, base = 'https://axiom.trade/'): string | null {
+  const fromLocation = axiomPageMint(href, base);
+  if (fromLocation) return fromLocation;
+
+  const strongAttributes = [
+    'data-mint', 'data-token-mint', 'data-token-address', 'data-contract-address', 'data-ca'
+  ];
+  const copyAttributes = [
+    'data-address', 'data-copy-value', 'data-clipboard-text', 'data-clipboard'
+  ];
+  const candidates = (attributes: string[]): Set<string> => {
+    const found = new Set<string>();
+    for (const name of attributes) {
+      for (const element of Array.from(doc.querySelectorAll(`[${name}]`))) {
+        const value = element.getAttribute(name)?.trim() ?? '';
+        if (mintPattern.test(value)) found.add(value);
+        if (found.size > 1) return found;
+      }
+    }
+    return found;
+  };
+
+  const strong = candidates(strongAttributes);
+  if (strong.size === 1) return [...strong][0] ?? null;
+  if (strong.size > 1) return null;
+
+  const copy = candidates(copyAttributes);
+  return copy.size === 1 ? [...copy][0] ?? null : null;
+}
+
 /** Scout's own injected UI, which must never be read back as page evidence. */
 export const scoutUiSelector = '.scout-pulse-badge, .scout-pulse-tags, .scout-pulse-tooltip';
 

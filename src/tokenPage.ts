@@ -1,5 +1,5 @@
 import { extractAxiomDevBadge } from './axiomDevBadge.js';
-import { axiomPageMint } from './axiomMint.js';
+import { axiomDocumentMint } from './axiomMint.js';
 import { requestAssessments } from './scanClient.js';
 import { startTokenPageMonitor } from './tokenPageMonitor.js';
 
@@ -10,7 +10,7 @@ import { startTokenPageMonitor } from './tokenPageMonitor.js';
  * DEV) when present.
  */
 startTokenPageMonitor(
-  href => axiomPageMint(href),
+  href => axiomDocumentMint(document, href),
   requestAssessments,
   { pageBadge: () => extractAxiomDevBadge(document) }
 ).start();
