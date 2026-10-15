@@ -3,6 +3,7 @@ import { formatTokenTags, tokenTags, type TokenCategory } from './categories.js'
 import { loadCoinHistory, type CoinObservation } from './coinHistory.js';
 import { mintFromGmgnUrl } from './gmgnMint.js';
 import { createPulseTooltipHost } from './pulseTooltipHost.js';
+import { setPulseRowFlow } from './pulseRowFlow.js';
 import { requestAssessments } from './scanClient.js';
 import { applyPulseSignals, type PulseRow } from './pulseRows.js';
 import { defaults, validSettings } from './settings.js';
@@ -122,6 +123,7 @@ function clearRow(row: HTMLElement): void {
   row.removeAttribute('data-scout-hot');
   row.querySelectorAll(':scope > .scout-pulse-badge').forEach(badge => badge.remove());
   row.querySelectorAll(':scope > .scout-pulse-tags').forEach(tags => tags.remove());
+  row.querySelectorAll(':scope > .scout-pulse-flow').forEach(flow => flow.remove());
 }
 
 function setTags(row: HTMLElement, tags: TokenCategory[]): void {
@@ -191,6 +193,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     const byMint = new Map(fresh.map(a => [a.token.mint, a]));
     for (const row of rows) {
       const assessment = byMint.get(row.mint);
+      setPulseRowFlow(row.element, assessment?.token ?? null);
       const tags = assessment ? tokenTags(assessment.token) : [];
       const actionable = assessment ? badgeFor(assessment, settings).kind !== 'gray' : false;
       setTags(row.element, actionable ? tags : []);

@@ -84,7 +84,9 @@ test('GMGN rows open the same hover popup Axiom Pulse has, badge and all', async
   const dom = page(`<main><div id="row"><a href="/sol/token/${mint}">Coin</a><img src="x"><button>Buy</button></div></main>`);
   const now = Date.now();
   const [sample] = await fetchTokens('demo', now);
-  const [top] = assessTokens([{ ...sample, mint, symbol: 'FINCH', provider: 'Verified fixture' }], defaults, now);
+  const [top] = assessTokens([{ ...sample, mint, symbol: 'FINCH', provider: 'Verified fixture', solFlow5m: {
+    netSol: -2.5, buySol: 3, sellSol: 5.5, observedAt: now, source: 'Verified fixture'
+  } }], defaults, now);
   const overlay = createGmgnOverlay({
     document: dom.window.document,
     request: async () => ({ assessments: [top], settings: defaults }),
@@ -95,6 +97,7 @@ test('GMGN rows open the same hover popup Axiom Pulse has, badge and all', async
     const document_ = dom.window.document;
     const row = document_.querySelector('#row');
     await waitFor(() => row.classList.contains('scout-pulse-green'), 'the row to be assessed before hovering');
+    assert.equal(row.querySelector('.scout-pulse-flow')?.textContent, '5m -2.5 SOL');
     const tip = document_.querySelector('.scout-pulse-tooltip');
     assert.ok(tip, 'the hover popup is created for GMGN too');
     assert.equal(tip.classList.contains('is-visible'), false, 'and stays hidden until a row is hovered');

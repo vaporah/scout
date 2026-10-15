@@ -14,6 +14,7 @@ import { signalClass } from './ui.js';
 import { savePulseStatus } from './pulseStatus.js';
 import { extractRowLabels, formatPulseLabels, stageFromHeading, stageLabel, type PulseLabels } from './pulseLabels.js';
 import { createPulseTooltipHost } from './pulseTooltipHost.js';
+import { setPulseRowFlow } from './pulseRowFlow.js';
 import { readRowReadings, type RowReadings } from './rowReadings.js';
 
 const headings = ['New Pairs', 'Final Stretch', 'Migrated'] as const;
@@ -265,6 +266,7 @@ function clearRow(row: HTMLElement): void {
   row.removeAttribute('data-scout-hot');
   row.querySelectorAll(':scope > .scout-pulse-badge').forEach(badge => badge.remove());
   row.querySelectorAll(':scope > .scout-pulse-tags').forEach(tags => tags.remove());
+  row.querySelectorAll(':scope > .scout-pulse-flow').forEach(flow => flow.remove());
 }
 
 function badgeStyle(a: Assessment, settings: Settings): 'green' | 'amber' | 'red' | 'gray' | 'run' {
@@ -403,6 +405,7 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
     const byMint = new Map(fresh.map(a => [a.token.mint, a]));
     for (const row of rows) {
       const assessment = row.mint ? byMint.get(row.mint) : undefined;
+      setPulseRowFlow(row.element, assessment?.token ?? null);
       const narratives = assessment ? narrativeTags(assessment.token) : [];
       const attention = assessment ? attentionSignals(assessment.token, assessment.analytics) : [];
       const tags = assessment ? tokenTags(assessment.token) : [];

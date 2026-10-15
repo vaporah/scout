@@ -95,7 +95,9 @@ test('hovering a Pulse card opens the shared popup and leaving it closes the pop
   const dom = pulse(`<main><section><h2>New Pairs</h2><article id="row"><a href="/t/${one}?chain=sol">SCOUT</a></article></section></main>`);
   const now = Date.now();
   const [sample] = await fetchTokens('demo', now);
-  const [top] = assessTokens([{ ...sample, mint: one, symbol: 'FINCH', provider: 'Verified fixture' }], defaults, now);
+  const [top] = assessTokens([{ ...sample, mint: one, symbol: 'FINCH', provider: 'Verified fixture', solFlow5m: {
+    netSol: 5.25, buySol: 8, sellSol: 2.75, observedAt: now, source: 'Verified fixture'
+  } }], defaults, now);
   const overlay = createAxiomPulseOverlay({
     document: dom.window.document,
     request: async () => ({ assessments: [top], settings: defaults }),
@@ -106,6 +108,7 @@ test('hovering a Pulse card opens the shared popup and leaving it closes the pop
     const document_ = dom.window.document;
     const row = document_.querySelector('#row');
     await waitFor(() => row.classList.contains('scout-pulse-green'), 'the row to be assessed before hovering');
+    assert.equal(row.querySelector('.scout-pulse-flow')?.textContent, '5m +5.25 SOL', 'Axiom Pulse shows flow directly on the card');
     const tip = document_.querySelector('.scout-pulse-tooltip');
     assert.ok(tip, 'the hover popup the GMGN overlay shares is created here too');
     assert.equal(tip.classList.contains('is-visible'), false);
@@ -115,6 +118,7 @@ test('hovering a Pulse card opens the shared popup and leaving it closes the pop
     assert.equal(tip.querySelector('.scout-pulse-tooltip-symbol')?.textContent, 'FINCH');
     assert.ok(tip.querySelector('.scout-pulse-tooltip-mark img'), 'the mascot badge survives the shared host');
     assert.equal(tip.dataset.scoutTone, 'green');
+    assert.match(tip.textContent ?? '', /5m SOL flow\+5\.25 SOL net/);
 
     row.querySelector('a').dispatchEvent(new dom.window.MouseEvent('mouseout', { bubbles: true, relatedTarget: document_.body }));
     await waitFor(() => !tip.classList.contains('is-visible'), 'the popup to close after the grace period');

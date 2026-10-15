@@ -64,6 +64,24 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
+.scout-pulse-flow {
+  position: absolute;
+  z-index: 7;
+  right: 4px;
+  bottom: 3px;
+  padding: 2px 5px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 5px;
+  background: rgba(8, 8, 10, .88);
+  color: #d9d9dc;
+  font: 700 9px/1.25 system-ui, sans-serif;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.scout-pulse-flow.is-positive { border-color: rgba(62, 220, 133, .45); color: #9ce8bc; }
+.scout-pulse-flow.is-negative { border-color: rgba(255, 76, 99, .48); color: #ffb2bd; }
+.scout-pulse-flow.is-flat { color: #b9b9bf; }
 .scout-pulse-badge {
   position: absolute;
   z-index: 5;
