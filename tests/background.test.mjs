@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assessVisibleMints, isAxiomPulseSender, isScoutSender, maxScanMints, registerScanListener, scanMints } from '../dist/src/background.js';
 import { resetHolderAccountCache } from '../dist/src/rugcheck.js';
+import { resetGmgnStatCache } from '../dist/src/gmgnStat.js';
 
 const mint = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN';
 const other = '11111111111111111111111111111111';
@@ -168,6 +169,39 @@ test('a coin no market indexer lists is still described, and says where the figu
   } finally {
     globalThis.fetch = oldFetch;
     resetHolderAccountCache();
+  }
+});
+
+test('GMGN stats make an unindexed Axiom mint useful without waiting for the slow holder report', async () => {
+  const statMint = 'ABCDEFGHJKLMNPQRSTUVWXYZ5555555555555';
+  const oldFetch = globalThis.fetch;
+  const now = Date.now();
+  resetHolderAccountCache();
+  resetGmgnStatCache();
+  globalThis.fetch = async url => {
+    const target = String(url);
+    if (target.includes('dexscreener')) return new Response('[]', { status: 200 });
+    if (target.includes('geckoterminal')) return new Response(JSON.stringify({ data: [] }), { status: 200 });
+    if (target.includes('gopluslabs')) return new Response(JSON.stringify({ code: 1, result: {} }), { status: 200 });
+    if (target.includes('gmgn.ai/api/v1/token_stat')) return new Response(JSON.stringify({
+      code: 0,
+      data: { holder_count: '4261', top_10_holder_rate: '0.467', creator_hold_rate: '0.03', creator_created_count: '7' }
+    }), { status: 200 });
+    if (target.includes('rugcheck')) return new Promise(() => {});
+    throw new Error(`Unexpected URL ${target}`);
+  };
+  try {
+    const response = await assessVisibleMints([statMint], now);
+    const token = response.assessments[0]?.token;
+    assert.ok(token, 'GMGN context should produce an Axiom assessment before the holder report returns');
+    assert.equal(token.holderCount, 4261);
+    assert.equal(token.top10HoldPct, 46.7);
+    assert.equal(token.developerHoldingPct, 3);
+    assert.equal(token.holderQuality?.devLaunches, 7);
+  } finally {
+    globalThis.fetch = oldFetch;
+    resetHolderAccountCache();
+    resetGmgnStatCache();
   }
 });
 

@@ -67,6 +67,8 @@ export function isUnidentifiedToken(token: Token): boolean {
     && token.holderCount == null
     && token.holderBands == null
     && token.top10HoldPct == null
+    && token.holderQuality == null
+    && token.developerHoldingPct == null
     && token.marketSnapshot === undefined;
 }
 

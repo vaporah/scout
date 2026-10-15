@@ -58,16 +58,16 @@ const lookupConcurrency = 4;
  * established token never needs it because the other providers already answered.
  */
 async function withFallbackReport(token: Token, now: number): Promise<Token> {
+  const startedUnidentified = isUnidentifiedToken(token);
   const hasMarket = (token.poolAddresses?.length ?? 0) > 0;
   const hasHolders = (token.holders?.length ?? 0) > 0 || token.holderBands != null || typeof token.holderCount === 'number';
   const hasTop10 = token.holderBands?.top10 != null || token.top10HoldPct != null;
   if (hasMarket && hasHolders && hasTop10 && typeof token.developerHoldingPct === 'number') return token;
-  // Requested together: both only run when something is missing, and one slow source
-  // must not add its latency to the other.
-  const [found, stats] = await Promise.all([
-    fetchHolderAccounts(token.mint, now).catch(() => null),
-    fetchGmgnStats(token.mint, now).catch(() => null)
-  ]);
+  // The holder report is warmed when a token page starts, but it can take several
+  // seconds. GMGN's compact token stat is usually fast and already supplies enough
+  // holder context to make the Axiom page useful, so do not hold that answer behind
+  // the slower report.
+  const stats = await fetchGmgnStats(token.mint, now).catch(() => null);
   let next = token;
   // What the deployer still holds — the figure the popup's Dev row kept missing.
   if (stats?.creatorHoldingPct != null && next.developerHoldingPct == null) {
@@ -82,6 +82,14 @@ async function withFallbackReport(token: Token, now: number): Promise<Token> {
   if (stats?.quality && !next.holderQuality) {
     next = { ...next, holderQuality: stats.quality };
   }
+  // Return early only for the page that had no public market identity at all. A normal
+  // pool still benefits from the detailed report because it can name the creator and
+  // fill in a real holder list, even when GMGN supplied a quick headline figure.
+  if (startedUnidentified && !isUnidentifiedToken(next)) return next;
+
+  // No quick contextual answer arrived. The already-warmed detailed report is now
+  // worth awaiting because it is the remaining way to name or describe this mint.
+  const found = await fetchHolderAccounts(token.mint, now).catch(() => null);
   if (!found) return next;
   if (!hasMarket && found.meta) {
     // Nothing else described this coin, so the name here replaces the truncated mint.
