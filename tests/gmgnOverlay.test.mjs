@@ -42,6 +42,21 @@ test('GMGN row discovery keys rows by full mint links and ignores tickers', () =
   } finally { dom.window.close(); }
 });
 
+test('GMGN row discovery supports the current clickable Trenches card', () => {
+  const dom = page(`<main>
+    <div id="card" href="/sol/token/${mint}" class="cursor-pointer">
+      <img src="x" alt="logo"><span>Coin</span>
+      <a href="https://pump.fun/coin/${mint}">Launchpad</a>
+    </div>
+  </main>`);
+  try {
+    const rows = collectGmgnRows(dom.window.document);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].mint, mint);
+    assert.equal(rows[0].element.id, 'card');
+  } finally { dom.window.close(); }
+});
+
 test('GMGN overlay paints a verified exact match and clears a removed row', async () => {
   const dom = page(`<main><div id="row"><a href="/sol/token/${mint}">Coin</a><img src="x"><button>Buy</button></div></main>`);
   const now = Date.now();

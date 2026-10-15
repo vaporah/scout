@@ -10,7 +10,7 @@ import { runningWithoutVerdict } from './attention.js';
 import { signalClass } from './ui.js';
 import type { Assessment, Settings } from './types.js';
 
-const colouredClasses = ['scout-pulse-green', 'scout-pulse-amber', 'scout-pulse-red', 'scout-pulse-gray', 'scout-pulse-neutral'];
+const colouredClasses = ['scout-pulse-green', 'scout-pulse-amber', 'scout-pulse-red', 'scout-pulse-gray', 'scout-pulse-run', 'scout-pulse-neutral'];
 
 export interface GmgnOverlayOptions {
   document?: Document;
@@ -39,24 +39,29 @@ function inViewport(element: Element): boolean {
   return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < view.innerHeight;
 }
 
-function mintCount(element: Element): number {
-  let count = 0;
-  for (const anchor of Array.from(element.querySelectorAll('a[href]'))) {
-    if (mintFromGmgnUrl(anchor.getAttribute('href') ?? '')) count++;
+function linkedMints(element: Element): Set<string> {
+  const mints = new Set<string>();
+  const own = mintFromGmgnUrl(element.getAttribute('href') ?? '');
+  if (own) mints.add(own);
+  for (const link of Array.from(element.querySelectorAll('[href]'))) {
+    const mint = mintFromGmgnUrl(link.getAttribute('href') ?? '');
+    if (mint) mints.add(mint);
   }
-  return count;
+  return mints;
 }
 
 function looksLikeRow(element: Element): boolean {
-  return !!element.querySelector('img') && Array.from(element.querySelectorAll('button')).some(button => /\b(?:buy|sell|trade)\b/i.test(button.textContent ?? ''));
+  if (!element.querySelector('img')) return false;
+  if (mintFromGmgnUrl(element.getAttribute('href') ?? '')) return true;
+  return Array.from(element.querySelectorAll('button')).some(button => /\b(?:buy|sell|trade)\b/i.test(button.textContent ?? ''));
 }
 
-function rowContainer(anchor: Element): HTMLElement | null {
-  const view = anchor.ownerDocument.defaultView;
-  let current: Element | null = anchor.parentElement;
+function rowContainer(identity: Element): HTMLElement | null {
+  const view = identity.ownerDocument.defaultView;
+  let current: Element | null = identity;
   let candidate: HTMLElement | null = null;
-  while (current && current !== anchor.ownerDocument.body) {
-    if (mintCount(current) > 1) break; // a wrapper containing several tokens is not one row
+  while (current && current !== identity.ownerDocument.body) {
+    if (linkedMints(current).size > 1) break; // a wrapper containing several tokens is not one row
     const rect = current.getBoundingClientRect();
     const sized = rect.width === 0 && rect.height === 0 || rect.height >= 28 && rect.height <= 320 && rect.width >= 140;
     if (sized) candidate = current as HTMLElement;
@@ -74,10 +79,13 @@ export function collectGmgnRows(doc: Document): PulseRow[] {
   const base = 'https://gmgn.ai/';
   const rows: PulseRow[] = [];
   const seen = new Set<string>();
-  for (const anchor of Array.from(doc.querySelectorAll('a[href]'))) {
-    const mint = mintFromGmgnUrl(anchor.getAttribute('href') ?? '', base);
-    if (!mint || seen.has(mint) || isHidden(anchor) || !inViewport(anchor)) continue;
-    const row = rowContainer(anchor);
+  // GMGN currently renders Trenches cards as clickable div[href] elements.
+  // Older layouts and the compact table use anchors, so accept any href-bearing
+  // element while keeping the same exact-host, exact-mint URL validation.
+  for (const identity of Array.from(doc.querySelectorAll('[href]'))) {
+    const mint = mintFromGmgnUrl(identity.getAttribute('href') ?? '', base);
+    if (!mint || seen.has(mint) || isHidden(identity) || !inViewport(identity)) continue;
+    const row = rowContainer(identity);
     if (!row) continue;
     seen.add(mint);
     rows.push({ element: row, mint });

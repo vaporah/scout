@@ -12,15 +12,15 @@
   background: rgba(255, 76, 99, .09) !important;
   box-shadow: inset 3px 0 0 #ff4c63 !important;
 }
-/* White is the default state. A row with no actionable Scout finding is deliberately
-   returned to the host UI without a rail, badge, tint, or animation. */
+/* Every exact-mint match gets a quiet white rail. Verdict colors replace it only when
+   Scout has enough evidence for a green, yellow, or red state. */
 .scout-pulse-neutral {
-  background: none !important;
-  box-shadow: none !important;
+  background: rgba(255, 255, 255, .025) !important;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, .72) !important;
 }
 .scout-pulse-gray {
-  background: none !important;
-  box-shadow: none !important;
+  background: rgba(255, 255, 255, .025) !important;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, .72) !important;
 }
 /* Activity without a quality verdict is caution yellow, never a separate blue state. */
 .scout-pulse-run {
@@ -86,7 +86,7 @@
 .scout-pulse-badge--amber { background: #facc4b; }
 .scout-pulse-badge--red { background: #ff4c63; }
 .scout-pulse-badge--run { background: #facc4b; }
-.scout-pulse-badge--gray, .scout-pulse-badge--neutral { display: none; }
+.scout-pulse-badge--gray, .scout-pulse-badge--neutral { background: rgba(255, 255, 255, .72); }
 .scout-pulse-tooltip {
   display: none;
   position: fixed;
