@@ -1,10 +1,10 @@
 // The store version is intentionally omitted until the Chrome Web Store finishes
-// processing the newest package. Keep sourcePublic false until GitHub visibility is
-// changed to public; anonymous requests currently receive a 404 response.
+// processing the newest package. The repository is public, so the source link can
+// be shown alongside the Chrome Web Store action.
 window.SCOUT_RELEASE = Object.freeze({
   released: true,
   version: '',
   downloadUrl: 'https://chromewebstore.google.com/detail/mcmjonacgckbkemcmngpbpdhogagncak',
-  sourcePublic: false,
+  sourcePublic: true,
   sourceUrl: 'https://github.com/vaporah/scout'
 });
