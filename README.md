@@ -1,12 +1,28 @@
 # Scout
 
-Scout is a Chromium extension for Solana token research on Axiom Pulse and, as a secondary surface, GMGN. It colours each detected visible coin row while it scans, then changes the colour when independent evidence supports a more specific result. A full Solana mint is required before a coin can receive a score. The compact companion remains available for detailed evidence. On individual token chart pages, Scout shows an evidence-based developer-risk warning near the top-right. The streamer screenshots are visual references, not a source of scoring rules.
+<p align="center">
+  <img src="./scout-raccoon-logo.png" width="128" alt="Scout raccoon wearing a red headband">
+</p>
 
-## Brand assets
+<p align="center"><strong>Evidence-first Solana research for Axiom and GMGN.</strong></p>
 
-Scout uses a raccoon with a red headband for its toolbar icon and top-right header mark. The transparent [master artwork](./assets/scout-raccoon-master.png) is retained for reuse; [generate-icons.ps1](./scripts/generate-icons.ps1) creates the packaged PNG sizes and the smaller header logo. The popup and dashboard use a black and crimson theme. Coin-status green, amber, red, blue and gray keep their separate meanings.
+<p align="center">
+  <a href="https://scoutai.trade/">Website</a> ·
+  <a href="./LICENSE">MIT License</a> ·
+  <a href="./PRIVACY.md">Privacy</a> ·
+  <a href="./SECURITY.md">Security</a>
+</p>
 
-## Build and load
+Scout is a Chromium extension that adds independent token context to the trading screen. It matches coins by full Solana mint, presents available market and risk evidence, and leaves every trading decision with the user.
+
+## What Scout does
+
+- Matches a coin only after finding its full Solana mint.
+- Brings market, holder, developer, token-control, and copycat context into Axiom and GMGN.
+- Keeps missing evidence visible instead of treating it as a clean result.
+- Never connects a wallet, signs a transaction, or places an order.
+
+## Install locally
 
 1. Run `npm install` and `npm test` (or `npm run build`).
 2. Open `brave://extensions` (or `chrome://extensions`), enable Developer mode, and choose **Load unpacked**.
