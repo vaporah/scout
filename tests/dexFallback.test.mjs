@@ -55,7 +55,7 @@ test('a token page follows a pool address to the token it holds', async () => {
         chainId: 'solana', dexId: 'pumpfun', pairAddress: pool,
         baseToken: { address: held, name: 'Saindra', symbol: 'SAINDRA' },
         quoteToken: { symbol: 'SOL' },
-        liquidity: { usd: 16_000 }, priceUsd: '0.0002', marketCap: 18_600, fdv: 18_600,
+        liquidity: { usd: 16_000, quote: 100.25 }, priceUsd: '0.0002', marketCap: 18_600, fdv: 18_600,
         volume: { m5: 4_000 }, txns: { m5: { buys: 20, sells: 9 } }, priceChange: { m5: 3 }
       }]), { status: 200 });
     }
@@ -69,6 +69,7 @@ test('a token page follows a pool address to the token it holds', async () => {
     const token = await fetchMint(pool, Date.now(), true);
     assert.equal(token.mint, held, 'the token the pool holds is the real identity');
     assert.equal(token.symbol, 'SAINDRA');
+    assert.equal(token.liquiditySol, 100.25, 'the SOL-side reserve is retained when DEX Screener publishes it');
     assert.ok(calls.some(call => call.includes('/latest/dex/pairs/solana/')), 'the pair endpoint is what maps pool to token');
   } finally {
     globalThis.fetch = oldFetch;
@@ -106,6 +107,7 @@ test('GeckoTerminal token-pools parser maps market and pool fields', () => {
   assert.equal(token.dexName, 'raydium');
   assert.equal(token.quoteSymbol, 'SOL');
   assert.equal(token.liquidityUsd, 20000);
+  assert.equal(token.liquiditySol, null, 'the Gecko pool endpoint does not publish an exact quote reserve');
   assert.equal(token.priceUsd, 0.001);
   assert.equal(token.marketCapUsd, 50000);
   assert.equal(token.marketSnapshot.buys5m, 10);

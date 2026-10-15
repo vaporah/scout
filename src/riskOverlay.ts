@@ -213,6 +213,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     row(wrap, 'Price', usd(token.priceUsd));
     if (token.priceChange5mPct !== null) row(wrap, 'Price 5m', `${token.priceChange5mPct.toFixed(1)}%`);
     row(wrap, 'Liquidity', usd(token.liquidityUsd));
+    if (token.liquiditySol !== null && token.liquiditySol !== undefined) row(wrap, 'SOL in pool', `${token.liquiditySol.toLocaleString('en-US', { maximumFractionDigits: 3 })} SOL`);
     if (token.liquidityChangePct !== null) row(wrap, 'Liquidity chg', `${token.liquidityChangePct.toFixed(1)}%`);
     row(wrap, '5m volume', hasActivity ? usd(a.volume5m) : 'Unknown');
     // The score is largely made of fields a new pair has not published yet, so how hard

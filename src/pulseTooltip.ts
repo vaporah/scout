@@ -217,6 +217,7 @@ export function renderPulseTooltip(
     detail(root, 'Price', usd(t.priceUsd));
     if (t.priceChange5mPct !== null) detail(root, 'Price 5m', `${t.priceChange5mPct.toFixed(1)}%`);
     detail(root, 'Liquidity', usd(t.liquidityUsd));
+    if (t.liquiditySol !== null && t.liquiditySol !== undefined) detail(root, 'SOL in pool', `${t.liquiditySol.toLocaleString('en-US', { maximumFractionDigits: 3 })} SOL`);
     if (t.liquidityChangePct !== null) detail(root, 'Liquidity chg', `${t.liquidityChangePct.toFixed(1)}%`);
     detail(root, '5m volume', hasActivity ? usd(a.volume5m) : 'Unknown');
     detail(root, 'Movement', movementVerdict(t, a).detail);

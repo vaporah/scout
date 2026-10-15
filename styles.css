@@ -136,6 +136,10 @@ select.select option { background: #151216; color: var(--text); }
 .popup-head { display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .popup-head .header-copy { margin-left: 0; align-items: flex-start; text-align: left; }
 .popup-head .mark { width: 40px; height: 40px; }
+.popup-tabs { display: inline-flex; gap: 2px; margin-left: auto; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); }
+.popup-tab { border: 0; border-radius: 6px; background: transparent; color: var(--muted); padding: 5px 8px; font: 700 9px/1 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.popup-tab:hover { color: var(--text); }
+.popup-tab.is-active { background: var(--line-2); color: var(--text); }
 .muted { color: var(--muted); font-size: 12px; line-height: 1.5; }
 .popup-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
 .popup-stats > div {
@@ -393,3 +397,13 @@ footer { color: var(--muted-2); font-size: 11px; margin-top: 22px; text-align: c
 .popup-website input { width: 100%; min-width: 0; }
 .popup-website button { width: 100%; }
 .popup-website [role=status] { margin: 8px 0 0; overflow-wrap: anywhere; }
+.popup-settings { display: flex; flex-direction: column; gap: 13px; }
+.popup-settings-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.popup-settings h1 { margin: 0 0 4px; font-size: 18px; letter-spacing: -.02em; }
+.popup-settings-head .subtle { padding: 6px 8px; font-size: 10px; }
+.popup-setting-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.popup-setting-grid label { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: var(--muted); font-size: 10px; font-weight: 700; }
+.popup-setting-grid input { width: 100%; min-width: 0; padding: 8px 9px; font-size: 12px; }
+.popup-toggle { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: 11px; font-weight: 600; cursor: pointer; }
+.popup-toggle input { width: 14px; height: 14px; accent-color: var(--accent); }
+.popup-settings-status { min-height: 1.4em; margin: -4px 0 0; color: var(--muted-2); font-size: 10px; line-height: 1.45; }

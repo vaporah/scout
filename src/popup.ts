@@ -7,7 +7,8 @@ import { loadPulseStatus } from './pulseStatus.js';
 import { checkActiveWebsite } from './siteCheck.js';
 import { popupCoinRow } from './tokenCard.js';
 import { coinDetail } from './coinDetail.js';
-import { escapeHtml as e, bindCoinImages, bindCopyButtons, loadProviderMode, loadSettings } from './ui.js';
+import { escapeHtml as e, bindCoinImages, bindCopyButtons, loadProviderMode, loadSettings, saveSettings } from './ui.js';
+import { defaults, validSettings } from './settings.js';
 import { filterByPlatform, loadPlatformFilter, platformCatalogue, savePlatformFilter, togglePlatform } from './platformFilter.js';
 import { filterByQuote, loadQuoteFilter, quoteOptions, saveQuoteFilter, toggleQuote } from './quoteFilter.js';
 import { bindProtocolPicker, platformPickerIds, protocolPicker, quotePickerIds } from './protocolPicker.js';
@@ -27,15 +28,51 @@ let platforms = loadPlatformFilter();
 let platformsExpanded = false;
 /** Quote-token filter, also shared with the dashboard. */
 let quotes = loadQuoteFilter();
+let popupTab: 'scan' | 'settings' = 'scan';
+
+const settingInput = (name: keyof Settings, label: string, value: number, min: number, max: number, step: number): string =>
+  `<label><span>${e(label)}</span><input data-popup-setting="${name}" type="number" value="${value}" min="${min}" max="${max}" step="${step}"></label>`;
 
 function websiteCheckSection(): string {
   return `<details class="popup-website"><summary>Check this website's token address</summary><p>Open a coin's HTTPS website, click Scout, then paste the full Solana mint. Scout checks only what this page visibly shows now.</p><form id="site-check-form"><input id="site-check-mint" type="text" spellcheck="false" autocomplete="off" aria-label="Token mint to check on this website" placeholder="Paste full Solana mint" value="${e(siteMint)}"><button class="subtle" type="submit">Check exact address</button></form><p id="site-check-result" class="muted" role="status">${e(siteResult)}</p></details>`;
 }
 
+function settingsView(settings: Settings): string {
+  return `<section class="popup-settings"><div class="popup-settings-head"><div><h1>Scanner settings</h1><p class="muted">These thresholds change Scout's research labels. They never place trades.</p></div><button id="reset-popup-settings" class="subtle" type="button">Reset</button></div><div class="popup-setting-grid">${settingInput('minLiquidityUsd', 'Minimum liquidity ($)', settings.minLiquidityUsd, 0, 1_000_000, 1000)}${settingInput('maxSlippagePct', 'Max estimated impact (%)', settings.maxSlippagePct, 0.1, 20, 0.1)}${settingInput('tradeSizeUsd', 'Sample trade ($)', settings.tradeSizeUsd, 1, 100_000, 1)}${settingInput('minScore', 'Top-candidate score', settings.minScore, 0, 100, 1)}${settingInput('maxAgeHours', 'Maximum age (hours)', settings.maxAgeHours, 1, 720, 1)}${settingInput('refreshSeconds', 'Refresh interval (seconds)', settings.refreshSeconds, 10, 300, 1)}</div><label class="popup-toggle"><input id="popup-notifications" type="checkbox" ${settings.notifications ? 'checked' : ''}><span>Enable research notifications</span></label><p id="popup-settings-status" class="popup-settings-status" role="status">Changes are saved locally and apply to future scans.</p><button id="open-dashboard" class="subtle wide" type="button">Open full dashboard</button></section>`;
+}
+
 function frame(content: string): void {
-  app.innerHTML = `<div class="popup-wrap"><header class="popup-head"><div class="header-end"><span class="mark" aria-label="Scout"><img src="scout-raccoon-logo.png" alt="Scout raccoon logo" width="36" height="36"></span></div><div class="header-copy"><span class="header-kicker">SOLANA / LIVE</span><strong>Market radar</strong></div></header>${content}${websiteCheckSection()}<button id="open-companion" class="primary wide">Open compact companion</button><button id="open-dashboard" class="subtle wide">Open full dashboard</button><p class="popup-foot">Scores are research aids, not trade instructions.</p></div>`;
+  const settings = latest?.settings ?? loadSettings();
+  const tabs = `<div class="popup-tabs" role="tablist" aria-label="Scout popup sections"><button id="tab-scan" class="popup-tab ${popupTab === 'scan' ? 'is-active' : ''}" type="button" role="tab" aria-selected="${popupTab === 'scan'}">Scan</button><button id="tab-settings" class="popup-tab ${popupTab === 'settings' ? 'is-active' : ''}" type="button" role="tab" aria-selected="${popupTab === 'settings'}">Settings</button></div>`;
+  const body = popupTab === 'settings' ? settingsView(settings) : `${content}${websiteCheckSection()}<button id="open-companion" class="primary wide" type="button">Open compact companion</button><button id="open-dashboard" class="subtle wide" type="button">Open full dashboard</button>`;
+  app.innerHTML = `<div class="popup-wrap"><header class="popup-head"><div class="header-end"><span class="mark" aria-label="Scout"><img src="scout-raccoon-logo.png" alt="Scout raccoon logo" width="36" height="36"></span></div><div class="header-copy"><span class="header-kicker">SOLANA / LIVE</span><strong>Market radar</strong></div>${tabs}</header>${body}<p class="popup-foot">Research aids only. Scout never connects a wallet or places a trade.</p></div>`;
+  app.querySelector<HTMLButtonElement>('#tab-scan')?.addEventListener('click', () => { popupTab = 'scan'; paint(); });
+  app.querySelector<HTMLButtonElement>('#tab-settings')?.addEventListener('click', () => { popupTab = 'settings'; paint(); });
   app.querySelector<HTMLButtonElement>('#open-dashboard')?.addEventListener('click', () => { window.open('dashboard.html', '_blank', 'noopener'); });
   app.querySelector<HTMLButtonElement>('#open-companion')?.addEventListener('click', () => { window.open('dashboard.html', 'scout-companion', 'popup,width=520,height=820'); });
+  app.querySelector<HTMLButtonElement>('#reset-popup-settings')?.addEventListener('click', () => {
+    if (latest) latest.settings = defaults;
+    saveSettings(defaults);
+    paint();
+  });
+  app.querySelectorAll<HTMLInputElement>('[data-popup-setting]').forEach(input => input.addEventListener('change', () => {
+    const value = Number(input.value);
+    if (!Number.isFinite(value)) { paint(); return; }
+    const current = latest?.settings ?? loadSettings();
+    const next = validSettings({ ...current, [input.dataset.popupSetting ?? '']: value });
+    if (latest) latest.settings = next;
+    saveSettings(next);
+    const status = app.querySelector<HTMLElement>('#popup-settings-status');
+    if (status) status.textContent = 'Saved. New scans use these thresholds.';
+  }));
+  app.querySelector<HTMLInputElement>('#popup-notifications')?.addEventListener('change', event => {
+    const current = latest?.settings ?? loadSettings();
+    const next = validSettings({ ...current, notifications: (event.target as HTMLInputElement).checked });
+    if (latest) latest.settings = next;
+    saveSettings(next);
+    const status = app.querySelector<HTMLElement>('#popup-settings-status');
+    if (status) status.textContent = 'Saved. Notifications remain research alerts only.';
+  });
   app.querySelectorAll<HTMLElement>('.coin-row[data-mint]').forEach(row => row.addEventListener('click', () => {
     selectedMint = row.dataset.mint ?? null;
     paint();
@@ -114,6 +151,7 @@ async function render(): Promise<void> {
 function paint(): void {
   if (!latest) return;
   const { assessments, settings, mode, pulseText } = latest;
+  if (popupTab === 'settings') { frame(''); return; }
   const open = selectedMint ? assessments.find(a => a.token.mint === selectedMint) ?? null : null;
   if (!open) selectedMint = null;
   const launchpads = platformCatalogue(assessments);

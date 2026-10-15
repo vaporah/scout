@@ -14,6 +14,7 @@ const num = (value: unknown): number | null => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 const nonnegative = (value: unknown): number => Math.max(0, num(value) ?? 0);
+const isSolQuote = (symbol: string | null): boolean => symbol?.toUpperCase() === 'SOL' || symbol?.toUpperCase() === 'WSOL';
 
 export function loadTrackedMints(): string[] {
   try {
@@ -93,7 +94,9 @@ export function parseDexPairs(payload: unknown, mint: string, now: number): Toke
     trades: [], holders: null,
     developer: { creator: null, priorLaunches: null, rapidFailures: null, linkedSales: null, source: 'unknown', note: 'DEX Screener market pairs do not verify creator wallets or token controls.' },
     mintAuthority: null, freezeAuthority: null, transferRestriction: null, migrationProgressPct: null, provider: 'DEX Screener public market pairs', sourceUrl,
-    dexName: str(pair.dexId) ?? null, quoteSymbol: str(obj(pair.quoteToken).symbol) ?? null,
+    dexName: str(pair.dexId) ?? null,
+    quoteSymbol: str(obj(pair.quoteToken).symbol) ?? null,
+    liquiditySol: isSolQuote(str(obj(pair.quoteToken).symbol)) ? num(obj(pair.liquidity).quote) : null,
     // DEX Screener publishes buy and sell *counts* but not unique buyers, and a zero
     // here would claim nobody bought. The pool feed path carries the counts only.
     marketSnapshot: { volume5m: nonnegative(volume.m5), volume15m: 0, buys5m: nonnegative(txns.buys), sells5m: nonnegative(txns.sells), buyers5m: null, sellers5m: null }
@@ -245,7 +248,7 @@ export function parseGeckoTokenPools(payload: unknown, mint: string, now: number
     mintAuthority: null, freezeAuthority: null, transferRestriction: null, migrationProgressPct: null,
     provider: 'GeckoTerminal token pools',
     sourceUrl: `https://www.geckoterminal.com/solana/pools/${poolAddress}`,
-    dexName: dexId ? dexId.replace(/^solana_/, '') : null, quoteSymbol,
+    dexName: dexId ? dexId.replace(/^solana_/, '') : null, quoteSymbol, liquiditySol: null,
     marketSnapshot: {
       volume5m: nonnegative(volume.m5), volume15m: nonnegative(volume.m15),
       buys5m: nonnegative(transactions.buys), sells5m: nonnegative(transactions.sells),

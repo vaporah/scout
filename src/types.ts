@@ -83,6 +83,8 @@ export interface Token {
   dexName?: string | null;
   /** Quote asset of the primary pair (for example SOL, USDC). */
   quoteSymbol?: string | null;
+  /** Exact quote-side SOL reserve, when the market provider publishes it. */
+  liquiditySol?: number | null;
   marketSnapshot?: { volume5m: number; volume15m: number; buys5m: number; sells5m: number; buyers5m: number | null; sellers5m: number | null };
 }
 export interface Settings {

@@ -47,6 +47,18 @@ test('tooltip gives an exact mint and actionable evidence without rendering untr
   } finally { dom.window.close(); }
 });
 
+test('tooltip shows the exact SOL-side reserve when the pool source publishes it', async () => {
+  const now = Date.now();
+  const assessment = await example(now);
+  assessment.token = { ...assessment.token, quoteSymbol: 'SOL', liquiditySol: 123.4567 };
+  const dom = new JSDOM('<div id="tip"></div>');
+  try {
+    const tip = dom.window.document.getElementById('tip');
+    renderPulseTooltip(tip, assessment, mint, 'assessed', now);
+    assert.equal(values(tip).get('SOL in pool'), '123.457 SOL');
+  } finally { dom.window.close(); }
+});
+
 test('scanning and unknown states explain the scan instead of listing empty facts', () => {
   const dom = new JSDOM('<div id="tip"><span id="old">Old token</span></div>');
   try {

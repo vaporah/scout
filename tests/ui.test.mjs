@@ -149,6 +149,29 @@ test('popup renders a live-only summary and the logo first in the header', async
   }
 });
 
+test('popup settings tab saves research thresholds locally', async () => {
+  const dom = setup('<div id="app"></div>');
+  const restoreFetch = mockLiveFetch();
+  try {
+    await import('../dist/src/popup.js?settings-tab');
+    await settle();
+    document.querySelector('#tab-settings').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+    const score = document.querySelector('[data-popup-setting="minScore"]');
+    assert.ok(score, 'the popup has a dedicated settings tab');
+    score.value = '81';
+    score.dispatchEvent(new window.Event('change', { bubbles: true }));
+    assert.equal(JSON.parse(localStorage.getItem('scout.settings.v1')).minScore, 81);
+
+    const notifications = document.querySelector('#popup-notifications');
+    notifications.checked = true;
+    notifications.dispatchEvent(new window.Event('change', { bubbles: true }));
+    assert.equal(JSON.parse(localStorage.getItem('scout.settings.v1')).notifications, true);
+  } finally {
+    restoreFetch();
+    dom.window.close();
+  }
+});
+
 test('clicking a coin in the popup opens that coin card and returns to the list', async () => {
   const dom = setup('<div id="app"></div>');
   const restoreFetch = mockLiveFetch();
