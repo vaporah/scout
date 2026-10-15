@@ -50,13 +50,17 @@ test('tooltip gives an exact mint and actionable evidence without rendering untr
 test('tooltip shows the exact SOL-side reserve when the pool source publishes it', async () => {
   const now = Date.now();
   const assessment = await example(now);
-  assessment.token = { ...assessment.token, quoteSymbol: 'SOL', liquiditySol: 123.4567 };
+  assessment.token = { ...assessment.token, quoteSymbol: 'SOL', liquiditySol: 123.4567, solFlow5m: {
+    netSol: 5.25, buySol: 8, sellSol: 2.75, observedAt: now, source: 'Verified fixture'
+  } };
   const dom = new JSDOM('<div id="tip"></div>');
   try {
     const tip = dom.window.document.getElementById('tip');
     renderPulseTooltip(tip, assessment, mint, 'assessed', now);
     assert.equal(values(tip).get('SOL in pool'), '123.457 SOL');
+    assert.equal(values(tip).get('5m SOL flow'), '+5.25 SOL net · 8 in · 2.75 out');
     assert.match([...tip.querySelectorAll('.scout-risk-verdict')].map(node => node.textContent).join(' '), /SOL pool123\.457 SOL/);
+    assert.match([...tip.querySelectorAll('.scout-risk-verdict')].map(node => node.textContent).join(' '), /5m flow\+5\.25 SOL/);
   } finally { dom.window.close(); }
 });
 

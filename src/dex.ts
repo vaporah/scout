@@ -1,4 +1,5 @@
 import type { Token } from './types.js';
+import { fetchSolFlow } from './solFlow.js';
 
 export const mintPattern = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const storageKey = 'scout.trackedMints.v1';
@@ -111,10 +112,11 @@ export async function fetchMint(mint: string, now = Date.now(), followPool = fal
   if (now >= retryAfter) {
     try {
       const dex = await requestDexScreener(mint, now);
-      if (dex.poolAddresses?.length) { cache.set(mint, { at: now, token: dex }); return dex; }
+      const dexWithFlow = await withSolFlow(dex, now);
+      if (dexWithFlow.poolAddresses?.length) { cache.set(mint, { at: now, token: dexWithFlow }); return dexWithFlow; }
       // DexScreener had no pool for this mint; GeckoTerminal can still supply one.
       const gecko = await requestGeckoToken(mint, now);
-      const token = gecko ?? dex;
+      const token = gecko ? await withSolFlow(gecko, now) : dexWithFlow;
       // A pool is not a token. Axiom's token pages put the *pool* address in the URL
       // (/meme/<pool>), so asking for it as a mint finds nothing at all while the coin
       // is trading fine. One extra lookup turns the pool back into the token it holds.
@@ -129,14 +131,29 @@ export async function fetchMint(mint: string, now = Date.now(), followPool = fal
       return token;
     } catch (cause) {
       const gecko = await requestGeckoToken(mint, now);
-      if (gecko) { cache.set(mint, { at: now, token: gecko }); return gecko; }
+      if (gecko) {
+        const enriched = await withSolFlow(gecko, now);
+        cache.set(mint, { at: now, token: enriched });
+        return enriched;
+      }
       throw cause;
     }
   }
 
   const gecko = await requestGeckoToken(mint, now);
-  if (gecko) { cache.set(mint, { at: now, token: gecko }); return gecko; }
+  if (gecko) {
+    const enriched = await withSolFlow(gecko, now);
+    cache.set(mint, { at: now, token: enriched });
+    return enriched;
+  }
   throw new Error('DEX Screener is rate limited; waiting before retry.');
+}
+
+async function withSolFlow(token: Token, now: number): Promise<Token> {
+  const pool = token.poolAddresses?.[0];
+  if (!pool) return token;
+  const flow = await fetchSolFlow(pool, token.quoteSymbol, now).catch(() => null);
+  return flow ? { ...token, solFlow5m: flow } : token;
 }
 
 /** DexScreener's pair endpoint: a pool address in, the token it trades out. */

@@ -6,6 +6,12 @@ export interface SolPoolReading {
   exact: boolean;
 }
 
+export interface SolFlowReading {
+  short: string;
+  detail: string;
+  exact: boolean;
+}
+
 const isSolPair = (symbol: string | null | undefined): boolean => {
   const quote = symbol?.trim().toUpperCase();
   return quote === 'SOL' || quote === 'WSOL';
@@ -35,4 +41,23 @@ export function solPoolReading(token: Token): SolPoolReading {
   }
 
   return { short: 'Unavailable', detail: 'Exact SOL reserve not published by the pool source', exact: false };
+}
+
+const signedSol = (value: number): string => {
+  const formatted = Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 3 });
+  return `${value > 0 ? '+' : value < 0 ? '-' : ''}${formatted} SOL`;
+};
+
+/** Five-minute net SOL buy flow for the exact pool, not fees or an estimate. */
+export function solFlowReading(token: Token): SolFlowReading {
+  const flow = token.solFlow5m;
+  if (!flow || !Number.isFinite(flow.netSol)) {
+    return { short: 'Unavailable', detail: 'Exact five-minute SOL flow not published yet', exact: false };
+  }
+  const parts = [
+    `${signedSol(flow.netSol)} net`,
+    flow.buySol !== null && Number.isFinite(flow.buySol) ? `${flow.buySol.toLocaleString('en-US', { maximumFractionDigits: 3 })} in` : null,
+    flow.sellSol !== null && Number.isFinite(flow.sellSol) ? `${flow.sellSol.toLocaleString('en-US', { maximumFractionDigits: 3 })} out` : null
+  ].filter(Boolean);
+  return { short: signedSol(flow.netSol), detail: parts.join(' · '), exact: true };
 }

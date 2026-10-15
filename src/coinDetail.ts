@@ -1,6 +1,6 @@
 import { escapeHtml as e, money, pct, safeImageUrl, statusClass } from './ui.js';
 import { avatarStyle, devChip, poolAgeLabel, stageLabel } from './tokenCard.js';
-import { solPoolReading } from './poolLiquidity.js';
+import { solFlowReading, solPoolReading } from './poolLiquidity.js';
 import type { Assessment, Settings, SignalRecord } from './types.js';
 
 /**
@@ -39,7 +39,7 @@ export function coinDetail(a: Assessment, options: CoinDetailOptions): string {
 
   return `<div class="detail-title"><span class="coin large" style="${avatarStyle(t.mint)}" aria-hidden="true">${e(t.symbol.slice(0, 1) || '?')}${image}</span><div><h2>${e(t.name)}</h2><p>${e(t.symbol)} · ${e(stageLabel(t.stage))} · ${e(poolAgeLabel(a, options.mode))}<button class="copy-ca" type="button" data-copy-mint="${e(t.mint)}" title="Copy contract address" aria-label="Copy contract address">Copy CA</button></p></div></div>
     <div class="verdict"><div><span class="badge ${statusClass(a.status)}">${e(a.status)}</span>${devChip(a)}<span class="confidence">${e(a.confidence)} confidence · ${a.dataCompletenessPct}% data · expires ${e(new Date(a.expiresAt).toLocaleTimeString())}</span></div><strong>${a.score}<small>/100</small></strong></div>
-    <div class="metrics">${metric('Market cap', money(t.marketCapUsd))}${metric('Liquidity', money(t.liquidityUsd))}${metric('SOL in pool', solPoolReading(t).short)}${metric('5m volume', money(a.analytics.volume5m))}${metric('5m price', pct(t.priceChange5mPct))}${buySell}${metric('Estimated impact', pct(a.slippagePct))}</div>
+    <div class="metrics">${metric('Market cap', money(t.marketCapUsd))}${metric('Liquidity', money(t.liquidityUsd))}${metric('SOL in pool', solPoolReading(t).short)}${metric('5m SOL flow', solFlowReading(t).short)}${metric('5m volume', money(a.analytics.volume5m))}${metric('5m price', pct(t.priceChange5mPct))}${buySell}${metric('Estimated impact', pct(a.slippagePct))}</div>
     <div class="detail-section"><h3>Entry conditions</h3><div class="conditions">${a.entryConditions.map(condition => `<div><span class="${condition.met ? 'yes' : 'no'}">${condition.met ? '✓' : '✕'}</span>${e(condition.label)}</div>`).join('')}</div></div>
     <div class="detail-section"><h3>Supporting evidence</h3>${list(a.positives, 'No supporting signals in the current observation.')}</div>
     <div class="detail-section"><h3>Warnings and critical risks</h3>${list([...a.critical, ...a.warnings], 'No warnings in the current observation.')}</div>

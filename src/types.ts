@@ -2,6 +2,13 @@ export type Stage = 'new' | 'bonding' | 'migrated' | 'unknown';
 export type Status = 'TOP CANDIDATE' | 'WATCH' | 'WAIT FOR CONFIRMATION' | 'HIGH RISK' | 'DISQUALIFIED' | 'UNKNOWN / INCOMPLETE';
 export type Confidence = 'low' | 'medium' | 'high';
 export interface Trade { at: number; side: 'buy' | 'sell'; usd: number; wallet: string; priceUsd: number }
+export interface SolFlow5m {
+  netSol: number;
+  buySol: number | null;
+  sellSol: number | null;
+  observedAt: number;
+  source: string;
+}
 /**
  * One entry in a holder breakdown. `pct` is a share of total supply, and `type`
  * stays conservative: a provider only labels an address as a pool or a burn when
@@ -85,6 +92,8 @@ export interface Token {
   quoteSymbol?: string | null;
   /** Exact quote-side SOL reserve, when the market provider publishes it. */
   liquiditySol?: number | null;
+  /** Five-minute SOL buy flow minus sell flow for the exact primary pool. */
+  solFlow5m?: SolFlow5m | null;
   marketSnapshot?: { volume5m: number; volume15m: number; buys5m: number; sells5m: number; buyers5m: number | null; sellers5m: number | null };
 }
 export interface Settings {
