@@ -1,38 +1,34 @@
 /* Scout only decorates rows resolved to one full Solana mint. */
 .scout-pulse-row { position: relative; }
 .scout-pulse-green {
-  background: rgba(43, 122, 84, .22) !important;
-  box-shadow: inset 0 0 0 2px rgba(62, 220, 133, .8) !important;
+  background: rgba(62, 220, 133, .08) !important;
+  box-shadow: inset 3px 0 0 #3edc85 !important;
 }
 .scout-pulse-amber {
-  background: rgba(150, 100, 24, .18) !important;
-  box-shadow: inset 0 0 0 2px rgba(230, 163, 60, .72) !important;
+  background: rgba(250, 204, 75, .08) !important;
+  box-shadow: inset 3px 0 0 #facc4b !important;
 }
 .scout-pulse-red {
-  background: rgba(148, 32, 45, .22) !important;
-  box-shadow: inset 0 0 0 2px rgba(255, 59, 80, .8) !important;
+  background: rgba(255, 76, 99, .09) !important;
+  box-shadow: inset 3px 0 0 #ff4c63 !important;
 }
-/* Awaiting evidence and unidentified coins keep the rail but take no body wash.
-   A tint on every unresolved row swamps the handful of rows that actually carry a
-   verdict — on a fresh-pairs list almost every row is unresolved — which is the
-   opposite of what the colour is for. The rail alone still marks the row as seen. */
+/* White is the default state. A row with no actionable Scout finding is deliberately
+   returned to the host UI without a rail, badge, tint, or animation. */
 .scout-pulse-neutral {
   background: none !important;
-  box-shadow: inset 2px 0 0 rgba(138, 42, 58, .7) !important;
+  box-shadow: none !important;
 }
 .scout-pulse-gray {
   background: none !important;
-  box-shadow: inset 2px 0 0 rgba(104, 74, 82, .6) !important;
+  box-shadow: none !important;
 }
-/* Moving, with a verdict too thin to be worth anything: a blue wash so the row is not
-   silent, deliberately distinct from the green of a candidate and the amber of a
-   caution. It claims activity, never quality. */
+/* Activity without a quality verdict is caution yellow, never a separate blue state. */
 .scout-pulse-run {
-  background: rgba(31, 111, 184, .2) !important;
-  box-shadow: inset 0 0 0 2px rgba(47, 143, 224, .72) !important;
+  background: rgba(250, 204, 75, .08) !important;
+  box-shadow: inset 3px 0 0 #facc4b !important;
 }
-/* Additive attention ring: narrative match or strong volume/buyer breadth. */
-.scout-pulse-buzz { outline: 2px solid #ff6a4d !important; outline-offset: -2px; }
+/* Narrative and attention remain available in the tooltip; they do not recolour rows. */
+.scout-pulse-buzz { outline: none !important; }
 
 /*
  * Hot coin: a top-tier verdict, a crowd of buyers, and heavy volume. This is meant
@@ -42,46 +38,17 @@
  * animation in the cascade — animating them directly would do nothing at all.
  */
 .scout-pulse-green.scout-pulse-hot {
-  background: rgba(60, 214, 143, .5) !important;
-  box-shadow: inset 0 0 0 2px rgba(190, 255, 220, .98) !important;
+  background: rgba(62, 220, 133, .14) !important;
+  box-shadow: inset 3px 0 0 #3edc85 !important;
 }
 .scout-pulse-amber.scout-pulse-hot {
-  background: rgba(206, 146, 42, .5) !important;
-  box-shadow: inset 0 0 0 2px rgba(255, 232, 178, .98) !important;
+  background: rgba(250, 204, 75, .14) !important;
+  box-shadow: inset 3px 0 0 #facc4b !important;
 }
-/* One loud signal at a time: the halo replaces the buzz ring rather than doubling it.
-   The narrative/volume reason is still kept in data-scout-buzz and the tooltip. */
+/* One restrained signal at a time: detail stays in the tooltip, never a page-wide glow. */
 .scout-pulse-row.scout-pulse-hot { outline: none !important; }
 .scout-pulse-row.scout-pulse-hot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  border-radius: inherit;
-  pointer-events: none;
-  box-shadow:
-    inset 0 0 0 3px #c4ffe0,
-    inset 0 0 30px rgba(104, 255, 182, .6),
-    0 0 24px rgba(104, 255, 182, .65),
-    0 0 48px rgba(104, 255, 182, .32);
-  animation: scout-hot-breathe 2s ease-in-out infinite;
-}
-/* Same halo, in the row's own colour: a WATCH coin glows amber, never green. */
-.scout-pulse-amber.scout-pulse-hot::after {
-  box-shadow:
-    inset 0 0 0 3px #ffe8b2,
-    inset 0 0 30px rgba(255, 196, 96, .6),
-    0 0 24px rgba(255, 196, 96, .65),
-    0 0 48px rgba(255, 196, 96, .32);
-}
-@keyframes scout-hot-breathe {
-  0%, 100% { opacity: .5; }
-  50% { opacity: 1; }
-}
-/* A slow 2s opacity breath is well under the 3-per-second flash limit, but honour
-   a reduced-motion preference anyway by keeping the halo and dropping the pulse. */
-@media (prefers-reduced-motion: reduce) {
-  .scout-pulse-row.scout-pulse-hot::after { animation: none; opacity: 1; }
+  content: none;
 }
 /* Colored platform / category chips (pump.fun, Raydium, Charity, ...). */
 .scout-pulse-tags { position: absolute; top: 2px; right: 2px; display: flex; gap: 3px; z-index: 6; pointer-events: none; }
@@ -115,15 +82,11 @@
   letter-spacing: .02em;
   pointer-events: none;
 }
-.scout-pulse-badge--green { color: #a9ecc4; border-color: rgba(62, 220, 133, .75); background: #3edc85; }
-.scout-pulse-badge--amber { color: #f4d69b; border-color: rgba(230, 163, 60, .7); background: #e6a33c; }
-.scout-pulse-badge--red { color: #ffc3ca; border-color: rgba(255, 59, 80, .75); background: #ff3b50; }
-.scout-pulse-badge--gray { color: #efe0e3; border-color: rgba(140, 110, 118, .7); background: #6a4a52; }
-/* Movement, not quality and not risk: a coin that is trading hard while its score
-   still has too little to go on. Deliberately its own colour so it can never be
-   mistaken for a green candidate or an amber caution. */
-.scout-pulse-badge--run { color: #cfe9ff; border-color: rgba(47, 143, 224, .8); background: #1f6fb8; }
-.scout-pulse-badge--neutral { color: #ffe3e7; border-color: rgba(138, 42, 58, .75); background: #8a2a3a; }
+.scout-pulse-badge--green { background: #3edc85; }
+.scout-pulse-badge--amber { background: #facc4b; }
+.scout-pulse-badge--red { background: #ff4c63; }
+.scout-pulse-badge--run { background: #facc4b; }
+.scout-pulse-badge--gray, .scout-pulse-badge--neutral { display: none; }
 .scout-pulse-tooltip {
   display: none;
   position: fixed;

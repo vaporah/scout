@@ -406,13 +406,17 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
       const narratives = assessment ? narrativeTags(assessment.token) : [];
       const attention = assessment ? attentionSignals(assessment.token, assessment.analytics) : [];
       const tags = assessment ? tokenTags(assessment.token) : [];
-      setTags(row.element, tags);
+      // A neutral assessment intentionally leaves the host row alone. Platform/category
+      // chips on every unresolved coin recreated the same visual noise as colouring
+      // every row, so they are reserved for an actionable Scout signal.
+      const actionable = assessment ? badgeStyle(assessment, settings) !== 'gray' : false;
+      setTags(row.element, actionable ? tags : []);
       // The violet buzz ring is for narrative/volume; category tags are shown as chips.
       const buzz = [
         ...narratives.map(n => `Narrative ${n.tag}`),
         ...attention.map(s => s.id === 'volume' ? 'High volume' : 'Broad buying')
       ];
-      const categoryText = formatTokenTags(tags);
+      const categoryText = actionable ? formatTokenTags(tags) : '';
       row.element.classList.toggle('scout-pulse-buzz', buzz.length > 0);
       if (buzz.length) row.element.dataset.scoutBuzz = buzz.join(',');
       else delete row.element.dataset.scoutBuzz;

@@ -184,8 +184,9 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     for (const row of rows) {
       const assessment = byMint.get(row.mint);
       const tags = assessment ? tokenTags(assessment.token) : [];
-      setTags(row.element, tags);
-      const categoryText = formatTokenTags(tags);
+      const actionable = assessment ? badgeFor(assessment, settings).kind !== 'gray' : false;
+      setTags(row.element, actionable ? tags : []);
+      const categoryText = actionable ? formatTokenTags(tags) : '';
       if (assessment) {
         const badge = badgeFor(assessment, settings);
         setBadge(row.element, badge.kind, badge.text, categoryText ? `${badge.title} · ${categoryText}` : badge.title);
