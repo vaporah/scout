@@ -1,0 +1,31 @@
+node_modules/
+dist/
+
+# Local environment. `.env.example` is the tracked template and is deliberately not
+# covered by these patterns.
+.env
+.env.local
+.env.*.local
+
+# Scratch folders used while building the extension and checking UI states.
+.preview/
+.probe/
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# The store upload artefact, rebuilt with "npm run pack".
+scout-*.zip
+
+# Isolated website publishing checkout.
+.site-hosting/
+
+# Another assistant tool's working directory.
+.openai/

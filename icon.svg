@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Scout raccoon">
+  <rect x="2" y="2" width="124" height="124" rx="24" fill="#110c10" stroke="#df2d44" stroke-width="4"/>
+  <path d="M17 47 12 15l30 13M111 47l5-32-30 13" fill="#111318" stroke="#f2ede4" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M17 65c0-29 18-45 47-45s47 16 47 45v19c0 25-21 39-47 39S17 109 17 84Z" fill="#111318"/>
+  <path d="M21 43c11-13 27-19 43-19s32 6 43 19l-4 15c-13-12-26-17-39-17s-26 5-39 17Z" fill="#d80d2f"/>
+  <path d="M104 44c11 2 16 7 18 15l-16-6-7-9" fill="#d80d2f"/>
+  <path d="M19 74c9-20 22-27 38-20L42 88l-21 8ZM109 74c-9-20-22-27-38-20l15 34 21 8Z" fill="#f2ede4"/>
+  <path d="M29 75c6-14 17-20 29-17l-8 23-18 4ZM99 75c-6-14-17-20-29-17l8 23 18 4Z" fill="#111318"/>
+  <ellipse cx="45" cy="69" rx="4" ry="5" fill="#f2ede4"/>
+  <ellipse cx="83" cy="69" rx="4" ry="5" fill="#f2ede4"/>
+  <path d="M39 93c6-10 15-14 25-14s19 4 25 14c-4 12-13 18-25 18S43 105 39 93Z" fill="#f2ede4"/>
+  <path d="M53 87c4-4 18-4 22 0-1 6-6 9-11 9s-10-3-11-9Z" fill="#111318"/>
+  <path d="M64 96v6m-9 0c5 4 13 4 18 0" fill="none" stroke="#111318" stroke-width="3" stroke-linecap="round"/>
+</svg>

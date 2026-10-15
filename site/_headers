@@ -1,0 +1,17 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  # HSTS is deliberately NOT set here: Cloudflare sends it at the edge (SSL/TLS -> Edge
+  # Certificates, max-age 6 months), which also covers responses Cloudflare generates
+  # itself and this file never sees. Setting it in both places sends two headers.
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src https://api.geckoterminal.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+# Cache-Control is deliberately NOT set here. Cloudflare Pages pins every non-HTML asset
+# to "max-age=14400" and ignores Cache-Control from this file, so a rule would only look
+# like it worked. Verified: with Cache-Control: no-cache on both files below, a cache MISS
+# still returned max-age=14400. Unhashed assets are versioned in the HTML instead - bump
+# the ?v= on styles.css, site.js and release-config.js when their contents change, or the
+# change sits behind the cached copy for up to four hours.

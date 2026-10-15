@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scout | Privacy policy</title>
+<meta name="description" content="What the Scout browser extension stores, what it sends, and what it never does.">
+<link rel="canonical" href="https://scoutai.trade/privacy/">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/icon-128.png">
+<!--
+  The policy itself is plain HTML and reads fine with scripting off. theme.js is the one
+  script, and only settles the colour theme before the first paint so this page matches
+  whichever theme was chosen elsewhere on the site; the toggle it wires is hidden
+  outright when scripting is unavailable. Served at https://scoutai.trade/privacy/, which
+  is the URL the Chrome Web Store listing points at. The same policy is kept in
+  PRIVACY.md at the repo root.
+
+  Cloudflare appends a Web Analytics beacon at the edge, which our own content security
+  policy then blocks, so nothing is collected from this page. See SITE-RELEASE.md.
+-->
+<link rel="stylesheet" href="/styles.css?v=13">
+<script src="/theme.js?v=9"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <div class="shell nav-inner">
+    <a class="brand" href="/" aria-label="Scout home">
+      <img src="/scout-raccoon-logo.png" width="28" height="28" alt="">
+      <span>scout<b>.</b></span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/#features">The edge</a>
+      <a href="/#how">How it works</a>
+      <a href="/#source">Open source</a>
+    </nav>
+    <div class="nav-side">
+      <a class="button button--sm" href="/">Back to site</a>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.3M12 19.1v2.3M2.6 12h2.3M19.1 12h2.3M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.4 14.5A8.6 8.6 0 1 1 9.5 3.6a6.9 6.9 0 0 0 10.9 10.9Z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <div class="shell page-header">
+    <p class="eyebrow">Legal</p>
+    <h1>Privacy policy</h1>
+    <p class="lede">What the Scout browser extension stores, what it sends, and what it never does.</p>
+    <p class="page-meta">Last updated 14 October 2026 &middot; applies to the Scout extension and this website</p>
+  </div>
+
+  <div class="shell prose">
+    <div class="prose-body">
+
+      <div class="summary">
+        <p><strong>The short version.</strong> Scout is a research tool. It reads public market
+        data about Solana tokens and shows it beside the coins you are already looking at. It
+        has no accounts, no analytics, and no tracking. The optional live market panel on this
+        website makes a public request to GeckoTerminal; everything Scout itself remembers is stored
+        on your own computer.</p>
+      </div>
+
+      <h2>What Scout stores on your device</h2>
+      <p>All of it is local. None of it is transmitted to the publisher or to anyone else.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Stored</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td>Your settings: score threshold, minimum liquidity, trade size, slippage</td><td>So the extension behaves the way you configured it</td></tr>
+            <tr><td>Pinned mint addresses</td><td>So the coins you chose to track survive a reload</td></tr>
+            <tr><td>Platform and quote-asset filters</td><td>So the popup and the dashboard agree</td></tr>
+            <tr><td>Panel size, position and collapsed state</td><td>So the popup stays where you put it</td></tr>
+            <tr><td>Coins Scout has seen, and their observed highs</td><td>To tell whether a coin is a repeat, and what its high was</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Uninstalling the extension, or clearing site data for <code>axiom.trade</code>
+      or <code>gmgn.ai</code>, removes all of it.</p>
+
+      <h2>What Scout sends over the network</h2>
+      <p>Scout makes <strong>read-only <code>GET</code> requests</strong> for public market data.
+      There are no uploads, no form posts, and no cookies or credentials are attached to any
+      request. Requests go only to the hosts listed in the extension's permissions:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Host</th><th>What it is asked for</th></tr></thead>
+          <tbody>
+            <tr><td><code>api.dexscreener.com</code></td><td>Pool, price, liquidity and volume</td></tr>
+            <tr><td><code>api.geckoterminal.com</code></td><td>Pool data, holder distribution, all-time high</td></tr>
+            <tr><td><code>api.gopluslabs.io</code></td><td>Token security and holder list</td></tr>
+            <tr><td><code>api.rugcheck.xyz</code></td><td>Token report, holder accounts, deploying wallet</td></tr>
+            <tr><td><code>gmgn.ai</code></td><td>Holder count, concentration and wallet-quality figures</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The only information in those requests is a <strong>public Solana mint address</strong>:
+      the coin being looked at. No identifier for you, your browser, your settings or
+      your holdings is included.</p>
+      <p class="note">Be aware of the obvious consequence: as with any request to a third party,
+      those services see your IP address and the fact that this coin was queried. That is
+      inherent to fetching public data on the internet, and their own privacy policies govern
+      how they handle it.</p>
+
+      <h2>Live market panel on scoutai.trade</h2>
+      <p>The homepage's live Solana trending-pools panel requests the top three pools from
+      <code>api.geckoterminal.com</code> when the homepage is open, then refreshes no more than once
+      per minute. It sends no wallet address, settings, token search, account data, or identifier.
+      Like every public web request, GeckoTerminal receives your IP address. The panel is optional
+      presentation data and is not a trading signal.</p>
+
+      <h2>What Scout reads on the page</h2>
+      <p>Scout's content scripts run on <code>axiom.trade</code> and <code>gmgn.ai</code> only.
+      To match a coin row to a token, it reads the coin rows on the page: the symbol, the
+      mint address in links or data attributes, and the visible market figures already shown to
+      you. It does not read form fields, keystrokes, clipboard contents, other tabs, or any page
+      outside those two sites.</p>
+
+      <h2>What Scout never does</h2>
+      <ul>
+        <li class="no">No analytics, telemetry, crash reporting or usage statistics.</li>
+        <li class="no">No account, sign-in or identifier of any kind.</li>
+        <li class="no">No selling, sharing or transmitting of data about you.</li>
+        <li class="no">No remote code. All scripts are packaged in the extension, and the content
+          security policy is <code>script-src 'self'</code>.</li>
+        <li class="no">No trading. Scout never connects a wallet, never signs anything, and never
+          places an order or moves funds. It only displays information.</li>
+      </ul>
+
+      <h2>Permissions, and why each is needed</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Permission</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td><code>storage</code></td><td>To keep your settings and remembered panel state on your device</td></tr>
+            <tr><td><code>activeTab</code></td><td>To know which page you are on when you open the popup</td></tr>
+            <tr><td><code>scripting</code></td><td>To place the popup and row highlighting on Axiom and GMGN pages</td></tr>
+            <tr><td>Access to <code>axiom.trade</code>, <code>gmgn.ai</code></td><td>The two sites Scout decorates</td></tr>
+            <tr><td>Access to the five market-data APIs above</td><td>To fetch the public data shown in the popup</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Changes</h2>
+      <p>If a future version changes what is collected or where it is sent, this page will be
+      updated and the change described in the release notes before that version ships.</p>
+
+      <h2>Contact</h2>
+      <p><a class="text-link" href="mailto:privacy@scoutai.trade">privacy@scoutai.trade</a></p>
+
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="shell footer-top">
+    <a class="brand" href="/" aria-label="Scout home">
+      <img src="/scout-raccoon-logo.png" width="28" height="28" alt="">
+      <span>scout<b>.</b></span>
+    </a>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/#download">Release status</a>
+      <a href="mailto:hello@scoutai.trade">Contact</a>
+    </div>
+  </div>
+  <div class="shell footer-bottom">
+    <p>&copy; Scout &middot; scoutai.trade</p>
+    <p>Scout is not affiliated with Axiom, GMGN, or any of the data providers listed above. Nothing Scout shows is financial advice.</p>
+  </div>
+</footer>
+
+</body>
+</html>

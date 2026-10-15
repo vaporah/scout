@@ -1,0 +1,83 @@
+{
+  "manifest_version": 3,
+  "name": "Scout",
+  "version": "0.7.3",
+  "description": "Mint-matched Axiom and GMGN row highlights with holder, developer and risk readouts.",
+  "homepage_url": "https://scoutai.trade/",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://axiom.trade/*",
+    "https://gmgn.ai/*",
+    "https://api.geckoterminal.com/*",
+    "https://api.dexscreener.com/*",
+    "https://api.gopluslabs.io/*",
+    "https://api.rugcheck.xyz/*"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "scout-raccoon-logo.png"
+      ],
+      "matches": [
+        "https://axiom.trade/*",
+        "https://gmgn.ai/*",
+        "https://www.gmgn.ai/*"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://axiom.trade/*"
+      ],
+      "js": [
+        "axiomOverlay.js",
+        "tokenPage.js"
+      ],
+      "css": [
+        "axiom-pulse.css",
+        "riskAlerts.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://gmgn.ai/*",
+        "https://www.gmgn.ai/*"
+      ],
+      "js": [
+        "gmgn.js"
+      ],
+      "css": [
+        "axiom-pulse.css",
+        "riskAlerts.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Scout",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon-16.png",
+      "32": "icon-32.png"
+    }
+  },
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  }
+}

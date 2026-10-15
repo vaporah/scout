@@ -1,0 +1,27 @@
+{
+  "name": "scout",
+  "version": "0.7.3",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaporah/scout.git"
+  },
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "npm run build:compile",
+    "build:compile": "tsc && esbuild src/axiomOverlay.ts src/tokenPage.ts src/gmgn.ts --bundle --format=iife --platform=browser --target=chrome114 --outdir=dist && node scripts/copy.mjs",
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "lint": "tsc --noEmit",
+    "release": "node scripts/release.mjs patch && npm run build:compile",
+    "release:minor": "node scripts/release.mjs minor && npm run build:compile",
+    "release:major": "node scripts/release.mjs major && npm run build:compile",
+    "pack": "npm run build && node scripts/pack.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "jsdom": "^30.1.2",
+    "typescript": "^5.9.3"
+  }
+}
