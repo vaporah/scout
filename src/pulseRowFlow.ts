@@ -4,6 +4,10 @@ import type { Token } from './types.js';
 /** Keep a compact five-minute SOL flow readout on a highlighted list card. */
 export function setPulseRowFlow(row: HTMLElement, token: Token | null): void {
   const existing = row.querySelector(':scope > .scout-pulse-flow');
+  if (row.classList.contains('scout-pulse-watchlist')) {
+    existing?.remove();
+    return;
+  }
   const reading = token ? solFlowReading(token) : null;
   if (!reading?.exact || !token?.solFlow5m) {
     existing?.remove();

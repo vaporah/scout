@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { collectPulseRows, createAxiomPulseOverlay, mintFromVisiblePulseRow } from '../dist/src/axiomOverlay.js';
+import { collectAxiomWatchlistRows, collectPulseRows, createAxiomPulseOverlay, mintFromVisiblePulseRow } from '../dist/src/axiomOverlay.js';
 import { fetchTokens } from '../dist/src/provider.js';
 import { assessTokens } from '../dist/src/analysis.js';
 import { defaults } from '../dist/src/settings.js';
@@ -125,6 +125,34 @@ test('hovering a Pulse card opens the shared popup and leaving it closes the pop
 
     overlay.stop();
     assert.equal(document_.querySelector('.scout-pulse-tooltip'), null, 'stopping the overlay removes the popup');
+  } finally { overlay.stop(); dom.window.close(); }
+});
+
+test('Axiom top watchlist tokens receive Scout signals and the shared flow tooltip', async () => {
+  const dom = pulse(`<header data-scout-watchlist>
+    <a id="watch" href="/t/${one}?chain=sol"><img src="coin.png" alt="">FINCH $78K +12%</a>
+  </header><main><section><h2>New Pairs</h2></section></main>`);
+  const now = Date.now();
+  const [sample] = await fetchTokens('demo', now);
+  const [top] = assessTokens([{ ...sample, mint: one, symbol: 'FINCH', provider: 'Verified fixture', solFlow5m: {
+    netSol: 4.5, buySol: 7, sellSol: 2.5, observedAt: now, source: 'Verified fixture'
+  } }], defaults, now);
+  const overlay = createAxiomPulseOverlay({
+    document: dom.window.document,
+    request: async () => ({ assessments: [top], settings: defaults }),
+    debounceMs: 0
+  });
+  try {
+    assert.equal(collectAxiomWatchlistRows(dom.window.document).length, 1);
+    overlay.start();
+    const row = dom.window.document.querySelector('#watch');
+    await waitFor(() => row.classList.contains('scout-pulse-green'), 'the watchlist token to receive a verdict');
+    assert.equal(row.classList.contains('scout-pulse-watchlist'), true);
+    assert.equal(row.querySelector('.scout-pulse-flow'), null, 'the compact tab is not covered by inline text');
+    row.dispatchEvent(new dom.window.MouseEvent('mouseover', { bubbles: true }));
+    const tip = dom.window.document.querySelector('.scout-pulse-tooltip');
+    await waitFor(() => tip.classList.contains('is-visible'), 'the watchlist flow tooltip to open');
+    assert.match(tip.textContent ?? '', /5m SOL flow\+4\.5 SOL net/);
   } finally { overlay.stop(); dom.window.close(); }
 });
 

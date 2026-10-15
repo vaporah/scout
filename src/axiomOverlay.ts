@@ -19,7 +19,7 @@ import { readRowReadings, type RowReadings } from './rowReadings.js';
 
 const headings = ['New Pairs', 'Final Stretch', 'Migrated'] as const;
 const mintAttributes = ['data-mint', 'data-token-mint', 'data-token-address', 'data-contract-address', 'data-ca'] as const;
-const identitySelector = `a[href], [title], [aria-label], ${mintAttributes.map(name => `[${name}]`).join(', ')}`;
+const identitySelector = `[href], [title], [aria-label], ${mintAttributes.map(name => `[${name}]`).join(', ')}`;
 const labelledMint = /^(?:copy\s+(?:token|contract|coin|mint)\s+address|(?:token|contract|mint)\s+address|copy\s+ca)\s*:?\s*([1-9A-HJ-NP-Za-km-z]{32,44})$/i;
 const semanticCardSelector = '[data-scout-pulse-row], [data-testid*="token-card"], [data-testid*="pulse-row"], [role="row"], article';
 const rowSelector = `${semanticCardSelector}, li`;
@@ -29,7 +29,7 @@ const statuses: Status[] = ['TOP CANDIDATE', 'WATCH', 'WAIT FOR CONFIRMATION', '
 declare const chrome: unknown;
 
 export type ScanRequest = (mints: string[]) => Promise<ScanResponse>;
-export interface VisiblePulseRow { element: HTMLElement; mint: string | null; stage?: Stage; labels?: PulseLabels; readings?: RowReadings }
+export interface VisiblePulseRow { element: HTMLElement; mint: string | null; stage?: Stage; labels?: PulseLabels; readings?: RowReadings; watchlist?: boolean }
 export interface OverlayOptions {
   document?: Document;
   request?: ScanRequest;
@@ -39,9 +39,14 @@ export interface OverlayOptions {
   requestTimeoutMs?: number;
 }
 
+function isAxiomPage(doc: Document): boolean {
+  const url = doc.defaultView?.location;
+  return url?.hostname === 'axiom.trade';
+}
+
 function isPulsePage(doc: Document): boolean {
   const url = doc.defaultView?.location;
-  return url?.hostname === 'axiom.trade' && /^\/pulse(?:\/|$)/i.test(url.pathname);
+  return isAxiomPage(doc) && /^\/pulse(?:\/|$)/i.test(url?.pathname ?? '');
 }
 
 function isHidden(element: Element): boolean {
@@ -204,6 +209,52 @@ export function collectPulseRows(doc: Document): PulseRow[] {
   return result;
 }
 
+function watchlistRow(identity: Element, base: string): HTMLElement | null {
+  const own = directMints(identity, base);
+  if (own.size !== 1) return null;
+  const mint = [...own][0];
+  if (!mint) return null;
+  const shell = identity.closest('header, nav, [role="banner"], [data-scout-watchlist]');
+  const ownRect = identity.getBoundingClientRect();
+  const layoutUnknown = ownRect.width === 0 && ownRect.height === 0;
+  if (!shell && (layoutUnknown || ownRect.top > 180)) return null;
+
+  let current: Element | null = identity;
+  let best: HTMLElement | null = null;
+  for (let depth = 0; current && current !== identity.ownerDocument.body && depth < 8; depth++, current = current.parentElement) {
+    if (current === shell && current !== identity) break;
+    const mints = localMints(current, base);
+    if (mints.size !== 1 || !mints.has(mint)) break;
+    const rect = current.getBoundingClientRect();
+    const unknown = rect.width === 0 && rect.height === 0;
+    const compact = unknown || rect.width >= 56 && rect.width <= 280 && rect.height >= 18 && rect.height <= 64 && rect.top < 180;
+    const text = current.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+    const marketLike = !!current.querySelector('img') || /[$%]|\b(?:MC|MCap)\b/i.test(text);
+    if (compact && marketLike) best = current as HTMLElement;
+  }
+  return best;
+}
+
+/** Exact-mint token tabs in Axiom's compact horizontal watchlist. */
+export function collectAxiomWatchlistRows(doc: Document): VisiblePulseRow[] {
+  if (!isAxiomPage(doc) || !doc.body) return [];
+  const rows: VisiblePulseRow[] = [];
+  const seenElements = new Set<HTMLElement>();
+  const seenMints = new Set<string>();
+  for (const identity of Array.from(doc.querySelectorAll(identitySelector))) {
+    const own = directMints(identity, doc.baseURI);
+    if (own.size !== 1 || isHidden(identity) || !inViewport(identity)) continue;
+    const mint = [...own][0];
+    if (!mint || seenMints.has(mint)) continue;
+    const row = watchlistRow(identity, doc.baseURI);
+    if (!row || seenElements.has(row)) continue;
+    seenElements.add(row);
+    seenMints.add(mint);
+    rows.push({ element: row, mint, readings: readRowReadings(row), watchlist: true });
+  }
+  return rows;
+}
+
 function visualRowFromImage(image: Element, region: Element): HTMLElement | null {
   let current = image.parentElement;
   while (current && current !== region) {
@@ -219,10 +270,12 @@ function visualRowFromImage(image: Element, region: Element): HTMLElement | null
 
 /** Includes unidentifiable coins so they can receive an explicit UNKNOWN colour. */
 export function collectAllPulseRows(doc: Document): VisiblePulseRow[] {
-  if (!isPulsePage(doc)) return [];
-  const rows: VisiblePulseRow[] = collectPulseRows(doc).map(row => ({ ...row, labels: extractRowLabels(row.element), readings: readRowReadings(row.element) }));
+  if (!isAxiomPage(doc)) return [];
+  const rows: VisiblePulseRow[] = isPulsePage(doc)
+    ? collectPulseRows(doc).map(row => ({ ...row, labels: extractRowLabels(row.element), readings: readRowReadings(row.element) }))
+    : [];
   const seen = new Set(rows.map(row => row.element));
-  for (const region of pulseRegions(doc)) {
+  for (const region of isPulsePage(doc) ? pulseRegions(doc) : []) {
     for (const candidate of Array.from(region.element.querySelectorAll(rowSelector))) {
       if (candidate.querySelector(rowSelector) || containsHeading(candidate) || isHidden(candidate) || !inViewport(candidate)) continue;
       const row = candidate instanceof (doc.defaultView?.HTMLElement ?? HTMLElement) ? candidate as HTMLElement : null;
@@ -240,6 +293,11 @@ export function collectAllPulseRows(doc: Document): VisiblePulseRow[] {
       seen.add(row);
       rows.push({ element: row, mint: mintFromVisiblePulseRow(row, doc.baseURI), stage: region.stage, labels: extractRowLabels(row), readings: readRowReadings(row) });
     }
+  }
+  for (const row of collectAxiomWatchlistRows(doc)) {
+    if (seen.has(row.element)) continue;
+    seen.add(row.element);
+    rows.push(row);
   }
   return rows;
 }
@@ -267,6 +325,7 @@ function clearRow(row: HTMLElement): void {
   row.querySelectorAll(':scope > .scout-pulse-badge').forEach(badge => badge.remove());
   row.querySelectorAll(':scope > .scout-pulse-tags').forEach(tags => tags.remove());
   row.querySelectorAll(':scope > .scout-pulse-flow').forEach(flow => flow.remove());
+  row.classList.remove('scout-pulse-watchlist');
 }
 
 function badgeStyle(a: Assessment, settings: Settings): 'green' | 'amber' | 'red' | 'gray' | 'run' {
@@ -405,6 +464,7 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
     const byMint = new Map(fresh.map(a => [a.token.mint, a]));
     for (const row of rows) {
       const assessment = row.mint ? byMint.get(row.mint) : undefined;
+      row.element.classList.toggle('scout-pulse-watchlist', row.watchlist === true);
       setPulseRowFlow(row.element, assessment?.token ?? null);
       const narratives = assessment ? narrativeTags(assessment.token) : [];
       const attention = assessment ? attentionSignals(assessment.token, assessment.analytics) : [];
@@ -459,7 +519,7 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
         request(batch),
         new Promise<never>((_, reject) => { timeout = setTimeout(() => reject(new Error('Scout scan timed out')), requestTimeoutMs); })
       ]);
-      if (!active || !isPulsePage(doc)) return;
+      if (!active || !isAxiomPage(doc)) return;
       const now = Date.now();
       const returned = Array.isArray(response?.assessments)
         ? response.assessments.filter(a => validAssessment(a, now) && batch.includes(a.token.mint)) : [];

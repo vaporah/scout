@@ -82,6 +82,12 @@
 .scout-pulse-flow.is-positive { border-color: rgba(62, 220, 133, .45); color: #9ce8bc; }
 .scout-pulse-flow.is-negative { border-color: rgba(255, 76, 99, .48); color: #ffb2bd; }
 .scout-pulse-flow.is-flat { color: #b9b9bf; }
+.scout-pulse-watchlist.scout-pulse-green { box-shadow: inset 0 -2px 0 #3edc85 !important; }
+.scout-pulse-watchlist.scout-pulse-amber,
+.scout-pulse-watchlist.scout-pulse-run { box-shadow: inset 0 -2px 0 #facc4b !important; }
+.scout-pulse-watchlist.scout-pulse-red { box-shadow: inset 0 -2px 0 #ff4c63 !important; }
+.scout-pulse-watchlist.scout-pulse-gray,
+.scout-pulse-watchlist.scout-pulse-neutral { box-shadow: inset 0 -2px 0 rgba(255, 255, 255, .75) !important; }
 .scout-pulse-badge {
   position: absolute;
   z-index: 5;
