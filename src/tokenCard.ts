@@ -157,6 +157,6 @@ export function tokenCard(a: Assessment, options: CoinRowOptions): string {
   const platformChip = platform ? `<span class="meta-chip meta-chip--platform" style="--chip:${e(platform.color)}">${e(platform.label)}</span>` : '';
   const meta = [poolAgeLabel(a, options.mode), stageLabel(t.stage), `${money(t.liquidityUsd)} liq.`].map(metaChip).join('');
   const pinned = options.pinned ? '<em class="pinned-label">PINNED</em>' : '';
-  const label = `${t.name} (${t.symbol}) — Scout score ${a.score} of 100, ${a.status}`;
+  const label = `${t.name} (${t.symbol}), Scout score ${a.score} of 100, ${a.status}`;
   return `<div class="token-card ${signalClass(a, options.settings)} ${options.active ? 'active' : ''}" data-mint="${e(t.mint)}" role="button" tabindex="0" aria-label="${e(label)}">${avatar(t.symbol, t.mint, '', t.imageUrl)}<div class="token-main"><div class="token-name"><strong>${e(t.name)}</strong><span>${e(t.symbol)}</span>${copyButton(t.mint, 'CA')}${pinned}</div><div class="token-meta">${platformChip}${devChip(a)}${meta}</div></div><div class="token-right"><strong>${a.score}<small>/100</small></strong><span class="badge ${statusClass(a.status)}" title="${e(a.status)}">${e(statusShort(a.status))}</span></div><div class="token-stats">${chips}</div></div>`;
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Scout",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "description": "Mint-matched Axiom and GMGN row highlights with holder, developer and risk readouts.",
   "homepage_url": "https://scoutai.trade/",
   "permissions": [

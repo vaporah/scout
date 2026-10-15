@@ -16,7 +16,7 @@ test('rates arrive as fractions in strings and become percentages', () => {
 
 test('a top-ten rate of zero is not published, because on some coins it means uncomputed', () => {
   // This source reports 0 for a token whose pool holds almost everything, so a zero here
-  // would understate concentration — the dangerous direction for a risk readout.
+  // would understate concentration, the dangerous direction for a risk readout.
   const stats = parseGmgnStats(payload({ top_10_holder_rate: '0' }));
   assert.equal(stats.top10Pct, null);
   assert.equal(stats.holderCount, 1214, 'the rest of the payload is still used');

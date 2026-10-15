@@ -1338,7 +1338,7 @@ html.js :is(.grid > *, .steps > *, .section-head, .mascot, .release, .faq > div,
 .product-copy h2 { margin: 1rem 0 1.25rem; font-size: clamp(2.15rem, 4.5vw, 4.25rem); }
 .product-copy > p:not(.eyebrow) { max-width: 27rem; color: var(--muted); }
 .product-notes { display: grid; gap: .55rem; margin-top: 2.25rem; color: var(--text); font-size: .84rem; font-weight: 550; }
-.product-notes span::before { margin-right: .65rem; color: var(--accent); content: '—'; }
+.product-notes span::before { margin-right: .65rem; color: var(--accent); content: '·'; }
 .product-image { margin: 0; }
 .product-image img { width: 100%; height: auto; border: 1px solid var(--line-strong); border-radius: 16px; box-shadow: var(--shadow); }
 .product-image figcaption { margin-top: .75rem; color: var(--faint); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; }

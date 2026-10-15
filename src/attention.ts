@@ -27,7 +27,7 @@ export function attentionSignals(token: Token, a: Analytics): AttentionSignal[] 
  *
  * This is deliberately independent of the score. A brand-new pair has no creator
  * history, no holder breakdown and no token-control data, so most of its score is
- * made of things nobody can know yet — while the thing that actually matters, that
+ * made of things nobody can know yet, while the thing that actually matters, that
  * the coin is moving, is fully visible. A coin can run hard and still score poorly,
  * so movement is measured and shown on its own rather than through the score.
  */
@@ -68,7 +68,7 @@ export function movementVerdict(token: Token, a: Analytics): MovementVerdict {
  * A "hot" coin: Scout's strongest verdict, a crowd buying rather than one wallet,
  * and genuinely heavy volume behind it. This is what earns the bright animated
  * row highlight, so every part of the bar sits deliberately above the plain
- * attention signals — more unique wallets, more buys, buys clearly outweighing
+ * attention signals: more unique wallets, more buys, buys clearly outweighing
  * sells, and 5m volume worth at least a quarter of the pool.
  *
  * It is still a research cue: it says the available data currently looks as good
@@ -100,8 +100,8 @@ const hotBuyRatio = 1.5;
 
 export function hotCoin(a: Assessment, settings: Settings): HotCoin | null {
   // "A good one" has to mean a verdict the live feed can actually produce. A brand
-  // new pair can never be TOP CANDIDATE — that needs buyer-growth, net-pressure and
-  // volume-acceleration baselines the pool feed does not carry — so the top two
+  // new pair can never be TOP CANDIDATE: that needs buyer-growth, net-pressure and
+  // volume-acceleration baselines the pool feed does not carry, so the top two
   // tiers both qualify: TOP CANDIDATE, or WATCH (Scout's "worth watching" tier,
   // which is what a genuinely strong new pair reaches). Anything Scout is actively
   // warning about, and anything WAIT/UNKNOWN, is out.

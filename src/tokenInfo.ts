@@ -43,7 +43,7 @@ const object = (value: unknown): ObjectValue | null =>
 /**
  * A percentage that could plausibly be a share of supply. Note the empty-string
  * guard: `Number('')` is 0, and a blank field must read as missing, not as a real
- * zero — "the dev holds 0%" is a meaningful claim and must not be invented.
+ * zero: "the dev holds 0%" is a meaningful claim and must not be invented.
  */
 function percent(value: unknown): number | null {
   const parsed = typeof value === 'number' ? value

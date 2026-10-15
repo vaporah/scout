@@ -1,7 +1,7 @@
-# Scout — store listing and submission pack
+# Scout store listing and submission pack
 
 **Status: draft, reviewed by the publisher before release.** Everything here describes the
-extension as built. The store copy is a claim about your product — read it and make it
+extension as built. The store copy is a claim about your product, so read it and make it
 yours before publishing.
 
 ## Store copy
@@ -30,19 +30,19 @@ keeps under 100 characters):
 >
 > **On a coin's own page**, the popup answers the questions that decide a trade:
 >
-> - **Holders** — how many there are, how concentrated the top ten are, the largest
+> - **Holders**: how many there are, how concentrated the top ten are, the largest
 >   wallet or account, and what the developer still holds.
-> - **Wallet quality** — the deployer's track record, bundled buys, snipers, bots and
+> - **Wallet quality**: the deployer's track record, bundled buys, snipers, bots and
 >   fresh wallets, each as a share of supply. A thousand wallets funded to buy the launch
 >   is a different trade from a thousand that found it on their own.
-> - **Market & pool** — price, liquidity, volume, buys versus sells, and how hard the
+> - **Market & pool**: price, liquidity, volume, buys versus sells, and how hard the
 >   coin is actually trading relative to its own pool.
-> - **Token checks** — mint and freeze authority, transfer control, top-10 concentration.
-> - **Is this a copycat?** — other coins trading under the same name, and the all-time
+> - **Token checks**: mint and freeze authority, transfer control, top-10 concentration.
+> - **Is this a copycat?**: other coins trading under the same name, and the all-time
 >   high, so you can see whether this is the original or the trap.
 >
 > **What Scout will not do.** It never claims a coin is safe. Where the evidence is
-> missing it says so — `Not published yet`, `Unknown` — rather than showing a zero, and it
+> missing it says so (`Not published yet`, `Unknown`) rather than showing a zero, and it
 > keeps an unverified creator labelled `UNKNOWN DEV` instead of guessing. A `WAIT FOR
 > CONFIRMATION` badge is not a recommendation to avoid; it means Scout does not yet have
 > enough to say anything useful.
@@ -86,7 +86,7 @@ security policy is `script-src 'self'; object-src 'self'`.
 | Homepage URL | <https://scoutai.trade/> |
 | Support contact | <hello@scoutai.trade> |
 
-## Known limitations — be upfront about these
+## Known limitations, and be upfront about these
 
 1. **It reads third-party endpoints that are not officially supported for this use.**
    DexScreener, GeckoTerminal, GoPlus, RugCheck and the GMGN statistics endpoint can
@@ -114,16 +114,16 @@ security policy is `script-src 'self'; object-src 'self'`.
 | --- | --- |
 | Site source | `site/` in this repository |
 | Host | Cloudflare Pages project `scout`, connected to `vaporah/scout` |
-| Production branch | `main` — every push redeploys automatically, no manual upload |
-| Build command | *(empty — the site is static HTML)* |
+| Production branch | `main`, every push redeploys automatically, no manual upload |
+| Build command | *(empty: the site is static HTML)* |
 | Build output directory | `site` |
 | Preview URL | <https://scout-7tp.pages.dev> |
 | Live URL | <https://scoutai.trade> |
 
 Email Routing on `scoutai.trade`, both rules Active, forwarding to `thezadmin@gmail.com`:
 
-- `privacy@scoutai.trade` — the contact on the privacy policy
-- `hello@scoutai.trade` — the support contact in this listing
+- `privacy@scoutai.trade`: the contact on the privacy policy
+- `hello@scoutai.trade`: the support contact in this listing
 
 The MX, SPF and DKIM records are managed by Cloudflare and show as **Locked** in the
 dashboard. Changing the forwarding destination is done under Email → Email Routing →
@@ -132,16 +132,16 @@ Destination addresses; a new address must be verified by email before it can be 
 ## Before submitting
 
 - [ ] Confirm the privacy policy is reachable at <https://scoutai.trade/privacy/> **before**
-      submitting — review will fetch it, and a dead link is a rejection.
+      submitting: review will fetch it, and a dead link is a rejection.
 - [ ] Make `privacy@scoutai.trade` a real mailbox. Registrars usually offer free forwarding to
       an address you already read; if that is a hassle, point both documents at a contact form
       or a repository URL instead, since a bounce fails the same requirement.
-- [ ] Deploy the `site/` folder as the site root (plain static HTML, no build step — see the
+- [ ] Deploy the `site/` folder as the site root (plain static HTML, no build step. See the
       hosting steps in this file).
 - [ ] Confirm the summary in `manifest.json` still matches the extension's behaviour.
 - [ ] Load the packed `dist` folder in a clean browser profile and click through Axiom and
       GMGN once each; confirm no console errors and that the popup appears.
-- [ ] Run `npm test` — the suite must be green, and note that it must be green *twice in a
+- [ ] Run `npm test`: the suite must be green, and note that it must be green *twice in a
       row*, since this project has had timing-sensitive tests before.
 - [ ] Build the upload artefact with `npm run pack`. It refuses to run if `dist` is stale, so
       a green run means the zip matches the version in `package.json`.

@@ -35,7 +35,7 @@
  * to be the brightest thing on the page, so the row goes from a muted wash to a
  * near-solid one and a halo breathes over it. The halo is a pseudo-element because
  * the row's own background/box-shadow are !important, and !important wins over an
- * animation in the cascade — animating them directly would do nothing at all.
+ * animation in the cascade, so animating them directly would do nothing at all.
  */
 .scout-pulse-green.scout-pulse-hot {
   background: rgba(62, 220, 133, .14) !important;

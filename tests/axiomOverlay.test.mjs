@@ -312,7 +312,7 @@ test('a coin trading hard is badged for movement even when its score can say lit
   const dom = pulse(`<section><h2>New Pairs</h2><article id="row"><a href="/t/${one}?chain=sol">RUN</a></article></section>`);
   const now = Date.now();
   // A brand-new pair as the pool feed describes it: no creator, no holders, no token
-  // controls — so a low score here means "not enough evidence", not "nothing happening".
+  // controls, so a low score here means "not enough evidence", not "nothing happening".
   const [assessment] = assessTokens([{
     mint: one, chain: 'solana', name: 'Runner', symbol: 'RUN', stage: 'new',
     launchedAt: now - 240_000, observedAt: now,

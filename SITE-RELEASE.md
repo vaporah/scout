@@ -1,6 +1,6 @@
 ﻿# Scout website and release setup
 
-## Production hosting — verified 14 October 2026
+## Production hosting, verified 14 October 2026
 
 Scout already uses Cloudflare Pages. Keep this setup:
 
@@ -28,8 +28,8 @@ Our content security policy is `script-src 'self'`, so **the browser blocks it**
 
 Two ways to fix it, and the choice is the owner's:
 
-- **Turn Web Analytics off** — Cloudflare dashboard → the `scoutai.trade` zone → Analytics & Logs → Web Analytics → disable the site. This keeps the strict CSP, keeps `/privacy/` genuinely script-free, and loses nothing because the beacon is already blocked. This is the recommended option.
-- **Allow the beacon** — add `https://static.cloudflareinsights.com` to `script-src` in [`site/_headers`](./site/_headers) and add a line to the privacy policy about site analytics. Only worth doing if visitor analytics are actually wanted.
+- **Turn Web Analytics off**: Cloudflare dashboard → the `scoutai.trade` zone → Analytics & Logs → Web Analytics → disable the site. This keeps the strict CSP, keeps `/privacy/` genuinely script-free, and loses nothing because the beacon is already blocked. This is the recommended option.
+- **Allow the beacon**: add `https://static.cloudflareinsights.com` to `script-src` in [`site/_headers`](./site/_headers) and add a line to the privacy policy about site analytics. Only worth doing if visitor analytics are actually wanted.
 
 Cloudflare also appends `email-decode.min.js` for Email Address Obfuscation. That one is same-origin, so the CSP permits it, and it removes itself after running. Leave it alone.
 
@@ -41,13 +41,13 @@ Edit files in [site/](./site/), check them, then commit and push the website cha
 
 Cloudflare Pages serves non-HTML assets with `max-age=14400` and **ignores `Cache-Control` from `_headers`** (tested: a cache miss still returned `max-age=14400` with `no-cache` set). The stylesheet and scripts therefore cannot revalidate on their own.
 
-Whenever the contents of `styles.css`, `theme.js`, `site.js` or `release-config.js` change, bump the `?v=` on its `<link>`/`<script>` tag in `index.html`, `privacy/index.html` and `404.html`. HTML is revalidated on every request, so bumping the number there is enough to push the new asset out immediately. Miss this and the change hides behind the stale copy for up to four hours — new markup rendered against the previous theme.
+Whenever the contents of `styles.css`, `theme.js`, `site.js` or `release-config.js` change, bump the `?v=` on its `<link>`/`<script>` tag in `index.html`, `privacy/index.html` and `404.html`. HTML is revalidated on every request, so bumping the number there is enough to push the new asset out immediately. Miss this and the change hides behind the stale copy for up to four hours, with new markup rendered against the previous theme.
 
 ## Colour theme
 
 `theme.js` owns light and dark. It is loaded **blocking in `<head>`** so the theme is settled before the first paint; deferred, someone who chose light on a dark system would see a dark flash and then a swap. The choice is stored in `localStorage` under `scout.theme.v1`, and with no stored choice the stylesheet follows `prefers-color-scheme` on its own.
 
-It is a separate file rather than a few inline lines because the content security policy is `script-src 'self'`, which blocks inline scripts — the usual inlined theme snippet is not available to us.
+It is a separate file rather than a few inline lines because the content security policy is `script-src 'self'`, which blocks inline scripts, so the usual inlined theme snippet is not available to us.
 
 All three pages use system font stacks and token-driven colour, so the only difference between the themes is the palette. The toggle adds a `theme-js` class to `<html>`; the button itself is hidden until that class appears, so anyone without scripting never sees a control that does nothing.
 

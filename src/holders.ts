@@ -5,8 +5,8 @@ import type { HolderShare, Token } from './types.js';
  * ten are, and what the developer behind it actually holds.
  *
  * Everything here is derived from the holder list the data provider returned. When
- * a provider gives no holder breakdown — which is the norm for a token minted
- * minutes ago — this returns null rather than a set of zeroes, so the popup can say
+ * a provider gives no holder breakdown, which is the norm for a token minted
+ * minutes ago, this returns null rather than a set of zeroes, so the popup can say
  * "not published yet" instead of implying the coin has no holders.
  */
 
@@ -19,8 +19,8 @@ export interface CreatorHolding {
   locked: boolean;
   /**
    * Where the share came from, so the popup can word it honestly:
-   * `ranked` — read off the wallet list, `feed` — stated outright by the feed,
-   * `below-list` — the wallet is known but did not appear, so all we know is an upper bound.
+   * `ranked`, read off the wallet list, `feed`, stated outright by the feed,
+   * `below-list`, the wallet is known but did not appear, so all we know is an upper bound.
    */
   basis: 'ranked' | 'feed' | 'below-list';
 }

@@ -11,8 +11,8 @@ import type { Assessment, Stage } from './types.js';
 /**
  * The hover popup that both list overlays share. Axiom Pulse and GMGN publish
  * different row shapes, so each overlay collects its own rows and answers its own
- * questions; everything else — the black/red panel, the mascot verdict badge, the
- * short mode, drag/resize, dismissal, and the mouse and keyboard plumbing — lives
+ * questions; everything else, the black/red panel, the mascot verdict badge, the
+ * short mode, drag/resize, dismissal, and the mouse and keyboard plumbing, lives
  * here so the two sites can never drift apart.
  */
 

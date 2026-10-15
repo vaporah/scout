@@ -130,7 +130,7 @@ test('a pool turned over inside five minutes is credited and says why', () => {
 
 test('the score rises with how hard a coin is actually trading', () => {
   const now = Date.now();
-  // These four are all the same coin as far as creator, holders and token controls go —
+  // These four are all the same coin as far as creator, holders and token controls go,
   // none of it is published. Only the trading differs, and the score has to reflect it.
   // It used to give a coin doing 30% of its pool exactly the same score as one doing
   // almost nothing, and 10x turnover exactly the same as 2x.
@@ -150,7 +150,7 @@ test('a deep pool with ordinary volume is not credited with turnover it never ha
   const now = Date.now();
   // $20k of volume against half a million of liquidity is nothing, and must not be
   // reported as if the pool were turning over. (A coin like this can still reach WATCH
-  // on its buy/sell counts, which is a separate and older rule — what must not happen
+  // on its buy/sell counts, which is a separate and older rule, so what must not happen
   // is the turnover claim.)
   const calm = assess(freshPool(now, { liquidityUsd: 500_000, snapshot: { volume5m: 20_000 } }), defaults, now);
   const hot = assess(freshPool(now), defaults, now);

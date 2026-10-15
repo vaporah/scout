@@ -34,7 +34,7 @@ test('authorized sender covers Axiom token pages and GMGN, but rejects lookalike
 
 test('the sender rule authorizes by host, so a renamed Axiom route cannot refuse a real scan', () => {
   // This rule used to re-derive the route here. Axiom renames routes, so an unrecognised
-  // one was refused while the content script had already resolved the mint — the scan
+  // one was refused while the content script had already resolved the mint, the scan
   // never ran and the popup blamed the coin for having no data. That happened twice, so
   // the route shape is no longer mirrored here at all.
   assert.equal(isScoutSender({ url: `https://axiom.trade/terminal/${mint}` }), true);
@@ -132,7 +132,7 @@ test('a holder report that never answers cannot hold up a scan that does not nee
 });
 
 test('a coin no market indexer lists is still described, and says where the figures came from', async () => {
-  // Both indexers have gaps — DEX Screener lags a launch, and the GeckoTerminal
+  // Both indexers have gaps: DEX Screener lags a launch, and the GeckoTerminal
   // per-token endpoint has no pool for some coins. When neither answered, the popup
   // used to show a scorecard of "Unknown" with a 0/100 score, which reads as a broken
   // extension rather than a coin nobody has indexed yet.

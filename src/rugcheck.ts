@@ -4,7 +4,7 @@ import type { HolderShare } from './types.js';
  * Largest holder accounts from a Solana-native token report feed.
  *
  * Scout's other two holder sources only describe a token once it has been indexed and
- * has traded for a while, which is exactly the window — minutes after launch — where
+ * has traded for a while, which is exactly the window (minutes after launch) where
  * concentration matters most and where the popup currently has nothing to show. This
  * source answers for a token that is only a few minutes old.
  *
@@ -164,7 +164,7 @@ export function parseHolderReport(payload: unknown, mint: string): HolderAccount
  * The caller cannot know it needs this report until the other providers have answered,
  * and asking afterwards costs the whole round trip in series on the slowest scans. So
  * the request is set going alongside them, and only awaited if it turns out to be
- * needed — by which time it has had the length of the main scan to finish.
+ * needed, by which time it has had the length of the main scan to finish.
  */
 export function warmHolderAccounts(mint: string, now: number): void {
   void fetchHolderAccounts(mint, now).catch(() => { /* a missing report is not an error */ });

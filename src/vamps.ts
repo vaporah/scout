@@ -2,8 +2,8 @@ import { mintPattern } from './dex.js';
 
 /**
  * Same-ticker copies: other Solana mints trading under the same symbol. This is what
- * a "vampire" looks like from the outside — a different contract riding an existing
- * ticker — so it is reported as a same-symbol pool, never as proof of intent.
+ * a "vampire" looks like from the outside: a different contract riding an existing
+ * ticker, so it is reported as a same-symbol pool, never as proof of intent.
  */
 export interface VampPool {
   mint: string;

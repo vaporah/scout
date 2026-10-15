@@ -43,7 +43,7 @@ const lookupConcurrency = 4;
  *
  * Both market indexers have gaps: DEX Screener can be minutes behind a launch, and the
  * GeckoTerminal per-token endpoint has no pool at all for some coins. When neither has
- * one, Scout used to end up with a token that had no identity and no figures — the
+ * one, Scout used to end up with a token that had no identity and no figures. The
  * popup showed a scorecard of "Unknown" and a 0/100 score, which reads as a broken
  * extension rather than as a missing listing.
  *
@@ -69,7 +69,7 @@ async function withFallbackReport(token: Token, now: number): Promise<Token> {
   // the slower report.
   const stats = await fetchGmgnStats(token.mint, now).catch(() => null);
   let next = token;
-  // What the deployer still holds — the figure the popup's Dev row kept missing.
+  // What the deployer still holds, the figure the popup's Dev row kept missing.
   if (stats?.creatorHoldingPct != null && next.developerHoldingPct == null) {
     next = { ...next, developerHoldingPct: stats.creatorHoldingPct };
   }
@@ -170,7 +170,7 @@ export function isAxiomPulseSender(sender: MessageSender): boolean {
  * This used to re-derive the route here too, allowing only Pulse or a recognised token
  * URL. That duplicated the content script's own knowledge of Axiom's routes, and it has
  * now failed the same way twice: Axiom renamed a token route, the content script resolved
- * the mint perfectly well, and this refused the scan — so the popup reported the coin as
+ * the mint perfectly well, and this refused the scan, so the popup reported the coin as
  * having no data for a request that was never made. Route names belong to Axiom and cannot
  * be mirrored here.
  *

@@ -9,8 +9,8 @@ export interface TokenCategory {
 
 /**
  * Platform rules keyed off the token's current pool DEX (from the data
- * provider). This is the platform the pool trades on, which is a strong — but
- * not definitive — hint at the launchpad (pump.fun coins migrate to Raydium).
+ * provider). This is the platform the pool trades on, which is a strong, but
+ * not definitive, hint at the launchpad (pump.fun coins migrate to Raydium).
  *
  * Order matters: the first match wins, so patterns for a specific launchpad come
  * before the broader family pattern they would otherwise be swallowed by
@@ -60,7 +60,7 @@ export const knownPlatforms: { id: string; label: string; color: string }[] =
 
 /**
  * Category rules keyed off the token name/symbol. These are keyword heuristics,
- * clearly labelled as such — they are not verified claims about the coin.
+ * clearly labelled as such, and they are not verified claims about the coin.
  */
 const categoryRules: { id: string; label: string; color: string; pattern: RegExp }[] = [
   { id: 'charity', label: 'Charity', color: '#f472b6', pattern: /(charity|charitable|donat|relief|nonprofit|non-profit|giveaway|orphan|water-well)/i },

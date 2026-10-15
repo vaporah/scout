@@ -53,7 +53,7 @@ export function platformOptions(assessments: Assessment[]): PlatformOption[] {
 
 /**
  * The whole launchpad catalogue, not just what is on screen, so the filter can
- * reach every platform Scout knows about — the same way the Axiom protocol list
+ * reach every platform Scout knows about, the same way the Axiom protocol list
  * always offers every launchpad. Platforms with coins in this scan come first
  * (in catalogue order, so the list stays stable between scans) and the idle ones
  * follow, each carrying its own count so a zero is visible rather than implied.

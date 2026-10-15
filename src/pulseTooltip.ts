@@ -195,7 +195,7 @@ export function renderPulseTooltip(
 
   if (compact) {
     heading(root, 'Identity');
-    detail(root, 'Mint', mint ?? 'Unknown — no exact token match');
+    detail(root, 'Mint', mint ?? 'Unknown, no exact token match');
     if (current) detail(root, 'Source', current.token.provider || 'Unknown');
     const note = doc.createElement('div');
     note.className = 'scout-pulse-tooltip-note';

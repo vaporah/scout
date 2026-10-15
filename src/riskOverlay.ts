@@ -337,7 +337,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
   /**
    * Coin history always answers the vampire question: either the copies Scout knows
    * about, or a plain statement that none were found. A feed-sourced copy gets its own
-   * wording, because Scout has not seen it trade — only the ticker matches.
+   * wording, because Scout has not seen it trade, only the ticker matches.
    */
   function historySection(history: TokenHistoryView | null): HTMLElement | null {
     if (!history) return null;
@@ -456,7 +456,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
 
     // Holder distribution sits above the market readout and is deliberately NOT gated
     // behind the "hide details" mode: who holds the coin, and what the dev still holds,
-    // is the one block that stays on screen for every coin in every mode — including
+    // is the one block that stays on screen for every coin in every mode, including
     // UNKNOWN DEV, where it is the only real evidence there is.
     if (assessment) body.append(holdersSection(assessment));
 

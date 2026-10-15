@@ -3,13 +3,13 @@ import { glyphMark } from './platformMarks.js';
 import type { Assessment } from './types.js';
 
 /**
- * Quote-token filtering — the "what is this pool paired against" axis, next to
+ * Quote-token filtering: the "what is this pool paired against" axis, next to
  * the launchpad ("which platform is this pool on") axis.
  *
  * Scout only knows the quote asset for pools where the data provider reported it,
  * so this reads the quote symbol the feed gave us (SOL, USDC, USDT, USD1, ...) and
- * sorts it into a small, stable set of buckets. Anything unrecognised — including
- * a pool whose quote asset is simply missing from the feed — lands in OTHER rather
+ * sorts it into a small, stable set of buckets. Anything unrecognised, including
+ * a pool whose quote asset is simply missing from the feed, lands in OTHER rather
  * than being guessed at.
  */
 

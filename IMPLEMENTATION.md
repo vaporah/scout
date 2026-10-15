@@ -22,7 +22,7 @@ Reusable parts retained: GeckoTerminal parser, token and assessment types, weigh
 - [x] Add an extension-owned compact companion window and exact Solana mint pinning through the documented DEX Screener market-pair endpoint.
 - [x] Enrich a bounded set of exact live mints with GoPlus Solana beta security and top-holder fields, keeping missing responses and ambiguous controls UNKNOWN.
 - [x] Parse Axiom token routes by full mint and colour only exact, current, shared assessments; clear recycled rows and expired signals.
-- [x] Read Axiom Pulse row labels (developer FARMER/UNKNOWN, region, TECH, LARPP) and the column stage, and surface them as page observations in the row tooltip and badge title — separate from independently verified evidence.
+- [x] Read Axiom Pulse row labels (developer FARMER/UNKNOWN, region, TECH, LARPP) and the column stage, and surface them as page observations in the row tooltip and badge title, separate from independently verified evidence.
 - [x] Register a user-authorized Axiom Pulse content script and background worker that uses independent public data, without private Axiom API calls or trades.
 - [x] Add an evidence-based token-page risk warning overlay (top-right, draggable, dismissible) driven by the same shared assessment, with categories FARMER DEV, CRITICAL TOKEN SECURITY RISK, RISKY DEV, SUSPICIOUS WALLET CLUSTER, and LIQUIDITY WARNING.
 - [x] Add an independent developer-reputation verdict (RISKY DEV / UNKNOWN DEV) from observable launch history, plus a mirror of Axiom's own PROVEN DEV page badge on token pages.

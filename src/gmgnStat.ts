@@ -72,7 +72,7 @@ export function parseGmgnStats(payload: unknown): GmgnStats | null {
   // A holder count of zero would be a claim that nobody holds the coin.
   const holderCount = countValue !== null && countValue > 0 ? Math.floor(countValue) : null;
   // A deployer holding nothing is a real finding about one wallet, so a zero is kept
-  // here — unlike the top-ten rate below, where a zero means "not computed".
+  // here, unlike the top-ten rate below, where a zero means "not computed".
   const creatorHoldingPct = rate(data.creator_hold_rate, { allowZero: true });
   const top10Pct = rate(data.top_10_holder_rate, { allowZero: false });
 

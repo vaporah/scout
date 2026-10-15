@@ -52,7 +52,7 @@ function unknownToken(mint: string, now: number, note: string): Token {
  * Every market source answers "no pool here" with this stand-in rather than by failing,
  * and it is not evidence about a coin: no ticker, no price, no pool, no holders. Feeding
  * it to the scorer produced a real-looking "0/100 · UNKNOWN / INCOMPLETE" card for coins
- * that were merely not indexed yet, which reads as a verdict when it is only an absence —
+ * that were merely not indexed yet, which reads as a verdict when it is only an absence,
  * and a genuine 0 is indistinguishable from it. A miss is reported as a miss instead.
  *
  * The test is deliberately strict, so a thinly-covered coin that has any one real figure

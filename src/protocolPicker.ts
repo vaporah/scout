@@ -2,9 +2,9 @@ import { escapeHtml as e } from './ui.js';
 import type { PlatformOption } from './platformFilter.js';
 
 /**
- * The shared pill picker behind every "filter by" row — launchpads and quote
+ * The shared pill picker behind every "filter by" row: launchpads and quote
  * tokens. A card of toggle pills, one per option, with a bulk action and an
- * optional "show more" expander — the same idea as the Axiom protocol picker.
+ * optional "show more" expander, the same idea as the Axiom protocol picker.
  * An empty selection means "every option", so something new is never hidden by a
  * filter the user set earlier.
  *
@@ -73,7 +73,7 @@ export function protocolPicker(options: ProtocolPickerOptions): string {
     // A zero is left blank rather than printed: the dimmed pill and the tooltip
     // already say "nothing here right now", and 25 zeroes would just be noise.
     const count = item.count === 0 ? '' : `<span class="protocol-count">${item.count}</span>`;
-    return `<button type="button" class="protocol-pill ${on ? 'is-on' : ''}${idle}" ${attribute}="${e(item.id)}" style="--chip:${e(item.color)}" aria-pressed="${on}" title="${e(`${item.label} — ${coins}`)}">${icon(item)}<span class="protocol-name">${e(item.label)}</span>${count}</button>`;
+    return `<button type="button" class="protocol-pill ${on ? 'is-on' : ''}${idle}" ${attribute}="${e(item.id)}" style="--chip:${e(item.color)}" aria-pressed="${on}" title="${e(`${item.label}: ${coins}`)}">${icon(item)}<span class="protocol-name">${e(item.label)}</span>${count}</button>`;
   };
   const more = expander && (hidden > 0 || options.expanded)
     ? `<button type="button" class="protocols-more" id="${ids.showMore}" aria-expanded="${options.expanded}">${options.expanded ? 'Show less' : `Show more ${hidden}`}<span class="chev" aria-hidden="true">${options.expanded ? '\u25b4' : '\u25be'}</span></button>`
