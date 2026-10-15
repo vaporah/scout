@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://scoutai.trade/">
-    <img src="./scout-raccoon-logo.png" width="136" alt="Scout raccoon logo">
+    <img src="https://scoutai.trade/scout-raccoon-logo.png" width="136" alt="Scout raccoon logo">
   </a>
 </p>
 
@@ -24,8 +24,7 @@
 Scout is a read-only Chromium extension for researching Solana meme coins. It matches tokens by their full mint address, adds clear risk and market context to the pages traders already use, and keeps missing evidence visible instead of guessing.
 
 <p align="center">
-  <img src="./store/screenshot-1-rows.jpg" width="49%" alt="Scout highlights on a Solana token list">
-  <img src="./store/screenshot-2-popup.jpg" width="49%" alt="Scout token research panel">
+  <img src="https://scoutai.trade/scout-research-overlay.jpg" width="920" alt="Scout token research panel beside a Solana token list">
 </p>
 
 ## What Scout shows
