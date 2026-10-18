@@ -14,8 +14,8 @@ import { filterByQuote, loadQuoteFilter, quoteOptions, saveQuoteFilter, toggleQu
 import { bindProtocolPicker, platformPickerIds, protocolPicker, quotePickerIds } from './protocolPicker.js';
 import type { Assessment, Settings } from './types.js';
 import { clearWalletList, exportWalletList, loadWalletList, parseWalletList, saveWalletList, type TrackedWallet } from './walletList.js';
-import { axiomPageMint } from './axiomMint.js';
 import { defaultIntegrationPrefs, loadIntegrationPrefs, saveIntegrationPrefs, type IntegrationPrefs } from './integrationPrefs.js';
+import { tradingPageIdentity, type TradingPageIdentity } from './tradingPage.js';
 
 const root = document.querySelector<HTMLElement>('#app');
 if (!root) throw new Error('Popup root missing');
@@ -46,11 +46,11 @@ interface PopupBrowserApi {
   tabs?: { query(query: { active: true; currentWindow: true }): Promise<Array<{ url?: string }>> };
 }
 
-async function activeAxiomAddress(): Promise<string | null> {
+async function activeTradingPage(): Promise<TradingPageIdentity | null> {
   try {
     const api = (globalThis as typeof globalThis & { chrome?: PopupBrowserApi }).chrome;
     const [tab] = await api?.tabs?.query({ active: true, currentWindow: true }) ?? [];
-    return tab?.url ? axiomPageMint(tab.url) : null;
+    return tab?.url ? tradingPageIdentity(tab.url) : null;
   } catch { return null; }
 }
 
@@ -97,6 +97,10 @@ function frame(content: string): void {
   const tabs = `<div class="popup-tabs" role="tablist" aria-label="Scout popup sections"><button id="tab-scan" class="popup-tab ${popupTab === 'scan' ? 'is-active' : ''}" type="button" role="tab" aria-selected="${popupTab === 'scan'}">Scan</button><button id="tab-settings" class="popup-tab ${popupTab === 'settings' ? 'is-active' : ''}" type="button" role="tab" aria-selected="${popupTab === 'settings'}">Settings</button></div>`;
   const body = popupTab === 'settings' ? settingsView(settings) : `${content}${websiteCheckSection()}`;
   app.innerHTML = `<div class="popup-wrap"><header class="popup-head"><div class="header-end"><span class="mark" aria-label="Scout"><img src="scout-raccoon-logo.png" alt="Scout raccoon logo" width="36" height="36"></span></div><div class="header-copy"><span class="header-kicker">SOLANA INTELLIGENCE</span><strong>Scout</strong></div>${tabs}</header>${body}<p class="popup-foot">Independent research only · No wallet access · No trades</p></div>`;
+  app.querySelectorAll<HTMLElement>('.popup-feature-toggle small').forEach(description => {
+    if (description.textContent?.includes('Axiom Pulse and GMGN'))
+      description.textContent = 'Colour supported Axiom, GMGN, and Padre token lists.';
+  });
   app.querySelector<HTMLButtonElement>('#tab-scan')?.addEventListener('click', () => { popupTab = 'scan'; paint(); });
   app.querySelector<HTMLButtonElement>('#tab-settings')?.addEventListener('click', () => { popupTab = 'settings'; paint(); });
   app.querySelector<HTMLButtonElement>('#quick-settings')?.addEventListener('click', () => { popupTab = 'settings'; paint(); });
@@ -269,10 +273,10 @@ async function render(): Promise<void> {
     const now = Date.now();
     const settings = loadSettings();
     const mints = loadTrackedMints();
-    const activeAddress = await activeAxiomAddress();
+    const activePage = await activeTradingPage();
     const [feed, tracked, pulse, activeToken] = await Promise.allSettled([
       fetchTokens(mode, now), fetchTrackedTokens(mints, now), loadPulseStatus(now),
-      activeAddress ? fetchMint(activeAddress, now, true) : Promise.resolve(null)
+      activePage ? fetchMint(activePage.mint, now, true) : Promise.resolve(null)
     ]);
     if (currentRequest !== request) return;
     const pulseState = pulse.status === 'fulfilled' ? pulse.value : null;
@@ -300,9 +304,9 @@ async function render(): Promise<void> {
     const feedProblem = feed.status === 'rejected'
       ? feed.reason instanceof Error ? feed.reason.message : 'Live feed temporarily unavailable.'
       : '';
-    const pulseText = pageToken ? 'Current Axiom coin · exact page address' : pulseState?.onPulse
+    const pulseText = pageToken && activePage ? `Current ${activePage.platform} coin · exact page address` : pulseState?.onPulse
       ? `Trenches · ${pulseState.colouredRows}/${pulseState.visibleRows} rows coloured · ${pulseState.matchedRows} exact mints · ${Math.max(0, Math.round((now - pulseState.at) / 1000))}s ago`
-      : feedProblem || 'Open Axiom Pulse to start row highlights.';
+      : feedProblem || 'Open Axiom Pulse, GMGN Trenches, or Padre Trenches to start row highlights.';
     latest = { assessments, settings, mode, pulseText };
     if (pageToken && assessments.some(assessment => assessment.token.mint === pageToken.mint)) selectedMint = pageToken.mint;
     paint();

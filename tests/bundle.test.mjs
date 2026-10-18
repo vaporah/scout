@@ -28,15 +28,18 @@ test('packaged classic content script starts on Pulse and paints an exact matche
   } finally { dom.window.close(); }
 });
 
-test('Axiom and GMGN ship the same coin-panel and preference features', async () => {
-  const [manifest, axiomToken, gmgn] = await Promise.all([
+test('Axiom, GMGN, and Padre ship the same coin-panel and preference features', async () => {
+  const [manifest, axiomToken, gmgn, padre] = await Promise.all([
     readFile(new URL('../dist/manifest.json', import.meta.url), 'utf8').then(JSON.parse),
     readFile(new URL('../dist/tokenPage.js', import.meta.url), 'utf8'),
-    readFile(new URL('../dist/gmgn.js', import.meta.url), 'utf8')
+    readFile(new URL('../dist/gmgn.js', import.meta.url), 'utf8'),
+    readFile(new URL('../dist/padre.js', import.meta.url), 'utf8')
   ]);
   const axiomEntry = manifest.content_scripts.find(entry => entry.matches.includes('https://axiom.trade/*'));
   const gmgnEntry = manifest.content_scripts.find(entry => entry.matches.includes('https://gmgn.ai/*'));
-  assert.deepEqual(gmgnEntry.css, axiomEntry.css, 'both trading sites receive the same panel and hover styles');
+  const padreEntry = manifest.content_scripts.find(entry => entry.matches.includes('https://trade.padre.gg/*'));
+  assert.deepEqual(gmgnEntry.css, axiomEntry.css, 'GMGN receives the shared panel and hover styles');
+  assert.deepEqual(padreEntry.css, axiomEntry.css, 'Padre receives the shared panel and hover styles');
   for (const feature of [
     'Scout is gathering independent market, holder, and security data for this coin.',
     'scout.integrations.v1',
@@ -45,5 +48,6 @@ test('Axiom and GMGN ship the same coin-panel and preference features', async ()
   ]) {
     assert.ok(axiomToken.includes(feature), `Axiom includes ${feature}`);
     assert.ok(gmgn.includes(feature), `GMGN includes ${feature}`);
+    assert.ok(padre.includes(feature), `Padre includes ${feature}`);
   }
 });
