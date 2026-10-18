@@ -1,0 +1,20 @@
+#!/bin/sh
+# Publishes site/ after any commit that changed it, so committing is all it takes to put
+# the website live.
+#
+# It never fails a commit. If the publish cannot run, the commit still stands and the
+# reason is printed, because losing a commit to a network problem would be far worse than
+# a stale website. Publish by hand at any time with: npm run deploy:site
+#
+# Only changes under site/ are published. The extension in src/ is released separately and
+# is not part of the website, so a commit that only touches it deploys nothing.
+#
+# To turn this off:  git config --unset core.hooksPath
+if ! git diff-tree --no-commit-id --name-only -r HEAD | grep -q '^site/'; then
+  exit 0
+fi
+
+echo "site/ changed in this commit, publishing to Cloudflare Pages..."
+if ! node scripts/deploy-site.mjs; then
+  echo "Publish failed, the commit is unaffected. Retry with: npm run deploy:site"
+fi

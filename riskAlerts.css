@@ -1,0 +1,151 @@
+/* Top-right Scout panel on token chart pages. */
+.scout-risk {
+  display: none;
+  position: fixed;
+  z-index: 2147483646;
+  top: 16px;
+  right: 16px;
+  width: min(340px, calc(100vw - 32px));
+  max-height: calc(100vh - 24px);
+  border: 1px solid #5a2a33;
+  border-radius: 12px;
+  background: rgba(9, 7, 8, .98);
+  color: #f6eff0;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .6);
+  font: 12px/1.45 system-ui, sans-serif;
+  overflow: hidden;
+}
+/* Full research belongs only to a positively identified coin route. The document
+   marker is maintained synchronously by the shared Axiom/GMGN page monitor. */
+html[data-scout-coin-page] .scout-risk.is-visible { display: flex; flex-direction: column; animation: scout-risk-in .18s ease-out; }
+@keyframes scout-risk-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.scout-risk[data-scout-severity="red"] { border-color: rgba(255, 59, 80, .85); }
+.scout-risk[data-scout-severity="orange"] { border-color: rgba(230, 163, 60, .85); }
+.scout-risk[data-scout-severity="neutral"] { border-color: #5a2a33; }
+.scout-risk[data-scout-severity="green"] { border-color: rgba(62, 220, 133, .85); }
+
+.scout-risk-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  cursor: move;
+  user-select: none;
+  border-bottom: 1px solid rgba(239, 64, 90, .3);
+  background: rgba(239, 64, 90, .06);
+}
+/* Verdict badge: the Scout mascot in a circle coloured by severity. */
+.scout-risk-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, .45);
+  background: #6c6c78;
+  color: #fff;
+  flex: 0 0 auto;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 2px 8px rgba(0, 0, 0, .45);
+}
+.scout-risk-icon-img { display: block; width: 84%; height: 84%; object-fit: contain; }
+/* Vector stand-in when the mascot file cannot load, so the badge is never a broken box. */
+.scout-risk-icon-fallback { display: block; width: 84%; height: 84%; }
+.scout-risk-icon-fallback svg { display: block; width: 100%; height: 100%; }
+.scout-risk[data-scout-severity="red"] .scout-risk-icon { background: #e0293f; }
+.scout-risk[data-scout-severity="orange"] .scout-risk-icon { background: #d99020; }
+.scout-risk[data-scout-severity="neutral"] .scout-risk-icon { background: #6c6c78; }
+.scout-risk[data-scout-severity="green"] .scout-risk-icon { background: #24a862; }
+.scout-risk-titles { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+.scout-risk-brand { color: #ff8a95; font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.scout-risk-category { color: #fff6f7; font-size: 14px; font-weight: 800; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scout-risk-btn {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(239, 64, 90, .3);
+  border-radius: 7px;
+  background: rgba(239, 64, 90, .14);
+  color: #ffbcc4;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+.scout-risk-btn:hover { background: rgba(239, 64, 90, .28); color: #fff; }
+
+.scout-risk-body { flex: 1 1 auto; min-height: 0; padding: 10px 12px 12px; max-height: none; overflow: auto; }
+.scout-risk.is-collapsed .scout-risk-body { display: none; }
+.scout-risk-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.scout-risk-meta-chip {
+  padding: 2px 8px;
+  border: 1px solid var(--line-2, #4d2b34);
+  border-radius: 999px;
+  background: rgba(239, 64, 90, .08);
+  color: #e2bfc6;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.scout-risk-meta-chip--tone-red { border-color: rgba(255, 59, 80, .5); background: rgba(255, 59, 80, .13); color: #ffc3ca; }
+.scout-risk-meta-chip--tone-orange { border-color: rgba(230, 163, 60, .5); background: rgba(230, 163, 60, .13); color: #f4d69b; }
+.scout-risk-meta-chip--tone-neutral { border-color: #5a2a33; background: rgba(239, 64, 90, .1); color: #f0c6cd; }
+.scout-risk-meta-chip--tone-green { border-color: rgba(62, 220, 133, .5); background: rgba(62, 220, 133, .12); color: #a9ecc4; }
+.scout-risk-note { margin: 8px 0 0; color: #a8848c; font-size: 10px; }
+.scout-risk-summary { margin: 0 0 8px; color: #f3dde1; }
+.scout-risk-verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.scout-risk-verdict { display: inline-flex; align-items: baseline; gap: 5px; padding: 3px 8px; border: 1px solid var(--line-2, #4d2b34); border-radius: 8px; background: rgba(239, 64, 90, .07); font-size: 11px; }
+.scout-risk-verdict-key { color: #e3b3bb; font-weight: 650; }
+.scout-risk-verdict-value { color: #fff6f7; font-weight: 750; }
+.scout-risk-verdict--green { border-color: rgba(62, 220, 133, .5); background: rgba(62, 220, 133, .12); }
+.scout-risk-verdict--green .scout-risk-verdict-value { color: #a9ecc4; }
+.scout-risk-verdict--orange { border-color: rgba(230, 163, 60, .5); background: rgba(230, 163, 60, .12); }
+.scout-risk-verdict--orange .scout-risk-verdict-value { color: #f4d69b; }
+.scout-risk-verdict--red { border-color: rgba(255, 59, 80, .5); background: rgba(255, 59, 80, .12); }
+.scout-risk-verdict--red .scout-risk-verdict-value { color: #ffc3ca; }
+.scout-risk-verdict--neutral { border-color: #5a2a33; background: rgba(239, 64, 90, .1); }
+.scout-risk-verdict--neutral .scout-risk-verdict-value { color: #f0c6cd; }
+.scout-risk-verdict--pool { border-color: rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .07); }
+.scout-risk-verdict--pool .scout-risk-verdict-value { color: #f5f5f7; }
+.scout-risk-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
+.scout-risk-tag {
+  --scout-tag: #e3b3bb;
+  padding: 2px 8px;
+  border: 1px solid var(--scout-tag);
+  border-radius: 999px;
+  color: var(--scout-tag);
+  background: rgba(239, 64, 90, .07);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.scout-risk-evidence summary { cursor: pointer; color: #ff9aa5; font-weight: 700; }
+.scout-risk-evidence ul { margin: 8px 0; padding-left: 18px; }
+.scout-risk-reason { margin: 3px 0; color: #f3dde1; overflow-wrap: anywhere; }
+.scout-risk-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.scout-risk-link { color: #ff9aa5; text-decoration: none; }
+.scout-risk-link:hover { text-decoration: underline; }
+
+.scout-risk-history { margin-top: 9px; padding-top: 8px; border-top: 1px solid rgba(239, 64, 90, .22); }
+.scout-risk-history-title { color: #ff8a95; font-size: 9.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 4px; }
+.scout-risk-history-line { display: grid; grid-template-columns: 108px minmax(0, 1fr); gap: 8px; margin: 3px 0; overflow-wrap: anywhere; }
+.scout-risk-history-key { color: #cf9ba4; font-weight: 650; }
+.scout-risk-history-value { color: #f6eff0; }
+
+/* Holder breakdown: one ranked row per wallet, so dominance is visible at a glance. */
+.scout-risk-holders { margin-top: 7px; display: flex; flex-direction: column; gap: 3px; }
+.scout-risk-holder { display: grid; grid-template-columns: 14px minmax(0, 1fr) 52px auto; align-items: center; gap: 7px; }
+.scout-risk-holder-rank { color: #a8848c; font-size: 9.5px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.scout-risk-holder-bar { display: block; height: 5px; border-radius: 999px; background: rgba(239, 64, 90, .14); overflow: hidden; }
+.scout-risk-holder-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ef405a, #ff8a95); }
+.scout-risk-holder-pct { color: #f6eff0; font-size: 10.5px; font-weight: 750; text-align: right; font-variant-numeric: tabular-nums; }
+.scout-risk-holder-wallet { color: #ff9aa5; font-size: 10.5px; text-decoration: none; font-variant-numeric: tabular-nums; }
+.scout-risk-holder-wallet:hover { text-decoration: underline; }
+.scout-risk-holder-band { color: #cf9ba4; font-size: 10.5px; font-weight: 650; white-space: nowrap; }
+.scout-risk-disclaimer { margin: 8px 0 0; color: #a8848c; font-size: 10px; }
+.scout-risk-resize { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; z-index: 2; }
+.scout-risk-resize::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 8px; height: 8px; border-right: 2px solid #7a3a46; border-bottom: 2px solid #7a3a46; }

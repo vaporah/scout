@@ -1,0 +1,196 @@
+/* Scout only decorates rows resolved to one full Solana mint. */
+.scout-pulse-row { position: relative; }
+.scout-pulse-green {
+  background: rgba(62, 220, 133, .08) !important;
+  box-shadow: inset 3px 0 0 #3edc85 !important;
+}
+.scout-pulse-amber {
+  background: rgba(250, 204, 75, .08) !important;
+  box-shadow: inset 3px 0 0 #facc4b !important;
+}
+.scout-pulse-red {
+  background: rgba(255, 76, 99, .09) !important;
+  box-shadow: inset 3px 0 0 #ff4c63 !important;
+}
+/* Every exact-mint match gets a quiet white rail. Verdict colors replace it only when
+   Scout has enough evidence for a green, yellow, or red state. */
+.scout-pulse-neutral {
+  background: rgba(255, 255, 255, .025) !important;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, .72) !important;
+}
+.scout-pulse-gray {
+  background: rgba(255, 255, 255, .025) !important;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, .72) !important;
+}
+/* Activity without a quality verdict is caution yellow, never a separate blue state. */
+.scout-pulse-run {
+  background: rgba(250, 204, 75, .08) !important;
+  box-shadow: inset 3px 0 0 #facc4b !important;
+}
+/* Narrative and attention remain available in the tooltip; they do not recolour rows. */
+.scout-pulse-buzz { outline: none !important; }
+
+/*
+ * Hot coin: a top-tier verdict, a crowd of buyers, and heavy volume. This is meant
+ * to be the brightest thing on the page, so the row goes from a muted wash to a
+ * near-solid one and a halo breathes over it. The halo is a pseudo-element because
+ * the row's own background/box-shadow are !important, and !important wins over an
+ * animation in the cascade, so animating them directly would do nothing at all.
+ */
+.scout-pulse-green.scout-pulse-hot {
+  --scout-launch: rgba(105, 255, 173, .92);
+  --scout-launch-glow: rgba(62, 220, 133, .72);
+  --scout-launch-soft: rgba(62, 220, 133, .42);
+  background: rgba(62, 220, 133, .24) !important;
+  box-shadow: inset 4px 0 0 #69ffad, inset 0 0 18px rgba(62, 220, 133, .18) !important;
+}
+.scout-pulse-amber.scout-pulse-hot {
+  --scout-launch: rgba(255, 224, 114, .94);
+  --scout-launch-glow: rgba(250, 204, 75, .7);
+  --scout-launch-soft: rgba(250, 204, 75, .4);
+  background: rgba(250, 204, 75, .22) !important;
+  box-shadow: inset 4px 0 0 #ffe072, inset 0 0 18px rgba(250, 204, 75, .16) !important;
+}
+/* Reserved for verified New Pairs that are turning over their pool with broad buying. */
+.scout-pulse-row.scout-pulse-hot { outline: 1px solid var(--scout-launch) !important; outline-offset: -1px; }
+.scout-pulse-row.scout-pulse-hot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border: 2px solid var(--scout-launch);
+  border-radius: inherit;
+  box-shadow: 0 0 10px var(--scout-launch-glow), 0 0 24px var(--scout-launch-soft);
+  pointer-events: none;
+  animation: scout-launching 900ms ease-in-out infinite alternate;
+}
+@keyframes scout-launching {
+  from { opacity: .48; }
+  to { opacity: 1; }
+}
+/* Colored platform / category chips (pump.fun, Raydium, Charity, ...). */
+.scout-pulse-tags { position: absolute; top: 2px; right: 2px; display: flex; gap: 3px; z-index: 6; pointer-events: none; }
+.scout-pulse-tag {
+  --scout-tag: #e3b3bb;
+  padding: 1px 6px;
+  border: 1px solid var(--scout-tag);
+  border-radius: 999px;
+  background: rgba(12, 8, 10, .92);
+  color: var(--scout-tag);
+  font: 700 8.5px/1.4 system-ui, sans-serif;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.scout-pulse-flow {
+  position: absolute;
+  z-index: 7;
+  right: 4px;
+  bottom: 3px;
+  padding: 2px 5px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 5px;
+  background: rgba(8, 8, 10, .88);
+  color: #d9d9dc;
+  font: 700 9px/1.25 system-ui, sans-serif;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.scout-pulse-flow.is-positive { border-color: rgba(62, 220, 133, .45); color: #9ce8bc; }
+.scout-pulse-flow.is-negative { border-color: rgba(255, 76, 99, .48); color: #ffb2bd; }
+.scout-pulse-flow.is-flat { color: #b9b9bf; }
+.scout-pulse-badge {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(12, 10, 12, .94);
+  color: #ddd2d5;
+  font: 600 0/1.25 system-ui, sans-serif;
+  letter-spacing: .02em;
+  pointer-events: none;
+}
+.scout-pulse-badge--green { background: #3edc85; }
+.scout-pulse-badge--amber { background: #facc4b; }
+.scout-pulse-badge--red { background: #ff4c63; }
+.scout-pulse-badge--run { background: #facc4b; }
+.scout-pulse-badge--gray, .scout-pulse-badge--neutral { background: rgba(255, 255, 255, .72); }
+.scout-pulse-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 2147483647;
+  right: 16px;
+  bottom: 42px;
+  width: min(352px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  flex-direction: column;
+  border: 1px solid #5a2a33;
+  border-radius: 12px;
+  background: rgba(9, 7, 8, .98);
+  color: #f6eff0;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .6);
+  font: 12px/1.45 system-ui, sans-serif;
+  pointer-events: auto;
+  overflow: hidden;
+}
+/* Row-hover research is the list-page surface, never the coin-chart surface. */
+html:not([data-scout-coin-page]) .scout-pulse-tooltip.is-visible { display: flex; flex-direction: column; }
+.scout-pulse-tooltip-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 6px 5px 9px; cursor: move; user-select: none; border-bottom: 1px solid rgba(239, 64, 90, .3); background: rgba(239, 64, 90, .06); }
+.scout-pulse-tooltip-brand { display: flex; align-items: center; gap: 7px; min-width: 0; }
+/* Verdict badge: the Scout mascot in a circle coloured by the row verdict. */
+.scout-pulse-tooltip-mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, .45);
+  background: #6c6c78;
+  overflow: hidden;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08);
+}
+.scout-pulse-tooltip-mark-img { display: block; width: 84%; height: 84%; object-fit: contain; }
+.scout-pulse-tooltip-mark-fallback { display: block; width: 84%; height: 84%; }
+.scout-pulse-tooltip-mark-fallback svg { display: block; width: 100%; height: 100%; }
+.scout-pulse-tooltip[data-scout-tone="green"] .scout-pulse-tooltip-mark { background: #24a862; }
+.scout-pulse-tooltip[data-scout-tone="amber"] .scout-pulse-tooltip-mark { background: #d99020; }
+.scout-pulse-tooltip[data-scout-tone="red"] .scout-pulse-tooltip-mark { background: #e0293f; }
+.scout-pulse-tooltip[data-scout-tone="neutral"] .scout-pulse-tooltip-mark,
+.scout-pulse-tooltip[data-scout-tone="gray"] .scout-pulse-tooltip-mark { background: #6c6c78; }
+.scout-pulse-tooltip[data-scout-state="scanning"] .scout-pulse-tooltip-mark { background: #d99020; }
+.scout-pulse-tooltip-grip { color: #a8848c; font-size: 11px; line-height: 1; letter-spacing: 2px; }
+.scout-pulse-tooltip-actions { display: flex; align-items: center; gap: 2px; }
+.scout-pulse-tooltip-btn { border: 1px solid rgba(239, 64, 90, .3); background: rgba(239, 64, 90, .14); color: #ffbcc4; font-size: 13px; line-height: 1; padding: 2px 7px; border-radius: 7px; cursor: pointer; }
+.scout-pulse-tooltip-btn:hover { background: rgba(239, 64, 90, .28); color: #fff; }
+.scout-pulse-tooltip-close { border: 1px solid rgba(239, 64, 90, .3); background: rgba(239, 64, 90, .14); color: #ffbcc4; font-size: 13px; line-height: 1; padding: 2px 7px; border-radius: 7px; cursor: pointer; }
+.scout-pulse-tooltip-close:hover { background: rgba(239, 64, 90, .28); color: #fff; }
+.scout-pulse-tooltip-body { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 11px 14px 12px; }
+.scout-pulse-tooltip-resize { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; }
+.scout-pulse-tooltip-resize::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 8px; height: 8px; border-right: 2px solid #7a3a46; border-bottom: 2px solid #7a3a46; }
+.scout-pulse-tooltip .scout-pulse-tooltip-heading { display: block; margin: 0; color: #fff6f7; font-size: 13px; font-weight: 800; letter-spacing: .01em; }
+.scout-pulse-tooltip .scout-pulse-tooltip-token { display: flex; align-items: baseline; gap: 7px; margin: 2px 0 8px; min-width: 0; }
+.scout-pulse-tooltip .scout-pulse-tooltip-symbol { color: #f6eff0; font-size: 12px; font-weight: 800; }
+.scout-pulse-tooltip .scout-pulse-tooltip-name { color: #b58c94; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 9px; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip { padding: 2px 7px; border: 1px solid #4d2b34; border-radius: 999px; background: rgba(239, 64, 90, .08); color: #e2bfc6; font-size: 10px; font-weight: 700; letter-spacing: .02em; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip--axiom { border-color: rgba(239, 64, 90, .3); background: rgba(239, 64, 90, .12); color: #ffb9c0; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip--narrative { border-color: rgba(255, 106, 77, .34); background: rgba(255, 106, 77, .12); color: #ffc2b1; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip--attention { border-color: rgba(230, 163, 60, .34); background: rgba(230, 163, 60, .12); color: #f2d5a2; }
+.scout-pulse-tooltip .scout-pulse-tooltip-section { margin: 9px 0 3px; padding-top: 7px; border-top: 1px solid rgba(239, 64, 90, .22); color: #ff8a95; font-size: 9.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.scout-pulse-tooltip .scout-pulse-tooltip-line { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px; margin: 3px 0; overflow-wrap: anywhere; }
+.scout-pulse-tooltip .scout-pulse-tooltip-label { color: #cf9ba4; font-weight: 650; }
+.scout-pulse-tooltip .scout-pulse-tooltip-value { color: #f6eff0; }
+.scout-pulse-tooltip .scout-pulse-tooltip-note { margin-top: 8px; color: #a8848c; font-size: 10px; }
+.scout-pulse-tooltip[data-scout-tone="green"] { border-color: #3edc85; }
+.scout-pulse-tooltip[data-scout-tone="amber"] { border-color: #e6a33c; }
+.scout-pulse-tooltip[data-scout-tone="red"] { border-color: #ff3b50; }
+.scout-pulse-tooltip[data-scout-tone="neutral"] { border-color: #5a2a33; }

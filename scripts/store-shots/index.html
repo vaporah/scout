@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scout store screenshot harness</title>
+<!--
+  Screenshot harness for the Chrome Web Store listing.
+
+  This page is NOT part of the extension. It loads the real extension stylesheets and
+  calls the real rendering code (src/riskOverlay.ts, src/pulseRows.ts, src/categories.ts)
+  with illustrative data, so the captured images show genuinely rendered Scout output
+  rather than a hand-drawn mock.
+
+  The host page behind the rows is a neutral, unbranded dark list on purpose: Scout
+  decorates Axiom and GMGN, but neither site's branding belongs in store artwork.
+
+  Build:  npx esbuild scripts/store-shots/shot.ts --bundle --format=iife --outfile=scripts/store-shots/shot.js
+  Capture: see scripts/store-shots/README.md
+-->
+<link rel="stylesheet" href="../../styles.css">
+<link rel="stylesheet" href="../../live.css">
+<link rel="stylesheet" href="../../axiom-pulse.css">
+<link rel="stylesheet" href="../../riskAlerts.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 1280px;
+    height: 800px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 12% -10%, #171425 0%, #0d0b12 55%, #08070c 100%);
+    color: #e9ebf0;
+    font: 13px/1.45 system-ui, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  body[data-shot="popup"], body[data-shot="history"] { overflow: hidden; }
+  .scrim { position: fixed; inset: 0; background: rgba(6, 5, 9, .62); z-index: 40; }
+
+  /* ---- neutral, unbranded host list ---- */
+  .mock { padding: 20px 26px; }
+  .mock-bar { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .mock-title { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: .01em; }
+  .mock-sub { color: #6f6879; font-size: 11px; }
+  .mock-list { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+  .mock-list th {
+    padding: 0 10px 6px;
+    color: #6f6879;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    text-align: right;
+  }
+  .mock-list th.left { text-align: left; }
+  .mock-list td {
+    padding: 12px 10px;
+    background: #131019;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .mock-list tr td:first-child { border-radius: 8px 0 0 8px; }
+  .mock-list tr td:last-child { border-radius: 0 8px 8px 0; }
+  .mock-list td.left { text-align: left; }
+  .mock-rank { width: 34px; color: #6f6879; }
+  .mock-name { display: flex; align-items: baseline; gap: 8px; }
+  .mock-sym { font-weight: 700; letter-spacing: .01em; }
+  .mock-full { color: #6f6879; font-size: 11px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mock-age { color: #6f6879; font-size: 11px; }
+  .mock-up { color: #4ade9a; }
+  .mock-down { color: #ff6b7d; }
+  .mock-dim { color: #9a92a7; }
+</style>
+</head>
+<body data-shot="rows">
+  <div class="mock">
+    <div class="mock-bar">
+      <h1 class="mock-title">New pairs</h1>
+      <span class="mock-sub">illustrative data &middot; rows coloured by Scout</span>
+    </div>
+    <table class="mock-list">
+      <thead>
+        <tr>
+          <th class="left"></th>
+          <th class="left">Coin</th>
+          <th>Price</th>
+          <th>5m</th>
+          <th>Liquidity</th>
+          <th>Mkt cap</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <script src="./shot.js"></script>
+</body>
+</html>

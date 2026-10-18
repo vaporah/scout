@@ -1,0 +1,28 @@
+/* Responsive tweaks layered on top of styles.css. */
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: 1fr; }
+  .detail-panel { position: static; top: auto; }
+  .summary { grid-template-columns: repeat(2, 1fr); }
+  .setting-grid { grid-template-columns: repeat(2, 1fr); }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .topbar { flex-wrap: wrap; padding: 12px; }
+  .topbar > .mark { margin-left: -2px; }
+  .top-actions { grid-column: 1 / -1; grid-row: 2; width: 100%; justify-content: space-between; margin-left: 0; }
+  .page { padding: 18px 12px 34px; }
+  .intro h1 { font-size: 24px; }
+  .filters { flex-wrap: wrap; }
+  .filters input { flex-basis: 100%; }
+  .token-list { max-height: 360px; }
+  .mint-panel form { flex-wrap: wrap; }
+  .mint-panel input { flex-basis: 100%; }
+  .components { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 460px) {
+  .summary { grid-template-columns: 1fr 1fr; }
+}
+.popup-scan-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.popup-scan-head h1 { margin: 0; }

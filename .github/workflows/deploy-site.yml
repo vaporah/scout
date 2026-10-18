@@ -1,0 +1,67 @@
+# Publishes site/ to Cloudflare Pages whenever main changes underneath it, so a commit
+# is all it takes to put the website live. This replaces the Cloudflare Pages Git
+# integration, which was pointed at a GitHub App installation that no longer exists and
+# so had been failing every build silently.
+#
+# It needs one repository secret, CLOUDFLARE_API_TOKEN. Until that exists the job logs a
+# notice and skips rather than failing, because a red run on every push would train
+# everyone to ignore it. DEPLOY-SITE.md has the two minute setup.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/deploy-site.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time. A newer push makes an in-flight one pointless, and two running
+# together would race to publish different folders under the same project.
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Publish site/
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # A deploy publishes whatever it is pointed at. If site/ were ever moved or renamed,
+      # uploading an empty folder would replace the live site with nothing, so this refuses
+      # to publish before that can happen rather than after.
+      - name: Check the site is present
+        run: |
+          if [ ! -f site/index.html ]; then
+            echo "::error::site/index.html is missing, refusing to publish an empty folder"
+            exit 1
+          fi
+          echo "Publishing $(find site -type f | wc -l) files from site/"
+
+      - name: Check for Cloudflare credentials
+        id: creds
+        env:
+          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Site deploy skipped::Add the CLOUDFLARE_API_TOKEN repository secret to turn on push to deploy. See DEPLOY-SITE.md."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish site/ to Cloudflare Pages
+        if: steps.creds.outputs.ready == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # The account id is not a secret, it is visible in the dashboard URL, and the
+          # variable is only consulted so a fork or a second account can override it.
+          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID || '5a86e0e4c2139fcf8fd194dcd6e27629' }}
+          # --branch=main is what makes this a production deployment rather than a preview.
+          command: pages deploy site --project-name=scout --branch=main

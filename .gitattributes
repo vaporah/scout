@@ -1,0 +1,15 @@
+# Keep one line ending in the repository so a Windows checkout and a macOS or Linux
+# checkout agree. Without this, Git rewrites every file to CRLF on Windows and the first
+# commit on another machine shows thousands of lines as changed when nothing did.
+* text=auto eol=lf
+
+# Binaries: never touched, never diffed.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.crx binary
