@@ -665,6 +665,7 @@ html[data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotat
 .platform-mark img { object-fit: contain; }
 .platform-mark--axiom { background: #171717; }
 .platform-mark--gmgn { background: #b4f000; }
+.platform-mark--padre { background: #0f0f12; }
 .frog-head { fill: #148b4d; }
 .frog-snout { fill: #d9f6a0; }
 .frog-eye { fill: #f7fff1; }
@@ -675,6 +676,7 @@ html[data-theme="light"] .theme-toggle .icon-moon { opacity: 0; transform: rotat
   .platform-link:hover { transform: translateY(-2px); border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
   .platform-link--axiom:hover { background: color-mix(in srgb, #6d5dfc 8%, var(--surface)); }
   .platform-link--gmgn:hover { background: color-mix(in srgb, #00b36b 8%, var(--surface)); }
+  .platform-link--padre:hover { background: color-mix(in srgb, #86efac 8%, var(--surface)); }
   .platform-link:hover .platform-arrow { transform: translate(2px, -2px); color: var(--text); }
 }
 

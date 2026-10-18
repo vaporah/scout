@@ -35,7 +35,7 @@ test('the public site keeps a locked-down browser security policy', async () => 
 });
 
 test('the deployment marker represents the complete interactive asset set', async () => {
-  const names = ['styles.css', 'home.css', 'theme.js', 'release-config.js', 'site.js', 'scout-research-overlay.jpg', 'icon-32.png', 'icon-128.png'];
+  const names = ['styles.css', 'home.css', 'theme.js', 'release-config.js', 'site.js', 'scout-research-overlay.jpg', 'icon-32.png', 'icon-128.png', 'padre-logo.svg'];
   const digest = createHash('sha256');
   for (const name of names) digest.update(await readFile(siteFile(name)));
   const expected = digest.digest('hex').slice(0, 10);
@@ -77,13 +77,14 @@ test('supported-platform links use the official HTTPS entry points safely', asyn
   const dom = new JSDOM(html);
   const links = [...dom.window.document.querySelectorAll('.platform-link')];
 
-  assert.deepEqual(links.map(link => link.href), ['https://axiom.trade/', 'https://gmgn.ai/']);
+  assert.deepEqual(links.map(link => link.href), ['https://axiom.trade/', 'https://gmgn.ai/', 'https://trade.padre.gg/']);
   for (const link of links) {
     assert.equal(link.target, '_blank');
     assert.match(link.rel, /noopener/);
     assert.match(link.rel, /noreferrer/);
   }
   assert.equal(dom.window.document.querySelector('.platform-mark--axiom img').getAttribute('src'), '/axiom-logo.ico');
+  assert.equal(dom.window.document.querySelector('.platform-mark--padre img').getAttribute('src'), '/padre-logo.svg');
   dom.window.close();
 });
 
