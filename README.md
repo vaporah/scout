@@ -44,7 +44,7 @@ Scout works directly on:
 
 - [Axiom](https://axiom.trade/)
 - [GMGN](https://gmgn.ai/)
-- [Padre / Terminal](https://trade.padre.gg/)
+- <a href="https://trade.padre.gg/"><img src="./site/padre-logo.svg" width="18" height="18" alt="Padre logo" align="center"> Padre / Terminal</a>
 
 Panels can be moved and resized. Preferences, filters, and layout settings stay on the user's device.
 
@@ -113,4 +113,4 @@ The source code is available under the [MIT License](./LICENSE), copyright Brigh
 
 The Scout name, logo, and mascot are not granted under the MIT licence and may be protected by trademark rights. Third-party data remains governed by its providers, including DexScreener and the other public data services Scout uses.
 
-Scout is independent software and is not affiliated with or endorsed by Axiom, GMGN, Solana, or any data provider.
+Scout is independent software and is not affiliated with or endorsed by Axiom, GMGN, Padre, Solana, or any data provider.
