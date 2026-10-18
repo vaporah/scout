@@ -123,6 +123,11 @@
 .scout-pulse-badge--red { background: #ff4c63; }
 .scout-pulse-badge--run { background: #facc4b; }
 .scout-pulse-badge--gray, .scout-pulse-badge--neutral { background: rgba(255, 255, 255, .72); }
+/* Padre cards are exceptionally dense. Keep the exact-mint severity rail and hover
+   research panel, but do not cover its audit figures or instant-buy control. */
+[data-scout-padre-card] { isolation: isolate; }
+[data-scout-padre-card] > .scout-pulse-tags,
+[data-scout-padre-card] > .scout-pulse-flow { display: none !important; }
 .scout-pulse-tooltip {
   display: none;
   position: fixed;
