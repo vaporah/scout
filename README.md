@@ -44,7 +44,7 @@ Scout works directly on:
 
 - [Axiom](https://axiom.trade/)
 - [GMGN](https://gmgn.ai/)
-- <a href="https://trade.padre.gg/"><img src="./site/padre-logo.svg" width="18" height="18" alt="Padre logo" align="center"> Padre / Terminal</a>
+- [Padre / Terminal](https://trade.padre.gg/)
 
 Panels can be moved and resized. Preferences, filters, and layout settings stay on the user's device.
 
