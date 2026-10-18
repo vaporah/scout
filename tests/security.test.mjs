@@ -14,7 +14,7 @@ test('manifest requests only minimum permissions, no wallet access, and a strict
   // exposed - and only to the two sites Scout runs on, never to every page.
   assert.deepEqual(manifest.web_accessible_resources, [{
     resources: ['scout-raccoon-logo.png'],
-    matches: ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://www.gmgn.ai/*']
+    matches: ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://www.gmgn.ai/*', 'https://trade.padre.gg/*']
   }], 'only the mascot image may be exposed, and only to Scout host pages');
   assert.ok(manifest.host_permissions.every(host => /^https:\/\/[a-z0-9.-]+\/\*$/.test(host)), 'hosts must be explicit HTTPS origins');
   assert.ok(!manifest.host_permissions.some(host => host === '<all_urls>' || host.includes('*://*')));
@@ -24,7 +24,7 @@ test('manifest requests only minimum permissions, no wallet access, and a strict
 });
 
 test('shipped scripts contain no code execution, wallet, or exfiltration APIs', async () => {
-  const files = ['axiomOverlay.js', 'tokenPage.js', 'gmgn.js', 'src/background.js'];
+  const files = ['axiomOverlay.js', 'tokenPage.js', 'gmgn.js', 'padre.js', 'src/background.js'];
   const banned = [
     /\beval\s*\(/, /new\s+Function/, /document\.write/, /window\.ethereum/, /\.signTransaction/,
     /\.sendTransaction/, /requestAccounts/, /privateKey/i, /mnemonic/i, /seedPhrase/i, /chrome\.(cookies|webRequest)/

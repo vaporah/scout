@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>See more. Trade informed.</strong><br>
-  Independent Solana token research inside Axiom and GMGN.
+  Independent Solana token research inside Axiom, GMGN, and Padre.
 </p>
 
 <p align="center">
@@ -44,6 +44,7 @@ Scout works directly on:
 
 - [Axiom](https://axiom.trade/)
 - [GMGN](https://gmgn.ai/)
+- [Padre / Terminal](https://trade.padre.gg/)
 
 Panels can be moved and resized. Preferences, filters, and layout settings stay on the user's device.
 

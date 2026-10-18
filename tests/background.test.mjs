@@ -25,6 +25,7 @@ test('extension reload reconnects existing Axiom and GMGN tabs without duplicati
       query: async () => [
         { id: 1, url: `https://axiom.trade/meme/${mint}` },
         { id: 2, url: `https://gmgn.ai/sol/token/${mint}` },
+        { id: 3, url: 'https://trade.padre.gg/trenches' },
         { id: 3, url: 'https://example.com/' }
       ],
       onUpdated: { addListener: listener => { updated = listener; } }
@@ -37,9 +38,9 @@ test('extension reload reconnects existing Axiom and GMGN tabs without duplicati
   };
   registerContentRecovery(api);
   await new Promise(resolve => setTimeout(resolve, 0));
-  assert.deepEqual(scripts.map(call => call.files), [['axiomOverlay.js', 'tokenPage.js'], ['gmgn.js']]);
-  assert.deepEqual(css.map(call => call.files), [['axiom-pulse.css', 'riskAlerts.css'], ['axiom-pulse.css', 'riskAlerts.css']]);
-  assert.deepEqual(removedCss.map(call => call.files), [['axiom-pulse.css', 'riskAlerts.css'], ['axiom-pulse.css', 'riskAlerts.css']]);
+  assert.deepEqual(scripts.map(call => call.files), [['axiomOverlay.js', 'tokenPage.js'], ['gmgn.js'], ['padre.js']]);
+  assert.deepEqual(css.map(call => call.files), Array(3).fill(['axiom-pulse.css', 'riskAlerts.css']));
+  assert.deepEqual(removedCss.map(call => call.files), Array(3).fill(['axiom-pulse.css', 'riskAlerts.css']));
   assert.equal(typeof installed, 'function');
   assert.equal(typeof startup, 'function');
 
@@ -85,6 +86,7 @@ test('authorized sender covers Axiom token pages and GMGN, but rejects lookalike
   assert.equal(isScoutSender({ url: `https://axiom.trade/meme/${mint}` }), true);
   assert.equal(isScoutSender({ url: `https://gmgn.ai/sol/token/${mint}` }), true);
   assert.equal(isScoutSender({ url: 'https://www.gmgn.ai/sol/trenches' }), true);
+  assert.equal(isScoutSender({ url: 'https://trade.padre.gg/trenches' }), true);
   assert.equal(isScoutSender({ url: 'https://gmgn.ai.evil.test/sol/token/x' }), false);
   assert.equal(isScoutSender({ url: 'http://gmgn.ai/sol/token/x' }), false);
   assert.equal(isScoutSender({ url: 'https://evil.example/pulse' }), false);
@@ -95,6 +97,7 @@ test('pool resolution follows the actual page route, never the number of visible
   assert.equal(scanSurfaceForSender({ url: 'https://gmgn.ai/sol/trenches' }), 'list');
   assert.equal(scanSurfaceForSender({ url: `https://axiom.trade/terminal/${mint}` }), 'token-page');
   assert.equal(scanSurfaceForSender({ url: `https://gmgn.ai/sol/token/${mint}` }), 'token-page');
+  assert.equal(scanSurfaceForSender({ url: `https://trade.padre.gg/token/${mint}` }), 'token-page');
   assert.equal(scanSurfaceForSender({ url: 'https://axiom.trade/pulse', tab: { url: `https://axiom.trade/t/${mint}` } }), 'list', 'the sending frame URL wins over a different tab URL');
 });
 

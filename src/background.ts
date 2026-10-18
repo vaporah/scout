@@ -6,6 +6,7 @@ import { fetchMint, isUnidentifiedToken, mintPattern } from './dex.js';
 import { fetchGmgnStats, type GmgnStats } from './gmgnStat.js';
 import { enrichTokensWithGoPlus } from './goplus.js';
 import { isGmgnTokenPage } from './gmgnMint.js';
+import { isPadreTokenPage } from './padreMint.js';
 import { assessMintsMessage } from './messages.js';
 import { defaults, validSettings } from './settings.js';
 import { fetchTokenInfo } from './tokenInfo.js';
@@ -212,7 +213,8 @@ export function isScoutSender(sender: MessageSender): boolean {
   try {
     const url = new URL(href);
     if (url.protocol !== 'https:') return false;
-    return url.hostname === 'axiom.trade' || url.hostname === 'gmgn.ai' || url.hostname === 'www.gmgn.ai';
+    return url.hostname === 'axiom.trade' || url.hostname === 'gmgn.ai' || url.hostname === 'www.gmgn.ai'
+      || url.hostname === 'trade.padre.gg';
   } catch { return false; }
 }
 
@@ -226,7 +228,7 @@ export type ScanSurface = 'token-page' | 'list';
 export function scanSurfaceForSender(sender: MessageSender): ScanSurface {
   const href = sender.url ?? sender.tab?.url;
   if (!href) return 'list';
-  return axiomPageMint(href) !== null || isGmgnTokenPage(href) ? 'token-page' : 'list';
+  return axiomPageMint(href) !== null || isGmgnTokenPage(href) || isPadreTokenPage(href) ? 'token-page' : 'list';
 }
 
 /** Keep the page's input bounded; a ticker, shortened address or duplicate never becomes an identity. */
@@ -367,6 +369,9 @@ function tradingFiles(href: string): { scripts: string[]; styles: string[] } | n
     if (url.hostname === 'gmgn.ai' || url.hostname === 'www.gmgn.ai') return {
       scripts: ['gmgn.js'], styles: ['axiom-pulse.css', 'riskAlerts.css']
     };
+    if (url.hostname === 'trade.padre.gg') return {
+      scripts: ['padre.js'], styles: ['axiom-pulse.css', 'riskAlerts.css']
+    };
   } catch { /* not a supported page */ }
   return null;
 }
@@ -388,7 +393,7 @@ export function registerContentRecovery(api = extensionApi()): void {
     void api.scripting?.executeScript({ target: { tabId }, files: files.scripts }).catch(() => {});
   };
   const reconnect = (): void => {
-    void api.tabs?.query({ url: ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://www.gmgn.ai/*'] }).then(tabs => {
+    void api.tabs?.query({ url: ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://www.gmgn.ai/*', 'https://trade.padre.gg/*'] }).then(tabs => {
       for (const tab of tabs) if (typeof tab.id === 'number' && tab.url) inject(tab.id, tab.url);
     }).catch(() => {});
   };

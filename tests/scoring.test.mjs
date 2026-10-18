@@ -63,8 +63,8 @@ test('settings are clamped and invalid values fall back to defaults', () => {
 test('built extension manifest points to packaged assets', async () => {
   const manifest = JSON.parse(await readFile(new URL('../dist/manifest.json', import.meta.url), 'utf8'));
   assert.equal(manifest.name, 'Scout');
-  assert.deepEqual(manifest.host_permissions, ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://api.geckoterminal.com/*', 'https://api.dexscreener.com/*', 'https://api.gopluslabs.io/*', 'https://api.rugcheck.xyz/*']);
-  const files = [manifest.action.default_popup, ...Object.values(manifest.action.default_icon), ...Object.values(manifest.icons), 'scout-raccoon-logo.png', 'dashboard.html', 'styles.css', 'live.css', 'axiom-pulse.css', 'riskAlerts.css', 'axiomOverlay.js', 'tokenPage.js', 'gmgn.js', 'src/background.js', 'src/popup.js', 'src/dashboard.js', 'src/analysis.js', 'src/dex.js'];
+  assert.deepEqual(manifest.host_permissions, ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://trade.padre.gg/*', 'https://api.geckoterminal.com/*', 'https://api.dexscreener.com/*', 'https://api.gopluslabs.io/*', 'https://api.rugcheck.xyz/*']);
+  const files = [manifest.action.default_popup, ...Object.values(manifest.action.default_icon), ...Object.values(manifest.icons), 'scout-raccoon-logo.png', 'dashboard.html', 'styles.css', 'live.css', 'axiom-pulse.css', 'riskAlerts.css', 'axiomOverlay.js', 'tokenPage.js', 'gmgn.js', 'padre.js', 'src/background.js', 'src/popup.js', 'src/dashboard.js', 'src/analysis.js', 'src/dex.js'];
   for (const file of files) {
     assert.doesNotMatch(file, /\.svg$/i);
     assert.ok((await stat(new URL(`../dist/${file}`, import.meta.url))).size > 0, file);

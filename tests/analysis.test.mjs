@@ -16,7 +16,7 @@ test('packaged extension injects only the local Axiom highlighter and token-page
   assert.deepEqual(manifest.content_scripts[0].css, ['axiom-pulse.css', 'riskAlerts.css']);
   assert.equal(manifest.background.service_worker, 'src/background.js');
   assert.equal(manifest.background.type, 'module');
-  assert.deepEqual(manifest.host_permissions, ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://api.geckoterminal.com/*', 'https://api.dexscreener.com/*', 'https://api.gopluslabs.io/*', 'https://api.rugcheck.xyz/*']);
+  assert.deepEqual(manifest.host_permissions, ['https://axiom.trade/*', 'https://gmgn.ai/*', 'https://trade.padre.gg/*', 'https://api.geckoterminal.com/*', 'https://api.dexscreener.com/*', 'https://api.gopluslabs.io/*', 'https://api.rugcheck.xyz/*']);
   for (const path of ['../dist/src/overlay.js', '../dist/overlay.css'])
     await assert.rejects(stat(new URL(path, import.meta.url)));
 });

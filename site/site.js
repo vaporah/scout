@@ -34,6 +34,13 @@
     if (el) el.textContent = text;
   };
 
+  // The extension is public now; every route to the release section is an action,
+  // not a status check. Keeping this here also covers cached markup during rollout.
+  document.querySelectorAll('a[href="#download"]').forEach(link => { link.textContent = 'Download'; });
+  document.querySelectorAll('.hero-proof span, .release-action small').forEach(label => {
+    if (label.textContent?.includes('Axiom + GMGN')) label.textContent = label.textContent.replace('Axiom + GMGN', 'Axiom + GMGN + Padre');
+  });
+
   /* --------------------------------------------------------------- Release */
   const applyRelease = () => {
     const config = window.SCOUT_RELEASE || {};
@@ -69,7 +76,7 @@
     }
 
     setText('release-badge', version ? `Public release · v${version}` : 'Available on Chrome Web Store');
-    setText('release-description', 'Scout is available on the Chrome Web Store. Add it to Chrome, then open Axiom or GMGN and carry on as usual.');
+    setText('release-description', 'Scout is available on the Chrome Web Store. Add it to Chrome, then open Axiom, GMGN or Padre and carry on as usual.');
     setText('availability', version ? `Version ${version} available` : 'Available on Chrome Web Store');
 
     const heading = document.querySelector('.release h2');

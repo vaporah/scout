@@ -20,6 +20,8 @@ export interface GmgnOverlayOptions {
   debounceMs?: number;
   intervalMs?: number;
   batchSize?: number;
+  collectRows?: (document: Document) => PulseRow[];
+  isTokenPage?: (href: string) => boolean;
 }
 
 /** Ignore DOM changes made by Scout itself so badge rendering cannot trigger a scan loop. */
@@ -187,6 +189,8 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
   const fixedIntervalMs = options.intervalMs === undefined ? null : Math.max(100, options.intervalMs);
   const scanIntervalMs = (): number => fixedIntervalMs ?? Math.max(10_000, settings.refreshSeconds * 1000);
   const batchSize = Math.max(1, Math.min(12, options.batchSize ?? 12));
+  const collectRows = options.collectRows ?? collectGmgnRows;
+  const isTokenPage = options.isTokenPage ?? isGmgnTokenPage;
   let observer: MutationObserver | null = null;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let heartbeat: ReturnType<typeof setInterval> | null = null;
@@ -261,7 +265,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
       assessments = [];
       return;
     }
-    if (isGmgnTokenPage(doc.defaultView?.location.href ?? doc.URL)) {
+    if (isTokenPage(doc.defaultView?.location.href ?? doc.URL)) {
       for (const row of previousRows) clearRow(row);
       previousRows.clear();
       rows = [];
@@ -269,7 +273,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
       tooltip.update();
       return;
     }
-    rows = collectGmgnRows(doc);
+    rows = collectRows(doc);
     const visible = new Set(rows.map(row => row.mint));
     for (const mint of attempted) if (!visible.has(mint)) attempted.delete(mint);
     assessments = assessments.filter(a => visible.has(a.token.mint));
@@ -350,7 +354,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
       if (routeChanged) lastPath = path;
       // The token-page monitor owns chart pages. Live trades and holder tables mutate
       // constantly there; none of those changes can create a Trenches row.
-      if (!routeChanged && isGmgnTokenPage(view?.location.href ?? doc.URL)) return;
+      if (!routeChanged && isTokenPage(view?.location.href ?? doc.URL)) return;
       if (routeChanged || tokenRowsChanged(mutations, doc)) schedule();
     });
     observer.observe(doc.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['href', 'data-mint', 'data-token-mint', 'data-token-address', 'hidden', 'aria-hidden'] });
