@@ -13,8 +13,9 @@ import { nextVersion } from './version.mjs';
  *   npm run release:minor   minor   0.6.3 -> 0.7.0
  *   npm run release:major   major   0.6.3 -> 1.0.0
  *
- * package.json is the single source of truth. The source manifest, the lockfile and
- * the built manifest in dist/ are all kept in step so no two places can disagree.
+ * package.json is the single source of truth. The source manifest, the lockfile,
+ * the public site release config and the built manifest in dist/ are all kept in
+ * step so no two places can disagree.
  */
 
 const kind = process.argv[2] ?? 'patch';
@@ -58,6 +59,11 @@ if (lock) {
   if (lock.packages?.['']) lock.packages[''].version = version;
   await writeJson('package-lock.json', lock);
 }
+
+const releaseConfigPath = 'site/release-config.js';
+let releaseConfig = await readFile(releaseConfigPath, 'utf8');
+releaseConfig = releaseConfig.replace(/(version:\s*)'[^']*'/, `$1'${version}'`);
+await writeFile(releaseConfigPath, releaseConfig);
 
 console.log(`Scout ${previous} -> ${version} (${kind})`);
 console.log('Run "npm run build" (or "npm test") to stamp dist/manifest.json, then reload the extension.');

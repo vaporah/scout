@@ -1,10 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { JSDOM } from 'jsdom';
 
 const siteFile = name => new URL(`../site/${name}`, import.meta.url);
+
+test('the public release config names the package version', async () => {
+  const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  const config = await readFile(siteFile('release-config.js'), 'utf8');
+  assert.match(config, new RegExp(`version: '${pkg.version.replaceAll('.', '\\.')}'`));
+});
 
 test('every cacheable site asset URL carries its current content hash', async () => {
   for (const page of ['index.html', 'privacy/index.html', '404.html']) {
