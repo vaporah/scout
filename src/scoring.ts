@@ -32,6 +32,13 @@ export function assess(token: Token, settings: Settings, now: number): Assessmen
   if (slippage === null) missing.push('Entry slippage estimate');
   else if (!slippageOK) warnings.push('Estimated entry price impact is high');
   if (token.liquidityChangePct !== null && token.liquidityChangePct < -30) critical.push('Liquidity fell more than 30%');
+  const insider = token.insiderFlow;
+  if (insider?.status === 'exit') {
+    if ((insider.soldPct ?? 0) >= 10) critical.push(`INSIDER EXIT: identified insider wallets shed ${insider.soldPct!.toFixed(1)}% of supply`);
+    if ((insider.liquidityDropPct ?? 0) >= 30) critical.push(`LIQUIDITY PULL: observed liquidity fell ${insider.liquidityDropPct!.toFixed(1)}% from its recent peak`);
+  } else if (insider?.status === 'selling' && insider.soldPct !== null) {
+    warnings.push(`INSIDER SELLING: identified insider wallets shed ${insider.soldPct.toFixed(1)}% of supply`);
+  }
   if (token.freezeAuthority === true) critical.push('Freeze authority is active');
   if (token.transferRestriction === true) critical.push('Transfer restriction detected');
   if (token.mintAuthority === true) warnings.push('Mint authority is active');
@@ -110,7 +117,7 @@ export function assess(token: Token, settings: Settings, now: number): Assessmen
     { label: 'Security and creator data available', met: dev.source !== 'unknown' && token.mintAuthority !== null && token.freezeAuthority !== null && token.transferRestriction !== null }
   ];
   const confidence = stale || missing.length >= 3 ? 'low' : missing.length > 0 ? 'medium' : 'high';
-  const completenessChecks = [token.liquidityUsd !== null, token.priceChange5mPct !== null, Boolean(token.marketSnapshot || token.trades.length), a.buyers5m !== null, dev.creator !== null, dev.priorLaunches !== null, concentration !== null, token.mintAuthority !== null, token.freezeAuthority !== null, token.transferRestriction !== null];
+  const completenessChecks = [token.liquidityUsd !== null, token.priceChange5mPct !== null, Boolean(token.marketSnapshot || token.trades.length), a.buyers5m !== null, dev.creator !== null, dev.priorLaunches !== null, concentration !== null, token.mintAuthority !== null, token.freezeAuthority !== null, token.transferRestriction !== null, insider?.currentHoldingPct !== null && insider?.currentHoldingPct !== undefined];
   const dataCompletenessPct = Math.round(completenessChecks.filter(Boolean).length / completenessChecks.length * 100);
   const status = critical.length ? 'DISQUALIFIED' : farmer || a.suspiciousConcentration || severeHolderQuality ? 'HIGH RISK' : stale || token.liquidityUsd === null ? 'UNKNOWN / INCOMPLETE' : score >= settings.minScore && entryConditions.every(c => c.met) && confidence !== 'low' ? 'TOP CANDIDATE' : liquidityOK && (score >= 55 || token.marketSnapshot && buyCountLead && a.volume5m >= 1000) ? 'WATCH' : 'WAIT FOR CONFIRMATION';
   return {

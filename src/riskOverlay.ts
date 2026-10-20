@@ -8,6 +8,7 @@ import { attachOverlayFrame, applyOverlayRect } from './overlayFrame.js';
 import { holderReadings, shortWallet, type HolderReading } from './holders.js';
 import { loadOverlayFlags, loadOverlayRects, saveOverlayFlag, saveOverlayRect } from './overlayPrefs.js';
 import { warningFor, type Severity } from './riskWarning.js';
+import { trapCheck } from './trapCheck.js';
 import type { Assessment, Settings, Token } from './types.js';
 
 /** Developer provenance badge read from the host page (for example Axiom PROVEN DEV). */
@@ -204,6 +205,52 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     return wrap.childElementCount > 1 ? wrap : null;
   }
 
+  function insiderSection(assessment: Assessment): HTMLElement {
+    const flow = assessment.token.insiderFlow;
+    const wrap = element('div', 'scout-risk-history');
+    wrap.append(element('div', 'scout-risk-history-title', 'Insider exit watch'));
+    if (!flow || flow.currentHoldingPct === null) {
+      row(wrap, 'Insider holdings', 'Unavailable from current sources');
+      row(wrap, 'Exit signal', flow?.liquidityDropPct !== null && flow?.liquidityDropPct !== undefined
+        ? `${flow.liquidityDropPct.toFixed(1)}% liquidity decline from observed peak`
+        : 'Waiting for a labelled insider baseline');
+      return wrap;
+    }
+    row(wrap, 'Identified insiders', `${flow.currentHoldingPct.toFixed(1)}% of supply · ${flow.linkedWallets.length} wallet(s)`);
+    row(wrap, 'Supply moved out', flow.soldPct !== null ? `${flow.soldPct.toFixed(1)} percentage points` : 'No baseline yet');
+    row(wrap, 'Liquidity from peak', flow.liquidityDropPct !== null ? `−${flow.liquidityDropPct.toFixed(1)}%` : 'Unknown');
+    row(wrap, 'Status', flow.status === 'exit' ? 'EXIT DETECTED' : flow.status === 'selling' ? 'SELLING' : 'Watching');
+    return wrap;
+  }
+
+  function trapSection(assessment: Assessment): HTMLElement {
+    const result = trapCheck(assessment);
+    const wrap = element('div', 'scout-risk-history');
+    wrap.append(element('div', 'scout-risk-history-title', `Trap check · ${result.verdict}`));
+    const add = (label: string, items: string[]): void => { if (items.length) row(wrap, label, items.slice(0, 3).join(' · ')); };
+    add('Red flags', result.redFlags);
+    add('Cautions', result.warnings);
+    add('Looks clean', result.clean);
+    add('Still missing', result.missing);
+    return wrap;
+  }
+
+  function checkpointSection(assessment: Assessment): HTMLElement {
+    const point = assessment.token.launchCheckpoint;
+    const wrap = element('div', 'scout-risk-history');
+    wrap.append(element('div', 'scout-risk-history-title', '60-second checkpoint'));
+    if (!point || point.capturedAt === null) {
+      const remaining = point ? Math.max(0, Math.ceil((point.dueAt - Date.now()) / 1000)) : 60;
+      row(wrap, 'Status', `Watching · ${remaining}s remaining`);
+      row(wrap, 'Basis', 'Measured from Scout’s first observation');
+      return wrap;
+    }
+    row(wrap, 'Price after 60s', point.priceChangePct !== null ? `${point.priceChangePct >= 0 ? '+' : ''}${point.priceChangePct.toFixed(1)}%` : 'Unknown');
+    row(wrap, 'Market cap after 60s', point.marketCapChangePct !== null ? `${point.marketCapChangePct >= 0 ? '+' : ''}${point.marketCapChangePct.toFixed(1)}%` : 'Unknown');
+    row(wrap, 'Basis', 'Scout-observed checkpoint, not launch-block history');
+    return wrap;
+  }
+
   function marketSection(assessment: Assessment): HTMLElement {    const token = assessment.token;
     const a = assessment.analytics;
     const hasActivity = Boolean(token.marketSnapshot) || token.trades.length > 0;
@@ -391,6 +438,14 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     const copies = history?.similar.length ?? 0;
     const solPool = solPoolReading(assessment.token);
     const solFlow = solFlowReading(assessment.token);
+    const insider = assessment.token.insiderFlow;
+    const insiderValue = insider?.status === 'exit' ? 'EXIT'
+      : insider?.status === 'selling' ? 'SELLING'
+      : insider?.currentHoldingPct !== null && insider?.currentHoldingPct !== undefined ? `${insider.currentHoldingPct.toFixed(1)}%`
+      : 'unknown';
+    const insiderTone = insider?.status === 'exit' ? 'red' : insider?.status === 'selling' ? 'orange' : 'neutral';
+    const trap = trapCheck(assessment);
+    const trapTone = trap.verdict === 'RED' ? 'red' : trap.verdict === 'YELLOW' ? 'orange' : trap.verdict === 'GREEN' ? 'green' : 'neutral';
     // The vampire verdict names the count, and says plainly when none were found.
     const vamp = copies > 0
       ? verdictChip('Vamp', `${copies} ${copies === 1 ? 'copy' : 'copies'}`, copies >= 3 ? 'red' : 'orange', `${copies} other coin(s) trade under this name or ticker`)
@@ -398,6 +453,8 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     strip.append(
       verdictChip('Dev', dev.label, dev.tone, dev.reasons[0] ?? ''),
       verdictChip('Volume', volume.level, volume.tone),
+      verdictChip('Insiders', insiderValue, insiderTone, 'Tracks explicitly labelled insider holdings and changes from Scout’s observed peak'),
+      verdictChip('Trap', trap.verdict, trapTone, [...trap.redFlags, ...trap.warnings, ...trap.missing][0] ?? 'No configured trap sign found'),
       vamp,
       verdictChip('SOL pool', solPool.short, 'pool', solPool.detail),
       verdictChip('5m flow', solFlow.short, 'pool', solFlow.detail)
@@ -472,6 +529,10 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     // Who holds it belongs with how much is held, so it follows the holder block and
     // stays on screen in short mode for the same reason the holder block does.
     if (assessment) { const quality = walletQualitySection(assessment); if (quality) body.append(quality); }
+
+    if (assessment) body.append(insiderSection(assessment));
+
+    if (assessment) body.append(trapSection(assessment), checkpointSection(assessment));
 
     if (assessment && !short) body.append(marketSection(assessment));
 

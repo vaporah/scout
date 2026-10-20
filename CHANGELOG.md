@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.2
+
+- Added a rolling insider-exit detector that tracks explicitly labelled insider supply and recent liquidity peaks by exact mint.
+- Added red insider-exit and liquidity-pull warnings, with cautious selling states before the critical thresholds are reached.
+- Added an evidence-grouped trap check with RED, YELLOW, GREEN, and UNKNOWN verdicts across token panels, row tooltips, the popup, and dashboard.
+- Reserved GREEN trap results for complete clean evidence; incomplete authority, holder, sniper, bundle, or developer data now stays UNKNOWN.
+- Added a 60-second price and market-cap checkpoint measured from Scout's first exact-mint observation.
+- Preserved public insider labels when merging holder sources without delaying otherwise complete scans.
+
 ## 0.9.1
 
 - Reduced unnecessary GMGN DOM rescans on live coin charts.

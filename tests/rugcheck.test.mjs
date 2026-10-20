@@ -59,6 +59,7 @@ test('an insider flag outweighs the size heuristic', () => {
     topHolders: [{ address: curve, owner: curve, pct: 80, insider: true }]
   }), mint);
   assert.equal(insider.accounts[0].type, 'wallet');
+  assert.equal(insider.accounts[0].insider, true, 'the provider label is retained for exit tracking');
 });
 
 test('junk entries are dropped instead of becoming zero-percent holders', () => {

@@ -23,6 +23,30 @@ const present = (values: Array<string | null>): string[] => values.filter((value
 
 /** Highest-priority warning for the current assessment, or null when nothing is flagged. */
 export function warningFor(a: Assessment, settings: Settings): RiskWarning | null {
+  const insider = a.token.insiderFlow;
+  if (insider?.status === 'exit') {
+    const reasons = present([
+      insider.soldPct !== null && insider.soldPct >= 10
+        ? `Identified insider wallets shed ${insider.soldPct.toFixed(1)}% of supply from Scout's observed peak` : null,
+      insider.liquidityDropPct !== null && insider.liquidityDropPct >= 30
+        ? `Pool liquidity fell ${insider.liquidityDropPct.toFixed(1)}% from Scout's observed peak` : null,
+      insider.linkedWallets.length ? `${insider.linkedWallets.length} explicitly labelled insider wallet(s) remain visible` : null
+    ]);
+    return {
+      id: 'insider-exit', category: 'INSIDER EXIT', severity: 'red', headline: 'INSIDER EXIT',
+      summary: 'Insider-held supply or pool liquidity is leaving rapidly.',
+      reasons, confidence: a.confidence
+    };
+  }
+  if (insider?.status === 'selling' && insider.soldPct !== null) {
+    return {
+      id: 'insider-selling', category: 'INSIDER SELLING', severity: 'orange', headline: 'INSIDER SELLING',
+      summary: 'Wallets explicitly identified as insiders have started reducing their supply share.',
+      reasons: [`Insider holdings fell ${insider.soldPct.toFixed(1)} percentage points from Scout's observed peak`],
+      confidence: a.confidence
+    };
+  }
+
   if (a.farmer === true) {
     return {
       id: 'farmer-dev', category: 'FARMER DEV', severity: 'red', headline: 'FARMER DEV',

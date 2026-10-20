@@ -69,6 +69,12 @@ const cache = new Map<string, { at: number; value: HolderAccounts | null }>();
 let requestTimes: number[] = [];
 let retryAfter = 0;
 
+/** Read a completed, current report without waiting for an in-flight network call. */
+export function cachedHolderAccounts(mint: string, now: number): HolderAccounts | null {
+  const previous = cache.get(mint);
+  return previous && now - previous.at < cacheMs ? previous.value : null;
+}
+
 const object = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
 
@@ -145,7 +151,8 @@ export function parseHolderReport(payload: unknown, mint: string): HolderAccount
       pct,
       type: pct >= vaultLikePct && !insider ? 'pool' : 'wallet',
       tag: null,
-      locked: false
+      locked: false,
+      insider
     });
   }
 

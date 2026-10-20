@@ -7,10 +7,12 @@ import { fetchGmgnStats, type GmgnStats } from './gmgnStat.js';
 import { enrichTokensWithGoPlus } from './goplus.js';
 import { isGmgnTokenPage } from './gmgnMint.js';
 import { isPadreTokenPage } from './padreMint.js';
+import { trackInsiderFlow } from './insiderFlow.js';
+import { trackLaunchCheckpoints } from './launchCheckpoint.js';
 import { assessMintsMessage } from './messages.js';
 import { defaults, validSettings } from './settings.js';
 import { fetchTokenInfo } from './tokenInfo.js';
-import { fetchHolderAccounts, warmHolderAccounts } from './rugcheck.js';
+import { cachedHolderAccounts, fetchHolderAccounts, warmHolderAccounts, type HolderAccounts } from './rugcheck.js';
 import type { Assessment, Settings, Token } from './types.js';
 import { fetchVampPools, type VampPool } from './vamps.js';
 
@@ -86,8 +88,20 @@ const lookupConcurrency = 4;
  * established token never needs it because the other providers already answered.
  */
 async function withFallbackReport(token: Token, now: number): Promise<Token> {
+  const mergeReportHolders = (subject: Token, report: HolderAccounts | null): Token => {
+    if (!report?.accounts.length) return subject;
+    const insiders = report.accounts.filter(holder => holder.insider === true);
+    if (!insiders.length && (subject.holders?.length ?? 0) > 0) return subject;
+    const byWallet = new Map((subject.holders ?? []).map(holder => [holder.wallet, holder]));
+    for (const holder of report.accounts) {
+      const existing = byWallet.get(holder.wallet);
+      if (!existing || holder.insider === true) byWallet.set(holder.wallet, existing ? { ...existing, insider: true } : holder);
+    }
+    return { ...subject, holders: [...byWallet.values()].sort((a, b) => b.pct - a.pct), holderCount: subject.holderCount ?? report.count };
+  };
   const hasMarket = (token.poolAddresses?.length ?? 0) > 0;
   const hasHolders = (token.holders?.length ?? 0) > 0 || token.holderBands != null || typeof token.holderCount === 'number';
+  token = mergeReportHolders(token, cachedHolderAccounts(token.mint, now));
   if (hasMarket && hasHolders && (token.holderBands?.top10 != null || token.top10HoldPct != null)
     && typeof token.developerHoldingPct === 'number') return token;
   // The holder report is warmed when a token page starts, but it can take several
@@ -107,6 +121,7 @@ async function withFallbackReport(token: Token, now: number): Promise<Token> {
   // worth awaiting because it is the remaining way to name or describe this mint.
   const found = await fetchHolderAccounts(token.mint, now).catch(() => null);
   if (!found) return next;
+  next = mergeReportHolders(next, found);
   if (!hasMarket && found.meta) {
     // Nothing else described this coin, so the name here replaces the truncated mint.
     next = {
@@ -320,7 +335,9 @@ export async function assessVisibleMints(input: unknown, now = Date.now(), surfa
   // produced a 0/100 card for real tokens that were only not indexed yet, and that card
   // is indistinguishable from a genuinely bad coin. Report the miss so the page can say
   // "no data for this mint yet" instead of showing a verdict nobody earned.
-  const identified = holdersFilled.filter(token => !isUnidentifiedToken(token));
+  const identified = trackLaunchCheckpoints(
+    trackInsiderFlow(holdersFilled.filter(token => !isUnidentifiedToken(token)), now), now
+  );
   for (const token of holdersFilled) {
     if (isUnidentifiedToken(token)) errors.push(`${token.mint.slice(0, 6)}...${token.mint.slice(-4)}: no pool for this mint in the public feeds yet.`);
   }

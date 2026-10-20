@@ -6,6 +6,7 @@ import { solFlowReading, solPoolReading } from './poolLiquidity.js';
 import { formatPulseLabels, stageLabel, type PulseLabels } from './pulseLabels.js';
 import type { RowReadings } from './rowReadings.js';
 import type { Assessment, Stage } from './types.js';
+import { trapCheck } from './trapCheck.js';
 import { renderIfChanged } from './ui.js';
 
 export type PulseTooltipState = 'scanning' | 'unknown' | 'assessed';
@@ -168,9 +169,19 @@ export function renderPulseTooltip(
     const copies = rowInfo.similar ?? 0;
     const solPool = solPoolReading(current.token);
     const solFlow = solFlowReading(current.token);
+    const insider = current.token.insiderFlow;
+    const insiderValue = insider?.status === 'exit' ? 'EXIT'
+      : insider?.status === 'selling' ? 'SELLING'
+      : insider?.currentHoldingPct !== null && insider?.currentHoldingPct !== undefined ? `${insider.currentHoldingPct.toFixed(1)}%`
+      : 'unknown';
+    const insiderTone = insider?.status === 'exit' ? 'red' : insider?.status === 'selling' ? 'orange' : 'neutral';
+    const trap = trapCheck(current);
+    const trapTone = trap.verdict === 'RED' ? 'red' : trap.verdict === 'YELLOW' ? 'orange' : trap.verdict === 'GREEN' ? 'green' : 'neutral';
     verdicts.append(
       verdictChip(doc, 'Dev', dev.label, dev.tone),
       verdictChip(doc, 'Volume', volume.level, volume.tone),
+      verdictChip(doc, 'Insiders', insiderValue, insiderTone),
+      verdictChip(doc, 'Trap', trap.verdict, trapTone),
       verdictChip(doc, 'Vamp', copies > 0 ? `\u00d7${copies} copies` : 'unique', copies > 0 ? 'orange' : 'green'),
       verdictChip(doc, 'SOL pool', solPool.short, 'pool'),
       verdictChip(doc, '5m flow', solFlow.short, 'pool')
@@ -241,6 +252,33 @@ export function renderPulseTooltip(
     detail(root, 'Transfer control', t.transferRestriction === null ? 'Unknown' : t.transferRestriction ? 'Restricted' : 'Clear');
     detail(root, 'Top 10 holders', current.concentrationPct !== null ? `${current.concentrationPct.toFixed(1)}%` : 'Unknown');
     detail(root, 'Data completeness', `${current.dataCompletenessPct}% \u00b7 ${current.confidence} confidence`);
+
+    heading(root, 'Insider exit watch');
+    const insider = t.insiderFlow;
+    detail(root, 'Insider holdings', insider?.currentHoldingPct !== null && insider?.currentHoldingPct !== undefined
+      ? `${insider.currentHoldingPct.toFixed(1)}% across ${insider.linkedWallets.length} labelled wallet(s)` : 'Not published yet');
+    detail(root, 'Supply moved out', insider?.soldPct !== null && insider?.soldPct !== undefined
+      ? `${insider.soldPct.toFixed(1)} percentage points from observed peak` : 'Waiting for baseline');
+    detail(root, 'Liquidity from peak', insider?.liquidityDropPct !== null && insider?.liquidityDropPct !== undefined
+      ? `\u2212${insider.liquidityDropPct.toFixed(1)}%` : 'Unknown');
+
+    const trap = trapCheck(current);
+    heading(root, `Trap check \u00b7 ${trap.verdict}`);
+    if (trap.redFlags.length) detail(root, 'Red flags', trap.redFlags.slice(0, 3).join(' \u00b7 '));
+    if (trap.warnings.length) detail(root, 'Cautions', trap.warnings.slice(0, 3).join(' \u00b7 '));
+    if (trap.clean.length) detail(root, 'Looks clean', trap.clean.slice(0, 3).join(' \u00b7 '));
+    if (trap.missing.length) detail(root, 'Still missing', trap.missing.slice(0, 3).join(' \u00b7 '));
+
+    heading(root, '60-second checkpoint');
+    const point = t.launchCheckpoint;
+    if (!point || point.capturedAt === null) {
+      const remaining = point ? Math.max(0, Math.ceil((point.dueAt - now) / 1000)) : 60;
+      detail(root, 'Status', `Watching \u00b7 ${remaining}s remaining`);
+      detail(root, 'Basis', 'Measured from Scout\u2019s first observation');
+    } else {
+      detail(root, 'Price after 60s', point.priceChangePct !== null ? `${point.priceChangePct >= 0 ? '+' : ''}${point.priceChangePct.toFixed(1)}%` : 'Unknown');
+      detail(root, 'Market cap after 60s', point.marketCapChangePct !== null ? `${point.marketCapChangePct >= 0 ? '+' : ''}${point.marketCapChangePct.toFixed(1)}%` : 'Unknown');
+    }
 
     heading(root, 'Developer');
     detail(root, 'Creator', developer(current));

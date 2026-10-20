@@ -22,6 +22,36 @@ export interface HolderShare {
   tag?: string | null;
   /** Provider reports the balance as locked or vested. */
   locked?: boolean;
+  /** The upstream report explicitly identifies this owner as an insider. */
+  insider?: boolean;
+}
+
+export interface InsiderFlow {
+  /** Insider-owned supply at the latest observation. */
+  currentHoldingPct: number | null;
+  /** Highest insider-owned supply observed in the active launch window. */
+  peakHoldingPct: number | null;
+  /** Supply percentage points that left identified insider wallets since that peak. */
+  soldPct: number | null;
+  /** Liquidity lost from Scout's recent observed peak. */
+  liquidityDropPct: number | null;
+  /** Wallets explicitly labelled as insiders by the source. */
+  linkedWallets: string[];
+  status: 'unknown' | 'watching' | 'selling' | 'exit';
+  observedAt: number;
+  source: string;
+}
+
+export interface LaunchCheckpoint {
+  firstObservedAt: number;
+  dueAt: number;
+  capturedAt: number | null;
+  startPriceUsd: number | null;
+  priceUsd: number | null;
+  priceChangePct: number | null;
+  startMarketCapUsd: number | null;
+  marketCapUsd: number | null;
+  marketCapChangePct: number | null;
 }
 /**
  * Who is doing the holding, rather than how much is held.
@@ -94,6 +124,10 @@ export interface Token {
   liquiditySol?: number | null;
   /** Five-minute SOL buy flow minus sell flow for the exact primary pool. */
   solFlow5m?: SolFlow5m | null;
+  /** Rolling, exact-mint insider holdings and liquidity-exit evidence. */
+  insiderFlow?: InsiderFlow | null;
+  /** Price and market-cap result 60 seconds after Scout first observed this mint. */
+  launchCheckpoint?: LaunchCheckpoint | null;
   marketSnapshot?: { volume5m: number; volume15m: number; buys5m: number; sells5m: number; buyers5m: number | null; sellers5m: number | null };
 }
 export interface Settings {
