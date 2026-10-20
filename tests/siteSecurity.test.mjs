@@ -10,7 +10,8 @@ test('every cacheable site asset URL carries its current content hash', async ()
   for (const page of ['index.html', 'privacy/index.html', '404.html']) {
     const html = await readFile(siteFile(page), 'utf8');
     const dom = new JSDOM(html);
-    const assets = [...dom.window.document.querySelectorAll('link[href*="?v="], script[src], img[src*="?v="]')];
+    const assets = [...dom.window.document.querySelectorAll('link[href*="?v="], script[src], img[src*="?v="]')]
+      .filter(element => new URL(element.getAttribute('href') || element.getAttribute('src'), 'https://scoutai.trade/').origin === 'https://scoutai.trade');
     for (const element of assets) {
       const reference = element.getAttribute('href') || element.getAttribute('src');
       const url = new URL(reference, 'https://scoutai.trade/');
@@ -26,16 +27,28 @@ test('the public site keeps a locked-down browser security policy', async () => 
   const headers = await readFile(siteFile('_headers'), 'utf8');
 
   assert.match(headers, /Content-Security-Policy: default-src 'none'/);
-  assert.match(headers, /script-src 'self'/);
-  assert.match(headers, /connect-src 'self' https:\/\/api\.geckoterminal\.com/);
+  assert.match(headers, /script-src 'self' https:\/\/www\.googletagmanager\.com/);
+  assert.match(headers, /connect-src 'self' https:\/\/api\.geckoterminal\.com https:\/\/www\.google-analytics\.com https:\/\/region1\.google-analytics\.com/);
   assert.match(headers, /frame-ancestors 'none'/);
   assert.match(headers, /Cross-Origin-Opener-Policy: same-origin/);
   assert.match(headers, /Cross-Origin-Resource-Policy: same-origin/);
   assert.match(headers, /Permissions-Policy: camera=\(\), microphone=\(\), geolocation=\(\), payment=\(\), usb=\(\)/);
 });
 
+test('every public page loads the configured Google tag without inline script', async () => {
+  for (const page of ['index.html', 'privacy/index.html', '404.html']) {
+    const html = await readFile(siteFile(page), 'utf8');
+    const dom = new JSDOM(html);
+    assert.equal(dom.window.document.querySelector('script[src="https://www.googletagmanager.com/gtag/js?id=G-GJPRNYRR0P"]')?.hasAttribute('async'), true);
+    assert.ok(dom.window.document.querySelector('script[src^="/analytics.js?v="]'));
+    assert.equal([...dom.window.document.scripts].some(script => !script.src && script.textContent.trim()), false);
+    dom.window.close();
+  }
+  assert.match(await readFile(siteFile('analytics.js'), 'utf8'), /gtag\('config', 'G-GJPRNYRR0P'\)/);
+});
+
 test('the deployment marker represents the complete interactive asset set', async () => {
-  const names = ['styles.css', 'home.css', 'theme.js', 'release-config.js', 'site.js', 'scout-research-overlay.jpg', 'icon-32.png', 'icon-128.png', 'padre-logo.svg'];
+  const names = ['styles.css', 'home.css', 'theme.js', 'release-config.js', 'site.js', 'analytics.js', 'scout-research-overlay.jpg', 'icon-32.png', 'icon-128.png', 'padre-logo.svg'];
   const digest = createHash('sha256');
   for (const name of names) digest.update(await readFile(siteFile(name)));
   const expected = digest.digest('hex').slice(0, 10);

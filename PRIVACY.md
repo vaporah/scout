@@ -7,14 +7,14 @@ file; this one is the source.
 **Status: published.** This describes what the extension actually does as built. It is not
 legal advice.
 
-Last updated: 15 October 2026
+Last updated: 19 October 2026
 
 ## The short version
 
 Scout is a research tool. It reads public market data about Solana tokens and shows it
-beside the coins you are already looking at. It has no accounts, no analytics, no
-tracking, and it does not send anything about you anywhere. Everything it remembers is
-stored on your own computer.
+beside the coins you are already looking at. The extension has no accounts, analytics,
+or tracking. The public website uses Google Analytics to measure aggregate visits and
+usage. Everything the extension remembers is stored on your own computer.
 
 ## What Scout stores on your device
 
@@ -65,6 +65,16 @@ hosts the page is permitted to load, and they see the same thing any image host 
 IP address and which logo was asked for. If a logo is missing or blocked, the row falls
 back to the ticker's first letter.
 
+## Website analytics
+
+`scoutai.trade` uses Google Analytics measurement ID `G-GJPRNYRR0P` to understand
+aggregate website visits and page usage. When a website page is open, the browser loads
+`gtag.js` from `googletagmanager.com` and sends measurement data to Google Analytics.
+Google may receive information such as your IP address, browser and device details,
+referring page, pages visited, and interaction timing, subject to Google's own privacy
+terms. This website analytics code is not included in the Scout extension and does not
+receive wallet addresses, extension settings, seed phrases, or private keys.
+
 ## What Scout reads on the page
 
 Scout's content scripts run on `axiom.trade` and `gmgn.ai` only. To match a coin row to a
@@ -74,7 +84,7 @@ fields, keystrokes, clipboard contents, other tabs, or any page outside those tw
 
 ## What Scout does not do
 
-- No analytics, telemetry, crash reporting or usage statistics.
+- No analytics, telemetry, crash reporting or usage statistics in the Scout extension.
 - No account, sign-in or identifier of any kind.
 - No selling, sharing or transmitting of data about you.
 - No remote code. All scripts are packaged in the extension, and the content security

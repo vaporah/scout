@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GJPRNYRR0P"></script>
+<script src="/analytics.js?v=afa230e7f7"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scout | Privacy policy</title>
 <meta name="description" content="What the Scout browser extension stores, what it sends, and what it never does.">
@@ -18,8 +21,8 @@
   is the URL the Chrome Web Store listing points at. The same policy is kept in
   PRIVACY.md at the repo root.
 
-  Cloudflare appends a Web Analytics beacon at the edge, which our own content security
-  policy then blocks, so nothing is collected from this page. See SITE-RELEASE.md.
+  Google Analytics is disclosed below and permitted by the website CSP. The extension
+  itself still contains no analytics or tracking.
 -->
 <link rel="stylesheet" href="/styles.css?v=61fcf771c5">
 <script src="/theme.js?v=aab5a147fc"></script>
@@ -57,7 +60,7 @@
     <p class="eyebrow">Legal</p>
     <h1>Privacy policy</h1>
     <p class="lede">What the Scout browser extension stores, what it sends, and what it never does.</p>
-    <p class="page-meta">Last updated 15 October 2026 &middot; applies to the Scout extension and this website</p>
+    <p class="page-meta">Last updated 19 October 2026 &middot; applies to the Scout extension and this website</p>
   </div>
 
   <div class="shell prose">
@@ -66,9 +69,9 @@
       <div class="summary">
         <p><strong>The short version.</strong> Scout is a research tool. It reads public market
         data about Solana tokens and shows it beside the coins you are already looking at. It
-        has no accounts, no analytics, and no tracking. The optional live market panel on this
-        website makes a public request to GeckoTerminal; everything Scout itself remembers is stored
-        on your own computer.</p>
+        extension has no accounts, analytics, or tracking. This website uses Google Analytics to
+        measure aggregate visits and usage. Everything the extension itself remembers is stored on
+        your own computer.</p>
       </div>
 
       <h2>What Scout stores on your device</h2>
@@ -124,6 +127,16 @@
       does: your IP address and which logo was asked for. If a logo is missing or blocked, the row
       falls back to the ticker's first letter.</p>
 
+      <h2>Website analytics</h2>
+      <p><code>scoutai.trade</code> uses Google Analytics measurement ID
+      <code>G-GJPRNYRR0P</code> to understand aggregate website visits and page usage. When a website
+      page is open, the browser loads <code>gtag.js</code> from <code>googletagmanager.com</code> and
+      sends measurement data to Google Analytics. Google may receive information such as your IP
+      address, browser and device details, referring page, pages visited, and interaction timing,
+      subject to Google's own privacy terms. This website analytics code is not included in the
+      Scout extension and does not receive wallet addresses, extension settings, seed phrases, or
+      private keys.</p>
+
       <h2>What Scout reads on the page</h2>
       <p>Scout's content scripts run on <code>axiom.trade</code> and <code>gmgn.ai</code> only.
       To match a coin row to a token, it reads the coin rows on the page: the symbol, the
@@ -133,7 +146,7 @@
 
       <h2>What Scout never does</h2>
       <ul>
-        <li class="no">No analytics, telemetry, crash reporting or usage statistics.</li>
+        <li class="no">No analytics, telemetry, crash reporting or usage statistics in the Scout extension.</li>
         <li class="no">No account, sign-in or identifier of any kind.</li>
         <li class="no">No selling, sharing or transmitting of data about you.</li>
         <li class="no">No remote code. All scripts are packaged in the extension, and the content

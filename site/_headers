@@ -8,7 +8,7 @@
   # HSTS is deliberately NOT set here: Cloudflare sends it at the edge (SSL/TLS -> Edge
   # Certificates, max-age 6 months), which also covers responses Cloudflare generates
   # itself and this file never sees. Setting it in both places sends two headers.
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://coin-images.coingecko.com https://assets.geckoterminal.com; font-src 'self'; connect-src 'self' https://api.geckoterminal.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://www.googletagmanager.com; style-src 'self'; img-src 'self' https://coin-images.coingecko.com https://assets.geckoterminal.com; font-src 'self'; connect-src 'self' https://api.geckoterminal.com https://www.google-analytics.com https://region1.google-analytics.com; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
 # Cache-Control is deliberately NOT set here. Cloudflare Pages pins every non-HTML asset
 # to "max-age=14400" and ignores Cache-Control from this file, so a rule would only look
 # like it worked. Verified: with Cache-Control: no-cache on both files below, a cache MISS
