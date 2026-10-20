@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { devReputation, devStatus } from '../dist/src/developerReputation.js';
+import { BWA_DEVELOPER_WALLET, devReputation, devStatus } from '../dist/src/developerReputation.js';
 
 const token = dev => ({
   mint: '11111111111111111111111111111111', chain: 'solana', name: 'Base', symbol: 'BASE',
@@ -34,4 +34,17 @@ test('dev status is good, risky or unknown for the popup', () => {
   assert.equal(devStatus(token({ creator: 'creator11111111111111111111111111111', priorLaunches: 2, rapidFailures: 0, linkedSales: 0, source: 'verified', note: '' })).label, 'GOOD DEV');
   assert.equal(devStatus(token({ creator: 'creator11111111111111111111111111111', priorLaunches: 12, rapidFailures: 6, linkedSales: 0, source: 'verified', note: '' })).label, 'RISKY DEV');
   assert.equal(devStatus(token({ creator: null, priorLaunches: null, rapidFailures: null, linkedSales: null, source: 'unknown', note: '' })).label, 'UNKNOWN DEV');
+});
+
+test('the BWA wallet is identified by exact address and always treated as risky', () => {
+  const bwa = token({ creator: BWA_DEVELOPER_WALLET, priorLaunches: null, rapidFailures: null, linkedSales: null, source: 'unknown', note: '' });
+  const verdict = devReputation(bwa);
+  assert.ok(verdict);
+  assert.equal(verdict.label, 'BWA DEV');
+  assert.equal(verdict.tone, 'orange');
+  assert.match(verdict.reasons[0], /watchlist.*risky/i);
+  assert.equal(devStatus(bwa).label, 'BWA DEV');
+
+  const lookalike = token({ ...bwa.developer, creator: `${BWA_DEVELOPER_WALLET.slice(0, -1)}b` });
+  assert.equal(devReputation(lookalike).label, 'UNKNOWN DEV', 'a partial or lookalike address must not match');
 });

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { assessTokens } from '../dist/src/analysis.js';
 import { warningFor } from '../dist/src/riskWarning.js';
 import { defaults } from '../dist/src/settings.js';
+import { BWA_DEVELOPER_WALLET } from '../dist/src/developerReputation.js';
 
 const mint = '11111111111111111111111111111111';
 const now = Date.now();
@@ -65,6 +66,16 @@ test('creator-linked sales and risky launch history become a RISKY DEV warning',
   assert.ok(launches);
   assert.equal(launches.category, 'RISKY DEV');
   assert.equal(launches.severity, 'orange');
+});
+
+test('the watched BWA creator gets a named orange risk warning', () => {
+  const warning = warningFor(assess({
+    developer: { creator: BWA_DEVELOPER_WALLET, priorLaunches: null, rapidFailures: null, linkedSales: null, source: 'unknown', note: '' }
+  }), defaults);
+  assert.ok(warning);
+  assert.equal(warning.category, 'BWA DEV');
+  assert.equal(warning.severity, 'orange');
+  assert.match(warning.summary, /BWA developer watchlist/i);
 });
 
 test('weak liquidity and high impact become an orange liquidity warning', () => {

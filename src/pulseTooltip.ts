@@ -95,7 +95,7 @@ function verdictChip(doc: Document, key: string, value: string, tone: string): H
 
 function developer(a: Assessment): string {
   const verdict = devStatus(a.token);
-  if (verdict.label === 'RISKY DEV') return `RISKY DEV · ${verdict.reasons[0] ?? ''}`;
+  if (verdict.tone === 'orange') return `${verdict.label} · ${verdict.reasons[0] ?? ''}`;
   const dev = a.token.developer;
   if (dev.source !== 'verified' || !dev.creator) return 'Unverified / unknown';
   const history = dev.priorLaunches === null ? 'history unknown' : `${dev.priorLaunches} prior launches`;

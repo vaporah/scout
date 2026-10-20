@@ -6,6 +6,20 @@ export interface DevVerdict {
   reasons: string[];
 }
 
+export const BWA_DEVELOPER_WALLET = 'bwamJzztZsepfkteWRChggmXuiiCQvpLqPietdNfSXa';
+
+/** Public developer identities explicitly maintained by Scout's local watchlist. */
+const watchedDevelopers = new Map<string, { label: string; reasons: string[] }>([
+  [BWA_DEVELOPER_WALLET, {
+    label: 'BWA DEV',
+    reasons: ['Creator wallet matches the BWA developer watchlist; treat this developer as risky']
+  }]
+]);
+
+export function isRiskyDevVerdict(verdict: DevVerdict | null): verdict is DevVerdict & { tone: 'orange' } {
+  return verdict?.tone === 'orange';
+}
+
 /**
  * Evidence-based developer reputation from observable launch history.
  * A bad track record yields RISKY DEV; missing evidence stays UNKNOWN DEV.
@@ -14,6 +28,8 @@ export interface DevVerdict {
  */
 export function devReputation(token: Token): DevVerdict | null {
   const dev = token.developer;
+  const watched = dev.creator ? watchedDevelopers.get(dev.creator) : null;
+  if (watched) return { label: watched.label, tone: 'orange', reasons: watched.reasons };
   const reasons: string[] = [];
   if (dev.priorLaunches !== null && dev.rapidFailures !== null && dev.priorLaunches >= 5 && dev.rapidFailures >= 3)
     reasons.push(`${dev.rapidFailures} rapid failures across ${dev.priorLaunches} prior launches`);
@@ -26,7 +42,7 @@ export function devReputation(token: Token): DevVerdict | null {
 }
 
 export interface DevStatus {
-  label: 'GOOD DEV' | 'RISKY DEV' | 'UNKNOWN DEV';
+  label: 'GOOD DEV' | 'RISKY DEV' | 'BWA DEV' | 'UNKNOWN DEV';
   tone: 'green' | 'orange' | 'neutral';
   reasons: string[];
 }
@@ -41,7 +57,7 @@ export function devStatus(token: Token): DevStatus {
       reasons: [`Verified creator${dev.priorLaunches !== null ? ` with ${dev.priorLaunches} prior launches` : ''} and no rapid failures or linked selling in the available data`]
     };
   }
-  return verdict.label === 'RISKY DEV'
-    ? { label: 'RISKY DEV', tone: 'orange', reasons: verdict.reasons }
+  return isRiskyDevVerdict(verdict)
+    ? { label: verdict.label as 'RISKY DEV' | 'BWA DEV', tone: 'orange', reasons: verdict.reasons }
     : { label: 'UNKNOWN DEV', tone: 'neutral', reasons: verdict.reasons };
 }

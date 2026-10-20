@@ -1,4 +1,4 @@
-import { devReputation } from './developerReputation.js';
+import { devReputation, isRiskyDevVerdict } from './developerReputation.js';
 import type { Assessment, Settings } from './types.js';
 
 export type Severity = 'red' | 'orange' | 'neutral' | 'green';
@@ -45,9 +45,9 @@ export function warningFor(a: Assessment, settings: Settings): RiskWarning | nul
   }
 
   const verdict = devReputation(a.token);
-  if (verdict?.label === 'RISKY DEV') {
+  if (isRiskyDevVerdict(verdict)) {
     return {
-      id: 'risky-dev', category: 'RISKY DEV', severity: 'orange', headline: 'RISKY DEV',
+      id: 'risky-dev', category: verdict.label, severity: 'orange', headline: verdict.label,
       summary: verdict.reasons[0] ?? 'Developer track record shows concerning patterns.',
       reasons: verdict.reasons, confidence: a.confidence
     };

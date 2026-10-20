@@ -1,5 +1,5 @@
 import { analyze, estimateSlippagePct, holderConcentration } from './analytics.js';
-import { devReputation } from './developerReputation.js';
+import { devReputation, isRiskyDevVerdict } from './developerReputation.js';
 import type { Assessment, Settings, Token } from './types.js';
 
 const clamp = (n: number) => Math.min(1, Math.max(0, n));
@@ -39,7 +39,7 @@ export function assess(token: Token, settings: Settings, now: number): Assessmen
   if (token.mintAuthority === null || token.freezeAuthority === null || token.transferRestriction === null) missing.push('Token authority / extension checks');
   if (farmer === true) critical.push('FARMER DEV: verified funding, token distribution and coordinated sales across linked wallets');
   const devVerdict = devReputation(token);
-  if (devVerdict?.label === 'RISKY DEV') warnings.push(`RISKY DEV: ${devVerdict.reasons.join('; ')}`);
+  if (isRiskyDevVerdict(devVerdict)) warnings.push(`${devVerdict.label}: ${devVerdict.reasons.join('; ')}`);
   if (dev.creator === null) missing.push('Verified creator identity and launch history');
   else if (dev.priorLaunches === null) missing.push('Developer prior-launch history');
   if (concentration === null) missing.push('Holder distribution');
