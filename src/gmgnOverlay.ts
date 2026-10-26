@@ -326,6 +326,12 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     timer = setTimeout(() => { timer = null; reconcile(); }, debounceMs);
   }
 
+  function onResume(): void {
+    if (doc.visibilityState === 'hidden') return;
+    lastRequestAt = 0;
+    reconcile();
+  }
+
   function start(): void {
     if (active || !doc.body) return;
     active = true;
@@ -359,7 +365,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     });
     observer.observe(doc.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['href', 'data-mint', 'data-token-mint', 'data-token-address', 'hidden', 'aria-hidden'] });
     view?.addEventListener('popstate', schedule);
-    doc.addEventListener('visibilitychange', () => { if (doc.visibilityState !== 'hidden') { lastRequestAt = 0; reconcile(); } });
+    doc.addEventListener('visibilitychange', onResume);
     heartbeat = setInterval(refreshEvidence, fixedIntervalMs ?? scanIntervalMs());
     reconcile();
   }
@@ -372,6 +378,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     if (timer !== null) clearTimeout(timer);
     if (heartbeat !== null) clearInterval(heartbeat);
     doc.defaultView?.removeEventListener('popstate', schedule);
+    doc.removeEventListener('visibilitychange', onResume);
     timer = heartbeat = null;
     unwatchPrefs?.();
     unwatchPrefs = null;

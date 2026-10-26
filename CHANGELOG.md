@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added a plain-language Scout read that combines demand, execution quality, risk, and evidence coverage without treating missing data as safe.
+- Added exact-mint social metadata for claimed X, Telegram, website, and direct launch-post links.
+- Added clear paid-promotion labeling for active DEX Screener boosts, kept separate from organic interest and the safety score.
+- Fixed token-page and GMGN controller cleanup so stopped overlays do not retain navigation or visibility listeners.
+
 ## 0.9.2
 
 - Added a rolling insider-exit detector that tracks explicitly labelled insider supply and recent liquidity peaks by exact mint.

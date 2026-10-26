@@ -126,3 +126,26 @@ test('GMGN rows open the same hover popup Axiom Pulse has, badge and all', async
     assert.equal(document_.querySelector('.scout-pulse-tooltip'), null, 'stopping the overlay removes the popup');
   } finally { overlay.stop(); dom.window.close(); }
 });
+
+test('stopping the GMGN overlay removes its visibility listener', () => {
+  const dom = page('<main></main>');
+  const document_ = dom.window.document;
+  const listeners = new Set();
+  const add = document_.addEventListener.bind(document_);
+  const remove = document_.removeEventListener.bind(document_);
+  document_.addEventListener = (type, listener, options) => {
+    if (type === 'visibilitychange') listeners.add(listener);
+    add(type, listener, options);
+  };
+  document_.removeEventListener = (type, listener, options) => {
+    if (type === 'visibilitychange') listeners.delete(listener);
+    remove(type, listener, options);
+  };
+  const overlay = createGmgnOverlay({ document: document_, request: async () => ({ assessments: [] }) });
+  try {
+    overlay.start();
+    assert.equal(listeners.size, 1);
+    overlay.stop();
+    assert.equal(listeners.size, 0, 'the exact callback registered at start is removed');
+  } finally { overlay.stop(); dom.window.close(); }
+});

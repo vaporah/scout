@@ -176,3 +176,28 @@ test('leaving a coin during an unfinished scan cannot repaint the panel on a lis
     assert.equal(panel?.classList.contains('is-visible'), false, 'the old coin response cannot repaint on Trenches');
   } finally { monitor.stop(); dom.window.close(); }
 });
+
+test('stopping a token-page monitor removes its SPA navigation listeners', async () => {
+  const { startTokenPageMonitor } = await import('../dist/src/tokenPageMonitor.js');
+  const dom = new JSDOM('<body></body>', { url: `https://axiom.trade/t/${mint}` });
+  const listeners = new Map();
+  const add = dom.window.addEventListener.bind(dom.window);
+  const remove = dom.window.removeEventListener.bind(dom.window);
+  dom.window.addEventListener = (type, listener, options) => {
+    if (type === 'popstate' || type === 'hashchange') listeners.set(type, listener);
+    add(type, listener, options);
+  };
+  dom.window.removeEventListener = (type, listener, options) => {
+    if (listeners.get(type) === listener) listeners.delete(type);
+    remove(type, listener, options);
+  };
+  const monitor = startTokenPageMonitor(() => mint, async () => ({ assessments: [], errors: [] }), {
+    document: dom.window.document, refreshMs: 60_000
+  });
+  try {
+    monitor.start();
+    assert.deepEqual([...listeners.keys()].sort(), ['hashchange', 'popstate']);
+    monitor.stop();
+    assert.equal(listeners.size, 0, 'the exact callbacks registered at start are removed');
+  } finally { monitor.stop(); dom.window.close(); }
+});

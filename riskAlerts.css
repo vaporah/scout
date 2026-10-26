@@ -96,6 +96,22 @@ html[data-scout-coin-page] .scout-risk.is-visible { display: flex; flex-directio
 .scout-risk-meta-chip--tone-green { border-color: rgba(62, 220, 133, .5); background: rgba(62, 220, 133, .12); color: #a9ecc4; }
 .scout-risk-note { margin: 8px 0 0; color: #a8848c; font-size: 10px; }
 .scout-risk-summary { margin: 0 0 8px; color: #f3dde1; }
+.scout-risk-insight {
+  margin: 9px 0;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-left: 3px solid #7d7376;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .035);
+}
+.scout-risk-insight--green { border-left-color: #3edc85; background: rgba(62, 220, 133, .07); }
+.scout-risk-insight--orange { border-left-color: #e6a33c; background: rgba(230, 163, 60, .07); }
+.scout-risk-insight--red { border-left-color: #ff3b50; background: rgba(255, 59, 80, .07); }
+.scout-risk-insight-label { color: #cf9ba4; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.scout-risk-insight-headline { display: block; margin-top: 2px; color: #fff6f7; font-size: 12px; line-height: 1.35; }
+.scout-risk-insight-points { display: grid; gap: 3px; margin-top: 7px; }
+.scout-risk-insight-point { margin: 0; color: #d8c8cb; font-size: 10.5px; line-height: 1.4; }
+.scout-risk-insight-key { display: inline-block; min-width: 58px; margin-right: 6px; color: #f0b9c2; font-weight: 750; }
 .scout-risk-verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .scout-risk-verdict { display: inline-flex; align-items: baseline; gap: 5px; padding: 3px 8px; border: 1px solid var(--line-2, #4d2b34); border-radius: 8px; background: rgba(239, 64, 90, .07); font-size: 11px; }
 .scout-risk-verdict-key { color: #e3b3bb; font-weight: 650; }

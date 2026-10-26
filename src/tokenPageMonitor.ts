@@ -155,6 +155,8 @@ export function startTokenPageMonitor(
     }, Math.max(10_000, refreshMs));
   }
 
+  const onRouteChange = (): void => { void refresh(true); };
+
   function start(): void {
     if (active) return;
     active = true;
@@ -171,8 +173,8 @@ export function startTokenPageMonitor(
     checkTimer = setInterval(() => void refresh(), 1_500);
     scheduleRefresh();
     void refresh();
-    doc.defaultView?.addEventListener('popstate', () => void refresh(true));
-    doc.defaultView?.addEventListener('hashchange', () => void refresh(true));
+    doc.defaultView?.addEventListener('popstate', onRouteChange);
+    doc.defaultView?.addEventListener('hashchange', onRouteChange);
   }
 
   function stop(): void {
@@ -184,8 +186,8 @@ export function startTokenPageMonitor(
     checkTimer = refreshTimer = null;
     unwatchPrefs?.();
     unwatchPrefs = null;
-    doc.defaultView?.removeEventListener('popstate', () => void refresh(true));
-    doc.defaultView?.removeEventListener('hashchange', () => void refresh(true));
+    doc.defaultView?.removeEventListener('popstate', onRouteChange);
+    doc.defaultView?.removeEventListener('hashchange', onRouteChange);
     overlay.destroy();
   }
 

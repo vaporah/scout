@@ -1,4 +1,5 @@
 import { movementVerdict, volumeVerdict } from './attention.js';
+import { coinRead } from './coinRead.js';
 import { solFlowReading, solPoolReading } from './poolLiquidity.js';
 import { scoutMark } from './asset.js';
 import { tokenTags } from './categories.js';
@@ -292,6 +293,23 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     return wrap;
   }
 
+  function socialSection(assessment: Assessment): HTMLElement | null {
+    const social = assessment.token.socialSignals;
+    if (!social) return null;
+    const wrap = element('div', 'scout-risk-history');
+    wrap.append(element('div', 'scout-risk-history-title', 'Social & promotion'));
+    row(wrap, 'Social footprint', [social.xUrl ? 'X' : null, social.telegramUrl ? 'Telegram' : null, social.websiteUrl ? 'Website' : null].filter(Boolean).join(' · ') || 'No public links');
+    row(wrap, 'Paid boosts', social.activeBoosts === null ? 'Not published' : social.activeBoosts > 0 ? `${social.activeBoosts} active on DEX Screener` : 'None reported');
+    row(wrap, 'Launch post', social.xPostUrl ? 'Direct X post linked' : 'No direct post linked');
+    const links = element('div', 'scout-risk-links');
+    if (social.xUrl) links.append(link('scout-risk-link', social.xUrl, social.xPostUrl ? 'Open launch post' : 'Open X'));
+    if (social.telegramUrl) links.append(link('scout-risk-link', social.telegramUrl, 'Open Telegram'));
+    if (social.websiteUrl) links.append(link('scout-risk-link', social.websiteUrl, 'Open website'));
+    if (links.childElementCount) wrap.append(links);
+    wrap.append(element('p', 'scout-risk-note', 'Links are claimed profile metadata. Paid boosts show promotion, not organic interest or token safety.'));
+    return wrap;
+  }
+
   /**
    * Holder distribution: how spread out a coin is, and what the developer behind it
    * still holds. Bars are scaled to the largest holder so the ranking is readable,
@@ -430,6 +448,21 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     return chip;
   }
 
+  function insightSection(assessment: Assessment): HTMLElement {
+    const read = coinRead(assessment);
+    const wrap = element('section', `scout-risk-insight scout-risk-insight--${read.tone}`);
+    wrap.append(element('div', 'scout-risk-insight-label', 'Scout read'));
+    wrap.append(element('strong', 'scout-risk-insight-headline', read.headline));
+    const points = element('div', 'scout-risk-insight-points');
+    for (const [label, value] of [['Demand', read.demand], ['Execution', read.execution], ['Evidence', read.evidence]] as const) {
+      const point = element('p', 'scout-risk-insight-point');
+      point.append(element('span', 'scout-risk-insight-key', label), doc.createTextNode(value));
+      points.append(point);
+    }
+    wrap.append(points);
+    return wrap;
+  }
+
   /** Plain-language Dev / Volume / Vamp verdicts shown at the top of the popup. */
   function verdictStrip(assessment: Assessment, history: TokenHistoryView | null): HTMLElement {
     const strip = element('div', 'scout-risk-verdicts');
@@ -459,6 +492,10 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
       verdictChip('SOL pool', solPool.short, 'pool', solPool.detail),
       verdictChip('5m flow', solFlow.short, 'pool', solFlow.detail)
     );
+    const boosts = assessment.token.socialSignals?.activeBoosts;
+    if (boosts !== null && boosts !== undefined && boosts > 0) {
+      strip.append(verdictChip('Promo', `${boosts} paid boost${boosts === 1 ? '' : 's'}`, 'orange', 'DEX Screener reports active paid promotion; this is not organic social interest'));
+    }
     return strip;
   }
 
@@ -516,7 +553,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     meta.append(metaChip(severityLabel[view.tone], `tone-${view.tone}`));
     body.append(meta, element('p', 'scout-risk-summary', view.summary));
 
-    if (assessment) body.append(verdictStrip(assessment, history));
+    if (assessment) body.append(insightSection(assessment), verdictStrip(assessment, history));
 
     if (assessment) { const categories = categoryRow(assessment); if (categories) body.append(categories); }
 
@@ -537,6 +574,8 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     if (assessment && !short) body.append(marketSection(assessment));
 
     if (assessment && !short) body.append(checksSection(assessment));
+
+    if (assessment && !short) { const social = socialSection(assessment); if (social) body.append(social); }
 
     if (!short) {
       const historyEl = historySection(history);

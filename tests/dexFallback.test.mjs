@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fetchMint, isUnidentifiedToken, parseDexPairs, parseGeckoTokenPools } from '../dist/src/dex.js';
+import { fetchMint, isUnidentifiedToken, parseDexPairs, parseDexSocialSignals, parseGeckoTokenPools } from '../dist/src/dex.js';
 
 const mint = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN';
 const pool = 'AAA1111111111111111111111111111111111111111';
@@ -37,6 +37,29 @@ test('a mint with no pool in the feeds is an absence, not a scored zero', () => 
   assert.equal(isUnidentifiedToken({ ...empty, poolAddresses: [pool] }), false);
   assert.equal(isUnidentifiedToken({ ...empty, symbol: 'TEST' }), false);
   assert.equal(isUnidentifiedToken({ ...empty, priceUsd: 0.001 }), false);
+});
+
+test('DEX profile socials are normalized and paid boosts stay separate from hype', () => {
+  const pair = {
+    info: {
+      websites: [{ url: 'https://coin.example.org/launch?utm_source=dex#top' }],
+      socials: [
+        { platform: 'twitter', handle: 'https://twitter.com/scoutcoin/status/123456789?ref=profile' },
+        { platform: 'telegram', handle: '@scoutcoin' },
+        { platform: 'x', handle: 'javascript:alert(1)' }
+      ]
+    },
+    boosts: { active: 7 }
+  };
+  assert.deepEqual(parseDexSocialSignals(pair), {
+    websiteUrl: 'https://coin.example.org/launch',
+    xUrl: 'https://x.com/scoutcoin/status/123456789',
+    telegramUrl: 'https://t.me/scoutcoin',
+    xPostUrl: 'https://x.com/scoutcoin/status/123456789',
+    activeBoosts: 7,
+    source: 'DEX Screener token profile'
+  });
+  assert.equal(parseDexSocialSignals({ info: { socials: [{ platform: 'x', handle: 'bad handle!' }] } }), null);
 });
 
 test('a token page follows a pool address to the token it holds', async () => {

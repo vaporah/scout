@@ -53,6 +53,17 @@ export interface LaunchCheckpoint {
   marketCapUsd: number | null;
   marketCapChangePct: number | null;
 }
+export interface SocialSignals {
+  /** Claimed project links published with this exact-mint market profile. */
+  websiteUrl: string | null;
+  xUrl: string | null;
+  telegramUrl: string | null;
+  /** A direct X post when the published social link points to one. */
+  xPostUrl: string | null;
+  /** Paid DEX Screener boosts currently attached to the token profile. */
+  activeBoosts: number | null;
+  source: string;
+}
 /**
  * Who is doing the holding, rather than how much is held.
  *
@@ -128,6 +139,8 @@ export interface Token {
   insiderFlow?: InsiderFlow | null;
   /** Price and market-cap result 60 seconds after Scout first observed this mint. */
   launchCheckpoint?: LaunchCheckpoint | null;
+  /** Claimed social links and paid-promotion context; never treated as safety proof. */
+  socialSignals?: SocialSignals | null;
   marketSnapshot?: { volume5m: number; volume15m: number; buys5m: number; sells5m: number; buyers5m: number | null; sellers5m: number | null };
 }
 export interface Settings {

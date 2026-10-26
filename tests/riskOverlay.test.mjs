@@ -66,6 +66,11 @@ test('risk overlay shows a green popup with market and coin-history details when
   const [sample] = await fetchTokens('demo', now);
   const [clean] = assessTokens([{
     ...sample, mint, provider: 'Verified fixture', dexName: 'raydium', quoteSymbol: 'SOL',
+    socialSignals: {
+      websiteUrl: 'https://scoutcoin.example.org/', xUrl: 'https://x.com/scoutcoin/status/123456789',
+      telegramUrl: 'https://t.me/scoutcoin', xPostUrl: 'https://x.com/scoutcoin/status/123456789',
+      activeBoosts: 4, source: 'DEX Screener token profile'
+    },
     developer: { creator: 'creator11111111111111111111111111111', priorLaunches: 2, rapidFailures: 0, linkedSales: 0, source: 'verified', note: '' }
   }], defaults, now);
   const overlay = createRiskOverlay({ document: dom.window.document });
@@ -80,10 +85,20 @@ test('risk overlay shows a green popup with market and coin-history details when
     assert.equal(panel.dataset.scoutSeverity, 'green');
     assert.equal(panel.querySelector('.scout-risk-category')?.textContent, 'GOOD DEV');
     assert.equal(panel.querySelector('.scout-risk-icon img')?.getAttribute('src'), 'scout-raccoon-logo.png');
+    const insight = panel.querySelector('.scout-risk-insight');
+    assert.ok(insight, 'the popup synthesizes the raw evidence into one readable market view');
+    assert.match(insight.textContent ?? '', /Scout read/);
+    assert.match(insight.textContent ?? '', /Demand/);
+    assert.match(insight.textContent ?? '', /Execution/);
+    assert.match(insight.textContent ?? '', /Evidence/);
     const text = panel.textContent ?? '';
     assert.match(text, /Market & pool/);
     assert.match(text, /raydium · quoted in SOL/);
     assert.match(text, /All-time high/);
+    assert.match(text, /Social & promotion/);
+    assert.match(text, /4 active on DEX Screener/);
+    assert.match(text, /Paid boosts show promotion, not organic interest or token safety/);
+    assert.ok([...panel.querySelectorAll('.scout-risk-link')].some(a => a.textContent === 'Open launch post'));
     assert.match(text, /Copycat\/vampire \(1\)/);
     assert.ok([...panel.querySelectorAll('.scout-risk-link')].some(a => a.getAttribute('href')?.includes(other)));
 
@@ -92,6 +107,7 @@ test('risk overlay shows a green popup with market and coin-history details when
     assert.ok(verdicts.some(value => /Dev/.test(value) && /GOOD DEV/.test(value)), 'dev verdict');
     assert.ok(verdicts.some(value => /Volume/.test(value) && /(HIGH|MODERATE|LOW|UNKNOWN)/.test(value)), 'volume verdict');
     assert.ok(verdicts.some(value => /Vamp/.test(value) && /(copy|copies)/.test(value)), 'vamp verdict names the copy count');
+    assert.ok(verdicts.some(value => /Promo/.test(value) && /4 paid boosts/.test(value)), 'paid promotion is visible without being called organic hype');
 
     overlay.update(null, defaults);
     assert.equal(panel.classList.contains('is-visible'), false);

@@ -23,6 +23,55 @@ const num = (value: unknown): number | null => {
 const nonnegative = (value: unknown): number => Math.max(0, num(value) ?? 0);
 const isSolQuote = (symbol: string | null): boolean => symbol?.toUpperCase() === 'SOL' || symbol?.toUpperCase() === 'WSOL';
 
+function publicHttpsUrl(value: unknown, hosts?: ReadonlySet<string>): string | null {
+  const raw = str(value);
+  if (!raw || raw.length > 2048) return null;
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    if (url.protocol !== 'https:' || url.username || url.password || url.port || (hosts && !hosts.has(host))) return null;
+    url.search = '';
+    url.hash = '';
+    return url.href;
+  } catch { return null; }
+}
+
+function socialUrl(platform: string | null, handle: string | null): string | null {
+  if (!platform || !handle) return null;
+  const kind = platform.toLowerCase();
+  if (kind === 'twitter' || kind === 'x') {
+    const direct = publicHttpsUrl(handle, new Set(['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com']));
+    if (direct) return direct.replace(/^https:\/\/(?:www\.)?twitter\.com\//, 'https://x.com/').replace(/^https:\/\/www\.x\.com\//, 'https://x.com/');
+    const username = handle.replace(/^@/, '');
+    return /^[A-Za-z0-9_]{1,15}$/.test(username) ? `https://x.com/${username}` : null;
+  }
+  if (kind === 'telegram') {
+    const direct = publicHttpsUrl(handle, new Set(['t.me', 'telegram.me']));
+    if (direct) return direct.replace('https://telegram.me/', 'https://t.me/');
+    const username = handle.replace(/^@/, '');
+    return /^[A-Za-z0-9_]{5,32}$/.test(username) ? `https://t.me/${username}` : null;
+  }
+  return null;
+}
+
+/** Read claimed social metadata without confusing paid promotion with organic interest. */
+export function parseDexSocialSignals(pair: unknown) {
+  const value = obj(pair);
+  const info = obj(value.info);
+  const websites = Array.isArray(info.websites) ? info.websites : [];
+  const websiteUrl = websites.map(item => publicHttpsUrl(obj(item).url)).find((url): url is string => url !== null) ?? null;
+  const socials = Array.isArray(info.socials) ? info.socials.map(obj) : [];
+  const xUrl = socials.map(item => socialUrl(str(item.platform), str(item.handle))).find(url => url?.startsWith('https://x.com/')) ?? null;
+  const telegramUrl = socials.map(item => socialUrl(str(item.platform), str(item.handle))).find(url => url?.startsWith('https://t.me/')) ?? null;
+  const path = xUrl ? new URL(xUrl).pathname : '';
+  const xPostUrl = /\/status\/\d+\/?$/i.test(path) ? xUrl : null;
+  const boosts = num(obj(value.boosts).active);
+  const activeBoosts = boosts !== null && Number.isSafeInteger(boosts) && boosts >= 0 ? boosts : null;
+  return websiteUrl || xUrl || telegramUrl || activeBoosts !== null
+    ? { websiteUrl, xUrl, telegramUrl, xPostUrl, activeBoosts, source: 'DEX Screener token profile' }
+    : null;
+}
+
 /** Fill missing artwork in one exact-mint batch (up to the API's 30-address limit). */
 export async function enrichTokenImages(tokens: Token[], now = Date.now()): Promise<Token[]> {
   const missing = [...new Set(tokens.filter(token => token.imageUrl === null && mintPattern.test(token.mint)).map(token => token.mint))].slice(0, 30);
@@ -131,6 +180,7 @@ export function parseDexPairs(payload: unknown, mint: string, now: number): Toke
     mintAuthority: null, freezeAuthority: null, transferRestriction: null, migrationProgressPct: null, provider: 'DEX Screener public market pairs', sourceUrl,
     dexName: str(pair.dexId) ?? null,
     quoteSymbol: str(obj(pair.quoteToken).symbol) ?? null,
+    socialSignals: parseDexSocialSignals(pair),
     liquiditySol: isSolQuote(str(obj(pair.quoteToken).symbol)) ? num(obj(pair.liquidity).quote) : null,
     // DEX Screener publishes buy and sell *counts* but not unique buyers, and a zero
     // here would claim nobody bought. The pool feed path carries the counts only.
