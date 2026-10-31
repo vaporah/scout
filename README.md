@@ -24,7 +24,17 @@
 Scout is a read-only Chromium extension for researching Solana meme coins. It matches tokens by their full mint address, adds clear risk and market context to the pages traders already use, and keeps missing evidence visible instead of guessing.
 
 <p align="center">
-  <img src="https://scoutai.trade/scout-research-overlay.jpg" width="920" alt="Scout token research panel beside a Solana token list">
+  <img src="./store/readme/01-developer-context.png" width="49%" alt="Scout developer and copycat context beside a live token chart">
+  <img src="./store/readme/02-risk-checks.png" width="49%" alt="Scout risk checks with reasons beside a live token chart">
+</p>
+
+<p align="center">
+  <img src="./store/readme/03-wallet-liquidity.png" width="49%" alt="Scout holder and liquidity context with missing evidence kept visible">
+  <img src="./store/readme/04-trench-scanning.png" width="49%" alt="Scout highlights across new, bonding, and migrated token lists">
+</p>
+
+<p align="center">
+  <img src="./store/readme/05-live-overlay.jpg" width="920" alt="Scout liquidity warning panel beside a color-coded token list">
 </p>
 
 ## What Scout shows
