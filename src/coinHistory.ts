@@ -40,6 +40,20 @@ export function coinIdentity(token: Pick<Token, 'symbol' | 'name'>): string {
   return identity(token.symbol, token.name);
 }
 
+/**
+ * Count observed mints by coin identity once for a whole row render. Consumers
+ * subtract the current mint when it is already present in history. This avoids
+ * rescanning the bounded history for every visible trading card.
+ */
+export function coinIdentityCounts(history: CoinObservation[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const record of history) {
+    const key = identity(record.symbol, record.name);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return counts;
+}
+
 export async function loadCoinHistory(): Promise<CoinObservation[]> {
   try {
     const value = (await api()?.storage?.local?.get(key))?.[key];

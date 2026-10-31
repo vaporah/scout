@@ -29,6 +29,8 @@
 }
 /* Narrative and attention remain available in the tooltip; they do not recolour rows. */
 .scout-pulse-buzz { outline: none !important; }
+.scout-pulse-copycat { box-shadow: inset 3px 0 0 #f59e0b !important; }
+.scout-pulse-insider { box-shadow: inset 3px 0 0 #ff4c63, inset 0 0 0 1px rgba(255, 76, 99, .16) !important; }
 
 /*
  * Hot coin: a top-tier verdict, a crowd of buyers, and heavy volume. This is meant
@@ -199,3 +201,52 @@ html:not([data-scout-coin-page]) .scout-pulse-tooltip.is-visible { display: flex
 .scout-pulse-tooltip[data-scout-tone="amber"] { border-color: #e6a33c; }
 .scout-pulse-tooltip[data-scout-tone="red"] { border-color: #ff3b50; }
 .scout-pulse-tooltip[data-scout-tone="neutral"] { border-color: #5a2a33; }
+
+/* Shared neutral glass treatment for the hover popup. */
+.scout-pulse-tooltip {
+  border-color: rgba(255, 255, 255, .16);
+  border-radius: 16px;
+  background: rgba(28, 29, 32, .98);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .34), 0 1px 0 rgba(255, 255, 255, .08) inset;
+}
+/* The mascot PNG is the mark; remove the redundant severity circle around it. */
+.scout-pulse-tooltip-mark {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  overflow: visible;
+}
+.scout-pulse-tooltip-mark-img,
+.scout-pulse-tooltip-mark-fallback { width: 100%; height: 100%; }
+.scout-pulse-tooltip[data-scout-tone="green"],
+.scout-pulse-tooltip[data-scout-tone="amber"],
+.scout-pulse-tooltip[data-scout-tone="red"],
+.scout-pulse-tooltip[data-scout-tone="neutral"] { border-color: rgba(255, 255, 255, .18); }
+.scout-pulse-tooltip-bar { padding: 8px 9px 8px 11px; border-bottom-color: rgba(255, 255, 255, .10); background: rgba(255, 255, 255, .045); }
+.scout-pulse-tooltip-grip { color: #8f929a; }
+.scout-pulse-tooltip-btn, .scout-pulse-tooltip-close { border-color: rgba(255, 255, 255, .13); background: rgba(255, 255, 255, .07); color: #c9cbd0; }
+.scout-pulse-tooltip-btn:hover, .scout-pulse-tooltip-close:hover { background: rgba(255, 255, 255, .15); color: #fff; }
+.scout-pulse-tooltip-body { padding: 12px 14px 14px; }
+.scout-pulse-tooltip .scout-pulse-tooltip-section { border-top-color: rgba(255, 255, 255, .11); color: #aeb1b8; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip { border-color: rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .065); color: #cdd0d5; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip--axiom,
+.scout-pulse-tooltip .scout-pulse-tooltip-chip--narrative,
+.scout-pulse-tooltip .scout-pulse-tooltip-chip--attention { border-color: rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .065); color: #d8d9dd; }
+.scout-pulse-tooltip .scout-pulse-tooltip-label { color: #aeb1b8; }
+.scout-pulse-tooltip .scout-pulse-tooltip-value { color: #f0f1f3; }
+.scout-pulse-tooltip .scout-pulse-tooltip-note { color: #999ca4; }
+.scout-pulse-tooltip-ca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: -3px 0 9px;
+  color: #aeb1b8;
+  font: 10px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.scout-pulse-tooltip-ca-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scout-pulse-tooltip-ca .copy-ca { flex: 0 0 auto; margin-left: auto; padding: 3px 7px; font-size: 9px; }
+.scout-pulse-tooltip-loading { margin: 0 0 9px; color: #aeb1b8; font-size: 10px; }

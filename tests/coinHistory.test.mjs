@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadCoinHistory, mergeVampirePools, recordObservations, summarizeHistory } from '../dist/src/coinHistory.js';
+import { coinIdentityCounts, loadCoinHistory, mergeVampirePools, recordObservations, summarizeHistory } from '../dist/src/coinHistory.js';
 
 function fakeChrome() {
   const store = {};
@@ -40,6 +40,17 @@ test('coin history tracks observed highs and detects same-name repeats', async (
     assert.equal(view.similar[0].mint, b);
     assert.equal(view.ath.priceUsd, 0.003);
   } finally { globalThis.chrome = previous; }
+});
+
+test('coin history indexes identity counts for row overlays', () => {
+  const records = [
+    { mint: 'a', symbol: 'SANC', name: 'Sanctuary' },
+    { mint: 'b', symbol: 'sanc', name: 'SANCTUARY' },
+    { mint: 'c', symbol: 'OTHER', name: 'Other' }
+  ];
+  const counts = coinIdentityCounts(records);
+  assert.equal(counts.get('SANC|sanctuary'), 2);
+  assert.equal(counts.get('OTHER|other'), 1);
 });
 
 test('coin history ignores simulated demo tokens', async () => {

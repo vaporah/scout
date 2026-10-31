@@ -24,6 +24,12 @@ npm-debug.log*
 # The store upload artefact, rebuilt with "npm run pack".
 scout-*.zip
 
+# Local social/store production workspaces. These contain raw captures, rendered
+# video, audio and intermediate frames; published store assets live directly in
+# store/ and remain tracked.
+media/
+store/refresh-1280x800/
+
 # Isolated website publishing checkout.
 .site-hosting/
 

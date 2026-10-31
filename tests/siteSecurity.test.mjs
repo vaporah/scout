@@ -48,7 +48,10 @@ test('every public page loads the configured Google tag without inline script', 
     const dom = new JSDOM(html);
     assert.equal(dom.window.document.querySelector('script[src="https://www.googletagmanager.com/gtag/js?id=G-GJPRNYRR0P"]')?.hasAttribute('async'), true);
     assert.ok(dom.window.document.querySelector('script[src^="/analytics.js?v="]'));
-    assert.equal([...dom.window.document.scripts].some(script => !script.src && script.textContent.trim()), false);
+    // Structured data is inert JSON, not executable inline JavaScript. Keep the
+    // CSP guard focused on inline scripts the browser could actually execute.
+    assert.equal([...dom.window.document.scripts].some(script =>
+      !script.src && script.type !== 'application/ld+json' && script.textContent.trim()), false);
     dom.window.close();
   }
   assert.match(await readFile(siteFile('analytics.js'), 'utf8'), /gtag\('config', 'G-GJPRNYRR0P'\)/);

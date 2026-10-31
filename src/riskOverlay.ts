@@ -11,6 +11,7 @@ import { loadOverlayFlags, loadOverlayRects, saveOverlayFlag, saveOverlayRect } 
 import { warningFor, type Severity } from './riskWarning.js';
 import { trapCheck } from './trapCheck.js';
 import type { Assessment, Settings, Token } from './types.js';
+import { bindCopyButtons } from './ui.js';
 
 /** Developer provenance badge read from the host page (for example Axiom PROVEN DEV). */
 export interface PageDevBadge {
@@ -553,6 +554,18 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     meta.append(metaChip(severityLabel[view.tone], `tone-${view.tone}`));
     body.append(meta, element('p', 'scout-risk-summary', view.summary));
 
+    if (mint) {
+      const contract = element('div', 'scout-risk-contract');
+      contract.append(element('span', 'scout-risk-contract-value', `CA ${shortMint(mint)}`));
+      const copy = element('button', 'copy-ca', 'Copy CA') as HTMLButtonElement;
+      copy.type = 'button';
+      copy.dataset.copyMint = mint;
+      copy.title = 'Copy contract address';
+      copy.setAttribute('aria-label', 'Copy contract address');
+      contract.append(copy);
+      body.append(contract);
+    }
+
     if (assessment) body.append(insightSection(assessment), verdictStrip(assessment, history));
 
     if (assessment) { const categories = categoryRow(assessment); if (categories) body.append(categories); }
@@ -623,6 +636,7 @@ export function createRiskOverlay(options: RiskOverlayOptions = {}) {
     root.dataset.scoutSeverity = view.tone;
     root.classList.toggle('is-collapsed', collapsed);
     root.append(head, body);
+    bindCopyButtons(root);
     if (resizeHandle) root.append(resizeHandle);
     if (scrollTop > 0) body.scrollTop = scrollTop;
     if (tokenChanged) void root.offsetWidth; // restart the entry animation only for a new token

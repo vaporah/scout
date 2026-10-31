@@ -42,7 +42,7 @@ const markFallback = '<svg viewBox="0 0 24 24" focusable="false" aria-hidden="tr
   + '<path d="M12 15.2c1.4 0 2.3.85 2.3 1.75S13.4 18.7 12 18.7s-2.3-.85-2.3-1.75S10.6 15.2 12 15.2z" fill="#e9ebf0"/>'
   + '</svg>';
 
-/** Build the circular Scout mascot badge used by every coin popup. */
+/** Build the Scout mascot mark used by every coin popup. */
 export function scoutMark(document: Document, className: string): HTMLElement {
   const badge = document.createElement('span');
   badge.className = className;

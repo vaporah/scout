@@ -466,6 +466,87 @@ footer { color: var(--muted-2); font-size: 11px; margin-top: 22px; text-align: c
 .wallet-dialog > footer { margin: 0; padding: 12px 14px; border-top: 1px solid #303036; }
 .wallet-dialog > footer button { width: 100%; border: 0; border-radius: 999px; background: #596fff; color: #090b14; padding: 9px 12px; font-weight: 800; }
 
+/* ---------- Scout product finish ----------
+   A restrained graphite system with one clear brand colour. These are CSS-only
+   surfaces: no additional runtime work, animation loops, or image effects. */
+:root {
+  --bg: #090a0c;
+  --bg-glow: radial-gradient(circle at 50% -15%, rgba(255, 255, 255, .07), transparent 34%);
+  --panel: #141518;
+  --panel-2: #1a1c20;
+  --line: rgba(255, 255, 255, .11);
+  --line-2: rgba(255, 255, 255, .18);
+  --text: #f5f6f7;
+  --muted: #a7aab1;
+  --muted-2: #777b83;
+  --brand: #ef405a;
+  --brand-2: #b3122f;
+}
+body { background-image: var(--bg-glow); }
+button, input, select { -webkit-font-smoothing: antialiased; }
+.primary { border-color: transparent; border-radius: 10px; box-shadow: 0 5px 16px rgba(239, 64, 90, .18); }
+.subtle { background: rgba(255, 255, 255, .055); border-color: var(--line-2); color: #e3e5e8; border-radius: 10px; }
+.subtle:hover { background: rgba(255, 255, 255, .11); border-color: rgba(255, 255, 255, .28); }
+input, select, select.select { background-color: rgba(255, 255, 255, .055); border-color: var(--line-2); }
+select.select:hover { background-color: rgba(255, 255, 255, .10); border-color: rgba(255, 255, 255, .28); }
+.popup-wrap { gap: 15px; }
+.popup-head { border-bottom-color: rgba(255, 255, 255, .10); }
+.popup-tabs { background: rgba(255, 255, 255, .055); border-color: rgba(255, 255, 255, .10); }
+.popup-tab { color: #969aa2; }
+.popup-tab.is-active { background: rgba(255, 255, 255, .14); color: #f4f5f6; }
+.popup-stats > div,
+.coin-row,
+.popup-website,
+.popup-pulse-state { border-color: var(--line); background: rgba(255, 255, 255, .045); }
+.popup-stats > div { border-radius: 13px; }
+.coin-row { border-radius: 13px; }
+.coin-row:hover { border-color: rgba(255, 255, 255, .24); background: rgba(255, 255, 255, .08); }
+.popup-website summary { color: #e4e6e9; }
+.popup-foot { color: #777b83; }
+.dashboard-page .summary > div,
+.list-panel, .detail-panel, .settings-panel, .mint-panel { border-color: var(--line); background: rgba(255, 255, 255, .035); }
+.topbar { border-bottom-color: var(--line); background: rgba(12, 13, 15, .88); }
+.section-head h2 { color: #f1f2f4; }
+.dashboard-filter-panel { border-color: var(--line); background: rgba(255, 255, 255, .035); }
+.popup-integration-settings, .popup-wallets { border-color: var(--line); background: rgba(255, 255, 255, .035); }
+.popup-feature-toggle { border-top-color: rgba(255, 255, 255, .09); }
+.popup-feature-toggle input:checked { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(239, 64, 90, .10); }
+
+/* Popup-specific tuning keeps the browser action compact and easy to scan. */
+body.popup {
+  --bg: #0b0c0f; --panel: #15171b; --panel-2: #1b1d21;
+  --line: rgba(255, 255, 255, .11); --line-2: rgba(255, 255, 255, .18);
+  --muted: #adb0b7; --muted-2: #7b7f87;
+  background-image: radial-gradient(circle at 50% -18%, rgba(255, 255, 255, .08), transparent 36%);
+}
+body.popup .popup-head { padding-bottom: 14px; }
+body.popup .header-kicker { color: #b7bac1; }
+body.popup .header-kicker::before { box-shadow: none; }
+body.popup .popup-detail .detail-title h2 { color: #f2f3f5; }
+
+/* Final popup tokens: keep the compact shell on the same neutral system as the
+   dashboard, while retaining Scout red for actionable states. */
+body.popup {
+  --bg: #0b0c0f;
+  --panel: #15171b;
+  --panel-2: #1b1d21;
+  --line: rgba(255, 255, 255, .11);
+  --line-2: rgba(255, 255, 255, .18);
+  --muted: #adb0b7;
+  --muted-2: #7b7f87;
+}
+
+/* Keep the interface crisp: no luminous text or status accents. */
+body.popup .header-kicker,
+body.popup .header-copy strong,
+body.popup .popup-tab,
+body.popup .coin-line strong,
+body.popup .coin-score > strong { text-shadow: none; }
+body.popup .header-kicker::before { box-shadow: none; }
+body.popup .popup-tab.is-active,
+body.popup .primary { box-shadow: none; }
+body.popup .live-dot { box-shadow: none; }
+
 /* ---------- Refined popup shell ---------- */
 body.popup {
   --bg: #080708; --bg-glow: radial-gradient(circle at 50% -10%, rgba(239, 64, 90, .14), transparent 34%);

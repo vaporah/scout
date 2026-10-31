@@ -7,7 +7,7 @@ import { formatPulseLabels, stageLabel, type PulseLabels } from './pulseLabels.j
 import type { RowReadings } from './rowReadings.js';
 import type { Assessment, Stage } from './types.js';
 import { trapCheck } from './trapCheck.js';
-import { renderIfChanged } from './ui.js';
+import { bindCopyButtons, renderIfChanged } from './ui.js';
 
 export type PulseTooltipState = 'scanning' | 'unknown' | 'assessed';
 
@@ -80,6 +80,30 @@ function chip(doc: Document, text: string, kind: string): HTMLElement {
   return el;
 }
 
+function shortMint(mint: string): string {
+  return mint.length > 16 ? `${mint.slice(0, 7)}…${mint.slice(-6)}` : mint;
+}
+
+const unusableIdentity = /^(?:logo|image|icon|avatar|thumbnail|unknown|token|coin|n\/a|\?)$/i;
+
+function contractRow(doc: Document, mint: string): HTMLElement {
+  const row = doc.createElement('div');
+  row.className = 'scout-pulse-tooltip-ca';
+  const value = doc.createElement('span');
+  value.className = 'scout-pulse-tooltip-ca-value';
+  value.textContent = `CA ${shortMint(mint)}`;
+  value.title = mint;
+  const copy = doc.createElement('button');
+  copy.type = 'button';
+  copy.className = 'copy-ca';
+  copy.dataset.copyMint = mint;
+  copy.setAttribute('aria-label', 'Copy contract address');
+  copy.title = 'Copy contract address';
+  copy.textContent = 'Copy CA';
+  row.append(value, copy);
+  return row;
+}
+
 /** Reuse the token-popup verdict styling so both popups look identical. */
 function verdictChip(doc: Document, key: string, value: string, tone: string): HTMLElement {
   const el = doc.createElement('span');
@@ -135,17 +159,28 @@ export function renderPulseTooltip(
   title.textContent = `Scout · ${standing}`;
   root.append(title);
 
-  if (token || readings?.symbol) {
+  // While scanning, row text is often incomplete (and can include image metadata).
+  // Do not present it as the coin identity until the exact lookup returns a token.
+  const rowSymbol = readings?.symbol?.trim() ?? '';
+  const hasUsableRowIdentity = rowSymbol.length > 0 && !unusableIdentity.test(rowSymbol);
+  if (token || (state !== 'scanning' && hasUsableRowIdentity)) {
     const identity = doc.createElement('div');
     identity.className = 'scout-pulse-tooltip-token';
     const symbol = doc.createElement('span');
     symbol.className = 'scout-pulse-tooltip-symbol';
-    symbol.textContent = token?.symbol || readings?.symbol || '?';
+    symbol.textContent = token?.symbol && !unusableIdentity.test(token.symbol) ? token.symbol : rowSymbol;
     const name = doc.createElement('span');
     name.className = 'scout-pulse-tooltip-name';
     name.textContent = token?.name || '';
     identity.append(symbol, name);
     root.append(identity);
+  }
+  if (mint) root.append(contractRow(doc, mint));
+  if (state === 'scanning') {
+    const loading = doc.createElement('div');
+    loading.className = 'scout-pulse-tooltip-loading';
+    loading.textContent = 'Scanning exact coin data…';
+    root.append(loading);
   }
 
   const chips = doc.createElement('div');
@@ -217,6 +252,7 @@ export function renderPulseTooltip(
     note.className = 'scout-pulse-tooltip-note';
     note.textContent = 'Details hidden \u00b7 press \u2212 in the bar to show market, checks and history.';
     root.append(note);
+    bindCopyButtons(root);
     renderIfChanged(container, `short|${state}|${mint ?? ''}|${root.textContent ?? ''}`, () => root);
     return;
   }
@@ -332,5 +368,6 @@ export function renderPulseTooltip(
     if (current) detail(root, 'Source', current.token.provider || 'Unknown');
   }
 
+  bindCopyButtons(root);
   renderIfChanged(container, `full|${state}|${mint ?? ''}|${root.textContent ?? ''}`, () => root);
 }

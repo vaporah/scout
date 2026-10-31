@@ -165,3 +165,68 @@ html[data-scout-coin-page] .scout-risk.is-visible { display: flex; flex-directio
 .scout-risk-disclaimer { margin: 8px 0 0; color: #a8848c; font-size: 10px; }
 .scout-risk-resize { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; z-index: 2; }
 .scout-risk-resize::after { content: ""; position: absolute; right: 3px; bottom: 3px; width: 8px; height: 8px; border-right: 2px solid #7a3a46; border-bottom: 2px solid #7a3a46; }
+
+/* Calm system-panel finish: the mascot remains the only expressive brand element. */
+.scout-risk {
+  border-color: rgba(255, 255, 255, .16);
+  border-radius: 16px;
+  background: rgba(28, 29, 32, .98);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, .34), 0 1px 0 rgba(255, 255, 255, .08) inset;
+}
+/* Use the supplied mascot PNG as the mark itself; severity is communicated by the
+   content and small metadata, not by wrapping the logo in a second circle. */
+.scout-risk-icon {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  overflow: visible;
+}
+.scout-risk-icon-img,
+.scout-risk-icon-fallback { width: 100%; height: 100%; }
+.scout-risk[data-scout-severity="red"],
+.scout-risk[data-scout-severity="orange"],
+.scout-risk[data-scout-severity="neutral"],
+.scout-risk[data-scout-severity="green"] { border-color: rgba(255, 255, 255, .18); }
+.scout-risk-head {
+  padding: 11px 12px;
+  border-bottom-color: rgba(255, 255, 255, .10);
+  background: rgba(255, 255, 255, .045);
+}
+.scout-risk-brand { color: #b8bbc2; letter-spacing: .16em; }
+.scout-risk-category { color: #f4f5f7; font-size: 13px; }
+.scout-risk-btn {
+  width: 24px; height: 24px; border-radius: 8px;
+  border-color: rgba(255, 255, 255, .13);
+  background: rgba(255, 255, 255, .07); color: #c9cbd0;
+}
+.scout-risk-btn:hover { background: rgba(255, 255, 255, .15); color: #fff; }
+.scout-risk-body { padding: 12px 13px 14px; }
+.scout-risk-meta-chip,
+.scout-risk-verdict,
+.scout-risk-tag {
+  border-color: rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .065);
+  color: #cdd0d5;
+}
+.scout-risk-meta-chip--tone-red,
+.scout-risk-meta-chip--tone-orange,
+.scout-risk-meta-chip--tone-neutral,
+.scout-risk-meta-chip--tone-green { border-color: rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .065); color: #d8d9dd; }
+.scout-risk-summary { color: #e2e3e6; }
+.scout-risk-insight { border-color: rgba(255, 255, 255, .12); border-left-color: #aeb2ba; background: rgba(255, 255, 255, .055); }
+.scout-risk-insight--green, .scout-risk-insight--orange, .scout-risk-insight--red { border-left-color: #aeb2ba; background: rgba(255, 255, 255, .055); }
+.scout-risk-insight-label, .scout-risk-verdict-key, .scout-risk-history-key { color: #aeb1b8; }
+.scout-risk-insight-headline, .scout-risk-verdict-value, .scout-risk-history-value { color: #f0f1f3; }
+.scout-risk-insight-point, .scout-risk-reason { color: #c8cacf; }
+.scout-risk-history, .scout-risk-section { border-top-color: rgba(255, 255, 255, .11); }
+.scout-risk-evidence summary, .scout-risk-link { color: #d2d4d9; }
+.scout-risk-holder-bar { background: rgba(255, 255, 255, .12); }
+.scout-risk-holder-fill { background: #bfc2c8; }
+.scout-risk-holder-wallet { color: #d7d9de; }
+.scout-risk-note, .scout-risk-disclaimer { color: #999ca4; }
+.scout-risk-contract { display: flex; align-items: center; gap: 8px; min-width: 0; margin: -2px 0 9px; color: #aeb1b8; font: 10px/1.25 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.scout-risk-contract-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scout-risk-contract .copy-ca { flex: 0 0 auto; margin-left: auto; padding: 3px 7px; font-size: 9px; }

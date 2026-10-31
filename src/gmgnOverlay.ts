@@ -1,6 +1,6 @@
 import { mintPattern } from './dex.js';
 import { formatTokenTags, tokenTags, type TokenCategory } from './categories.js';
-import { loadCoinHistory, type CoinObservation } from './coinHistory.js';
+import { coinIdentity, coinIdentityCounts, loadCoinHistory, type CoinObservation } from './coinHistory.js';
 import { isGmgnTokenPage, mintFromGmgnUrl } from './gmgnMint.js';
 import { createPulseTooltipHost } from './pulseTooltipHost.js';
 import { setPulseRowFlow } from './pulseRowFlow.js';
@@ -235,18 +235,26 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     const fresh = assessments.filter(a => validAssessment(a, now));
     applyPulseSignals(rows, fresh, settings, now);
     const byMint = new Map(fresh.map(a => [a.token.mint, a]));
+    const historyCounts = coinIdentityCounts(historyRecords);
+    const historyMints = new Set(historyRecords.map(record => record.mint));
     for (const row of rows) {
       const assessment = byMint.get(row.mint);
       setPulseRowFlow(row.element, assessment?.token ?? null);
       const tags = assessment ? tokenTags(assessment.token) : [];
+      const copies = assessment ? Math.max(0, (historyCounts.get(coinIdentity(assessment.token)) ?? 0)
+        - (historyMints.has(assessment.token.mint) ? 1 : 0)) : 0;
+      const insiderSelling = assessment?.token.insiderFlow?.status === 'selling' || assessment?.token.insiderFlow?.status === 'exit';
       const actionable = assessment ? badgeFor(assessment, settings).kind !== 'gray' : false;
       setTags(row.element, actionable ? tags : []);
       const categoryText = actionable ? formatTokenTags(tags) : '';
       if (assessment) {
         const badge = badgeFor(assessment, settings);
-        setBadge(row.element, badge.kind, badge.text, categoryText ? `${badge.title} · ${categoryText}` : badge.title);
+        row.element.classList.toggle('scout-pulse-copycat', copies > 0);
+        row.element.classList.toggle('scout-pulse-insider', insiderSelling);
+        const context = [categoryText, copies > 0 ? `Copycat · ${copies} seen` : '', insiderSelling ? 'Insiders selling' : ''].filter(Boolean).join(' · ');
+        setBadge(row.element, badge.kind, badge.text, context ? `${badge.title} · ${context}` : badge.title);
       } else {
-        row.element.classList.remove(...colouredClasses, 'scout-pulse-hot');
+        row.element.classList.remove(...colouredClasses, 'scout-pulse-hot', 'scout-pulse-copycat', 'scout-pulse-insider');
         row.element.classList.add(attempted.has(row.mint) ? 'scout-pulse-gray' : 'scout-pulse-neutral');
         setBadge(row.element, attempted.has(row.mint) ? 'gray' : 'neutral',
           attempted.has(row.mint) ? 'SCOUT \u00b7 UNKNOWN' : 'SCOUT \u00b7 SCANNING',

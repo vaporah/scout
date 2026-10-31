@@ -71,11 +71,16 @@ const categoryRules: { id: string; label: string; color: string; pattern: RegExp
 
 const titleCase = (value: string): string => value.replace(/[-_]+/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
 
+// Some trench-card DOM readers can pick up an image alt/class token as the
+// apparent DEX name. These are UI assets, not market venues, so never surface
+// them as platform chips.
+const nonPlatformAssetNames = new Set(['logo', 'image', 'icon', 'avatar', 'thumbnail']);
+
 /** Colored platform/category tags for a token, platform first. */
 export function tokenTags(token: Token): TokenCategory[] {
   const tags: TokenCategory[] = [];
   const dex = (token.dexName ?? '').trim();
-  if (dex) {
+  if (dex && !nonPlatformAssetNames.has(dex.toLowerCase())) {
     const rule = platformRules.find(candidate => candidate.pattern.test(dex));
     tags.push(rule
       ? { id: rule.id, label: rule.label, color: rule.color, kind: 'platform' }

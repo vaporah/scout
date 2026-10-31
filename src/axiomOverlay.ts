@@ -1,7 +1,7 @@
 import { mintCandidates, mintFromAxiomUrl } from './axiomMint.js';
 import { attentionSignals } from './attention.js';
 import { formatTokenTags, tokenTags, type TokenCategory } from './categories.js';
-import { loadCoinHistory, type CoinObservation } from './coinHistory.js';
+import { coinIdentity, coinIdentityCounts, loadCoinHistory, type CoinObservation } from './coinHistory.js';
 import { mintPattern } from './dex.js';
 import { type ScanResponse } from './messages.js';
 import { narrativeTags } from './narrative.js';
@@ -306,7 +306,7 @@ function validAssessment(input: unknown, now: number): input is Assessment {
 }
 
 function clearRow(row: HTMLElement): void {
-  row.classList.remove(...colouredClasses, 'scout-pulse-row', 'scout-pulse-buzz', 'scout-pulse-hot');
+  row.classList.remove(...colouredClasses, 'scout-pulse-row', 'scout-pulse-buzz', 'scout-pulse-hot', 'scout-pulse-copycat', 'scout-pulse-insider');
   row.removeAttribute('data-scout-mint');
   row.removeAttribute('data-scout-status');
   row.removeAttribute('data-scout-buzz');
@@ -479,6 +479,8 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
     const matched = rows.filter((row): row is PulseRow => row.mint !== null);
     applyPulseSignals(matched, fresh, settings, now);
     const byMint = new Map(fresh.map(a => [a.token.mint, a]));
+    const historyCounts = coinIdentityCounts(historyRecords);
+    const historyMints = new Set(historyRecords.map(record => record.mint));
     for (const row of rows) {
       const assessment = row.mint ? byMint.get(row.mint) : undefined;
       const compactTop = row.element.classList.contains('scout-pulse-watchlist');
@@ -486,6 +488,9 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
       const narratives = assessment ? narrativeTags(assessment.token) : [];
       const attention = assessment ? attentionSignals(assessment.token, assessment.analytics) : [];
       const tags = assessment ? tokenTags(assessment.token) : [];
+      const copies = assessment ? Math.max(0, (historyCounts.get(coinIdentity(assessment.token)) ?? 0)
+        - (historyMints.has(assessment.token.mint) ? 1 : 0)) : 0;
+      const insiderSelling = assessment?.token.insiderFlow?.status === 'selling' || assessment?.token.insiderFlow?.status === 'exit';
       // A neutral assessment intentionally leaves the host row alone. Platform/category
       // chips on every unresolved coin recreated the same visual noise as colouring
       // every row, so they are reserved for an actionable Scout signal.
@@ -494,10 +499,14 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
       // The violet buzz ring is for narrative/volume; category tags are shown as chips.
       const buzz = [
         ...narratives.map(n => `Narrative ${n.tag}`),
-        ...attention.map(s => s.id === 'volume' ? 'High volume' : 'Broad buying')
+        ...attention.map(s => s.id === 'volume' ? 'High volume' : 'Broad buying'),
+        ...(copies > 0 ? [`Copycat · ${copies} seen`] : []),
+        ...(insiderSelling ? ['Insiders selling'] : [])
       ];
       const categoryText = actionable ? formatTokenTags(tags) : '';
       row.element.classList.toggle('scout-pulse-buzz', buzz.length > 0);
+      row.element.classList.toggle('scout-pulse-copycat', copies > 0);
+      row.element.classList.toggle('scout-pulse-insider', insiderSelling);
       if (buzz.length) row.element.dataset.scoutBuzz = buzz.join(',');
       else delete row.element.dataset.scoutBuzz;
       if (assessment) addBadge(row.element, assessment, settings, row, categoryText ? [...buzz, categoryText] : buzz);
