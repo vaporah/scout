@@ -58,7 +58,7 @@ test('every public page loads the configured Google tag without inline script', 
 });
 
 test('the deployment marker represents the complete interactive asset set', async () => {
-  const names = ['styles.css', 'home.css', 'theme.js', 'release-config.js', 'site.js', 'analytics.js', 'scout-research-overlay.jpg', 'icon-32.png', 'icon-128.png', 'padre-logo.svg'];
+  const names = ['styles.css', 'home.css', 'theme.js', 'release-config.js', 'site.js', 'analytics.js', 'scout-developer-context.png', 'scout-risk-checks.png', 'scout-wallet-liquidity.png', 'scout-trench-scanning.png', 'icon-32.png', 'icon-128.png', 'padre-logo.svg'];
   const digest = createHash('sha256');
   for (const name of names) digest.update(await readFile(siteFile(name)));
   const expected = digest.digest('hex').slice(0, 10);
@@ -89,10 +89,10 @@ test('motion stays enabled regardless of an origin-specific reduced-motion flag'
 test('the landing page makes the product and its safety boundaries explicit', async () => {
   const html = await readFile(siteFile('index.html'), 'utf8');
 
-  assert.match(html, /scout-research-overlay\.jpg/);
+  assert.match(html, /scout-developer-context\.png/);
   assert.match(html, /No wallet access\./);
   assert.match(html, /No seed phrase, private key, wallet connection/);
-  assert.match(html, /Illustrative product view with fictional tokens and data/);
+  assert.match(html, /Developer context/);
 });
 
 test('supported-platform links use the official HTTPS entry points safely', async () => {

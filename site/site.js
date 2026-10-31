@@ -41,6 +41,79 @@
     if (label.textContent?.includes('Axiom + GMGN')) label.textContent = label.textContent.replace('Axiom + GMGN', 'Axiom + GMGN + Padre');
   });
 
+  /* ------------------------------------------------------------ Product gallery */
+  const gallery = document.querySelector('[data-gallery]');
+  const lightbox = document.querySelector('[data-gallery-lightbox]');
+  if (gallery && lightbox) {
+    const items = [gallery.querySelector('[data-gallery-main-image]'), ...gallery.querySelectorAll('.product-gallery-grid img')];
+    const slides = [
+      { title: '01 / Developer context', description: 'Review creator data, same-name tokens, and the evidence that could not be verified.' },
+      { title: '02 / Risk checks', description: 'Open the reasons behind each check, from token controls to liquidity and insider signals.' },
+      { title: '03 / Wallet and liquidity', description: 'Follow holder concentration and liquidity changes while keeping missing labels visible.' },
+      { title: '04 / Trench scanning', description: 'Scan new launches and migrated tokens with color-coded context before digging deeper.' }
+    ];
+    const image = lightbox.querySelector('[data-gallery-image]');
+    const title = lightbox.querySelector('[data-gallery-title]');
+    const count = lightbox.querySelector('[data-gallery-lightbox-count]');
+    const mainImage = gallery.querySelector('[data-gallery-main-image]');
+    const mainTitle = gallery.querySelector('[data-gallery-main-title]');
+    const mainDescription = document.createElement('span');
+    mainDescription.className = 'gallery-main-description';
+    mainTitle.parentElement.append(mainDescription);
+    const description = document.createElement('span');
+    description.className = 'gallery-lightbox-description';
+    title.parentElement.append(description);
+    let current = 0;
+    let lastFocus = null;
+    const dots = [...document.querySelectorAll('[data-gallery-dot]')];
+    const show = index => {
+      current = (index + items.length) % items.length;
+      const source = items[current];
+      image.style.opacity = '0';
+      window.setTimeout(() => { if (!lightbox.hidden) image.style.opacity = '1'; }, 80);
+      image.src = source.src;
+      image.alt = source.alt;
+      mainImage.src = source.src;
+      mainImage.alt = source.alt;
+      mainTitle.textContent = slides[current].title;
+      mainDescription.textContent = slides[current].description;
+      title.textContent = slides[current].title;
+      description.textContent = slides[current].description;
+      count.textContent = `${String(current + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+      dots.forEach(dot => dot.setAttribute('aria-selected', String(Number(dot.dataset.galleryDot) === current)));
+    };
+    const open = index => {
+      lastFocus = document.activeElement;
+      show(index);
+      lightbox.hidden = false;
+      lightbox.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(() => lightbox.classList.add('is-open'));
+      document.body.classList.add('gallery-open');
+      lightbox.querySelector('.gallery-lightbox-close').focus();
+    };
+    const close = () => {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('gallery-open');
+      window.setTimeout(() => {
+        lightbox.hidden = true;
+        lastFocus?.focus();
+      }, 350);
+    };
+    gallery.querySelectorAll('[data-gallery-open]').forEach((button, index) => button.addEventListener('click', () => open(index)));
+    document.querySelectorAll('[data-gallery-next]').forEach(button => button.addEventListener('click', () => lightbox.hidden ? show(current + 1) : show(current + 1)));
+    lightbox.querySelector('[data-gallery-prev]').addEventListener('click', () => show(current - 1));
+    dots.forEach(dot => dot.addEventListener('click', () => show(Number(dot.dataset.galleryDot))));
+    lightbox.querySelectorAll('[data-gallery-close]').forEach(button => button.addEventListener('click', close));
+    document.addEventListener('keydown', event => {
+      if (lightbox.hidden) return;
+      if (event.key === 'Escape') close();
+      if (event.key === 'ArrowLeft') show(current - 1);
+      if (event.key === 'ArrowRight') show(current + 1);
+    });
+    show(0);
+  }
+
   /* --------------------------------------------------------------- Release */
   const applyRelease = () => {
     const config = window.SCOUT_RELEASE || {};
