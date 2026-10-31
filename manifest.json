@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Scout",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Solana token research for Axiom, GMGN and Padre with exact-mint risk and market insights.",
   "homepage_url": "https://scoutai.trade/",
   "permissions": [
