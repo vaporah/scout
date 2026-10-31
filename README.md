@@ -34,7 +34,6 @@ Scout is a read-only Chromium extension for researching Solana meme coins. It ma
 </p>
 
 <p align="center">
-  <img src="./store/readme/05-live-overlay.jpg" width="920" alt="Scout liquidity warning panel beside a color-coded token list">
 </p>
 
 ## What Scout shows
