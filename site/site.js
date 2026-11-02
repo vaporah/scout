@@ -489,8 +489,8 @@
         if (card.classList.contains('build-card')) {
           const x = Math.max(-1, Math.min(1, (pointerX - box.left) / box.width * 2 - 1));
           const y = Math.max(-1, Math.min(1, (pointerY - box.top) / box.height * 2 - 1));
-          card.style.setProperty('--tilt-x', `${(-y * 2).toFixed(2)}deg`);
-          card.style.setProperty('--tilt-y', `${(x * 2).toFixed(2)}deg`);
+          card.style.setProperty('--tilt-x', `${(-y * .7).toFixed(2)}deg`);
+          card.style.setProperty('--tilt-y', `${(x * .7).toFixed(2)}deg`);
         }
       });
     }, { passive: true });

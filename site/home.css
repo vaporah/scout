@@ -288,15 +288,15 @@ html.js.motion-full .home .reveal:not(.is-in) { opacity: 0; transform: translate
 .home .build-card::before { content: ""; position: absolute; inset: 0; z-index: 0; opacity: 0; background: radial-gradient(18rem 18rem at var(--card-x, 50%) var(--card-y, 25%), var(--accent-wash), transparent 76%); pointer-events: none; transition: opacity .3s ease; }
 .home .build-card::after { content: ""; position: absolute; top: 0; left: 1.5rem; right: 1.5rem; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0; transform: scaleX(.35); pointer-events: none; transition: opacity .3s ease, transform .4s ease; }
 .home .build-card > * { position: relative; z-index: 1; }
-.home .build-card:hover { transform: perspective(900px) translateY(-8px) scale(1.028) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); }
-.home .build-card:focus-visible { transform: translateY(-5px) scale(1.018); }
-.home .build-card:hover, .home .build-card:focus-visible { border-color: color-mix(in srgb, var(--accent) 46%, var(--line)); background: color-mix(in srgb, var(--accent-wash) 30%, var(--surface)); box-shadow: var(--shadow-lg); }
+.home .build-card:hover { transform: perspective(900px) translateY(-3px) scale(1.008) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)); }
+.home .build-card:focus-visible { transform: translateY(-2px); }
+.home .build-card:hover, .home .build-card:focus-visible { border-color: color-mix(in srgb, var(--accent) 38%, var(--line)); background: color-mix(in srgb, var(--accent-wash) 30%, var(--surface)); box-shadow: var(--shadow); }
 .home .build-card:hover::before, .home .build-card:focus-visible::before { opacity: 1; }
-.home .build-card:hover::after, .home .build-card:focus-visible::after { opacity: .75; transform: scaleX(1); }
+.home .build-card:hover::after, .home .build-card:focus-visible::after { opacity: .45; transform: scaleX(1); }
 .home .build-card-index { margin-bottom: 2.3rem; color: var(--signal); font: 650 .67rem/1.3 var(--mono); letter-spacing: .08em; }
 .home .build-card strong { color: var(--text); font-size: 1.3rem; letter-spacing: -.035em; }
 .home .build-card p { margin: .55rem 0 1.5rem; color: var(--muted); font-size: .86rem; line-height: 1.6; }
 .home .build-card-link { display: inline-flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: auto; padding-top: .85rem; border-top: 1px solid var(--line); color: var(--text); font-size: .78rem; font-weight: 650; }
 .home .build-card-link span { display: grid; place-items: center; width: 1.65rem; height: 1.65rem; border: 1px solid var(--line); border-radius: 50%; color: var(--accent); font-size: 1rem; transition: transform .24s ease, background-color .24s ease, border-color .24s ease; }
-.home .build-card:hover .build-card-link span, .home .build-card:focus-visible .build-card-link span { transform: translate(2px, -2px); border-color: color-mix(in srgb, var(--accent) 48%, var(--line)); background: var(--accent-wash); }
+.home .build-card:hover .build-card-link span, .home .build-card:focus-visible .build-card-link span { transform: translate(1px, -1px); border-color: color-mix(in srgb, var(--accent) 42%, var(--line)); background: var(--accent-wash); }
 @media (max-width: 960px) { .home .build-head { grid-template-columns: 1fr; gap: 1rem; }.home .build-grid { grid-template-columns: 1fr; }.home .build-card { min-height: 0; }.home .build-card-index { margin-bottom: 1.5rem; } }
