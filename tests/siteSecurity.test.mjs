@@ -13,6 +13,33 @@ test('the public release config names the package version', async () => {
   assert.match(config, new RegExp(`version: '${pkg.version.replaceAll('.', '\\.')}'`));
 });
 
+test('all public pages keep the Scout brand and theme switch', async () => {
+  const theme = await readFile(siteFile('theme.js'), 'utf8');
+  for (const page of ['index.html', 'privacy/index.html', '404.html']) {
+    const dom = new JSDOM(await readFile(siteFile(page), 'utf8'), { url: 'https://scoutai.trade/', runScripts: 'outside-only' });
+    const doc = dom.window.document;
+    assert.equal(doc.querySelector('header.nav .brand')?.getAttribute('href'), '/', page);
+    assert.ok(doc.querySelector('header.nav .brand img[src="/scout-raccoon-logo.png"]'), page);
+    assert.ok(doc.querySelector('header.nav #theme-toggle[aria-label="Switch theme"]'), page);
+    assert.ok(doc.querySelector('link[href^="/styles.css?v="]'), page);
+    dom.window.matchMedia = () => ({ matches: false, addEventListener() {} });
+    dom.window.eval(theme);
+    doc.dispatchEvent(new dom.window.Event('DOMContentLoaded'));
+    doc.getElementById('theme-toggle').click();
+    assert.equal(doc.documentElement.dataset.theme, 'dark', page);
+    dom.window.close();
+  }
+});
+
+test('build notes link to public GitHub records without promising an unpublished release', async () => {
+  const dom = new JSDOM(await readFile(siteFile('index.html'), 'utf8'));
+  const links = [...dom.window.document.querySelectorAll('#updates a')];
+  assert.equal(links.length, 3);
+  assert.ok(links.every(link => link.href.startsWith('https://github.com/vaporah/scout')));
+  assert.ok(links.every(link => link.rel.includes('noopener') && link.rel.includes('noreferrer')));
+  dom.window.close();
+});
+
 test('every cacheable site asset URL carries its current content hash', async () => {
   for (const page of ['index.html', 'privacy/index.html', '404.html']) {
     const html = await readFile(siteFile(page), 'utf8');

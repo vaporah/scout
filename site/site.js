@@ -460,10 +460,10 @@
   /* ---------------------------------------------------- Pointer: the light */
   // One listener for the whole page. It leans the backdrop away from the pointer, which is
   // what makes the two layers feel like they are behind the page rather than painted on it,
-  // and moves the accent bloom inside whichever principle card is under the cursor. The
-  // bloom is written onto the card itself, so nothing else has to know about it.
-  const principleCards = [...document.querySelectorAll('.principle')];
-  if (finePointer.matches && (backdrop || principleCards.length)) {
+  // and moves a soft light inside whichever research or build card is under the
+  // cursor. One animation frame and one listener serve both sets of cards.
+  const interactiveCards = document.querySelectorAll('.principle, .build-card');
+  if (finePointer.matches && (backdrop || interactiveCards.length)) {
     let pointerFrame = 0;
     let pointerX = 0;
     let pointerY = 0;
@@ -481,11 +481,17 @@
           backdrop.style.setProperty('--pointer-x', `${x.toFixed(2)}vw`);
           backdrop.style.setProperty('--pointer-y', `${y.toFixed(2)}vh`);
         }
-        const card = pointerTarget?.closest?.('.principle');
+        const card = pointerTarget?.closest?.('.principle, .build-card');
         if (!card) return;
         const box = card.getBoundingClientRect();
         card.style.setProperty('--card-x', `${(pointerX - box.left).toFixed(0)}px`);
         card.style.setProperty('--card-y', `${(pointerY - box.top).toFixed(0)}px`);
+        if (card.classList.contains('build-card')) {
+          const x = Math.max(-1, Math.min(1, (pointerX - box.left) / box.width * 2 - 1));
+          const y = Math.max(-1, Math.min(1, (pointerY - box.top) / box.height * 2 - 1));
+          card.style.setProperty('--tilt-x', `${(-y * 2).toFixed(2)}deg`);
+          card.style.setProperty('--tilt-y', `${(x * 2).toFixed(2)}deg`);
+        }
       });
     }, { passive: true });
   }

@@ -7,7 +7,7 @@ file; this one is the source.
 **Status: published.** This describes what the extension actually does as built. It is not
 legal advice.
 
-Last updated: 19 October 2026
+Last updated: 2 November 2026
 
 ## The short version
 
@@ -28,8 +28,9 @@ All of it is local. None of it is transmitted to the publisher or to anyone else
 | Panel size, position and collapsed state | `chrome.storage.local` | So the popup stays where you put it |
 | Coins Scout has seen and their observed highs | `chrome.storage.local` | To work out whether a coin is a repeat and what its high was |
 
-Uninstalling the extension, or clearing site data for `axiom.trade` / `gmgn.ai`, removes
-all of it.
+Uninstalling the extension removes its local data. Clearing site data for `axiom.trade`
+or `gmgn.ai` removes page-local pinned mints there, but does not clear settings and
+history stored in `chrome.storage.local`.
 
 ## What Scout sends over the network
 
@@ -77,10 +78,12 @@ receive wallet addresses, extension settings, seed phrases, or private keys.
 
 ## What Scout reads on the page
 
-Scout's content scripts run on `axiom.trade` and `gmgn.ai` only. To match a coin row to a
+Scout's content scripts run on `axiom.trade`, `gmgn.ai`, and `trade.padre.gg` only. To match a coin row to a
 token, it reads the coin rows on the page: the symbol, the mint address in links or data
 attributes, and the visible market figures already shown to you. It does not read form
-fields, keystrokes, clipboard contents, other tabs, or any page outside those two.
+fields, keystrokes, or other tabs. Separately, if you click the wallet-import control in
+Scout's popup, the popup may ask the browser to read copied wallet JSON from your clipboard
+to fill the import field. That JSON stays on your device unless you choose to export it.
 
 ## What Scout does not do
 
@@ -98,8 +101,8 @@ fields, keystrokes, clipboard contents, other tabs, or any page outside those tw
 | --- | --- |
 | `storage` | To keep your settings and remembered panel state on your device |
 | `activeTab` | To know which page you are on when you open the popup |
-| `scripting` | To place the popup and row highlighting on Axiom and GMGN pages |
-| Host access to `axiom.trade`, `gmgn.ai` | The two sites Scout decorates |
+| `scripting` | To place the research panel and row highlighting on supported trading pages |
+| Host access to `axiom.trade`, `gmgn.ai`, `trade.padre.gg` | The three sites Scout decorates |
 | Host access to the five market-data APIs above | To fetch the public data shown in the popup |
 
 ## Changes

@@ -24,7 +24,7 @@
   Google Analytics is disclosed below and permitted by the website CSP. The extension
   itself still contains no analytics or tracking.
 -->
-<link rel="stylesheet" href="/styles.css?v=61fcf771c5">
+<link rel="stylesheet" href="/styles.css?v=528540692a">
 <script src="/theme.js?v=aab5a147fc"></script>
 </head>
 <body>
@@ -60,15 +60,21 @@
     <p class="eyebrow">Legal</p>
     <h1>Privacy policy</h1>
     <p class="lede">What the Scout browser extension stores, what it sends, and what it never does.</p>
-    <p class="page-meta">Last updated 19 October 2026 &middot; applies to the Scout extension and this website</p>
+    <p class="page-meta">Last updated 2 November 2026 &middot; applies to the Scout extension and this website</p>
   </div>
 
   <div class="shell prose">
     <div class="prose-body">
 
+      <div class="policy-highlights" aria-label="Privacy at a glance">
+        <div><span>01 / EXTENSION</span><strong>Local by default</strong><p>Settings and research history stay on your device.</p></div>
+        <div><span>02 / MARKET DATA</span><strong>Public mint only</strong><p>Read-only lookups use the token's public address.</p></div>
+        <div><span>03 / WALLET</span><strong>No signing access</strong><p>Scout never asks for keys or places orders.</p></div>
+      </div>
+
       <div class="summary">
         <p><strong>The short version.</strong> Scout is a research tool. It reads public market
-        data about Solana tokens and shows it beside the coins you are already looking at. It
+        data about Solana tokens and shows it beside the coins you are already looking at. The
         extension has no accounts, analytics, or tracking. This website uses Google Analytics to
         measure aggregate visits and usage. Everything the extension itself remembers is stored on
         your own computer.</p>
@@ -88,8 +94,9 @@
           </tbody>
         </table>
       </div>
-      <p class="note">Uninstalling the extension, or clearing site data for <code>axiom.trade</code>
-      or <code>gmgn.ai</code>, removes all of it.</p>
+      <p class="note">Uninstalling the extension removes its local data. Clearing site data for
+      <code>axiom.trade</code> or <code>gmgn.ai</code> removes page-local pinned mints there, but
+      does not clear settings and history in <code>chrome.storage.local</code>.</p>
 
       <h2>What Scout sends over the network</h2>
       <p>Scout makes <strong>read-only <code>GET</code> requests</strong> for public market data.
@@ -138,11 +145,13 @@
       private keys.</p>
 
       <h2>What Scout reads on the page</h2>
-      <p>Scout's content scripts run on <code>axiom.trade</code> and <code>gmgn.ai</code> only.
+      <p>Scout's content scripts run on <code>axiom.trade</code>, <code>gmgn.ai</code>, and
+      <code>trade.padre.gg</code> only.
       To match a coin row to a token, it reads the coin rows on the page: the symbol, the
       mint address in links or data attributes, and the visible market figures already shown to
-      you. It does not read form fields, keystrokes, clipboard contents, other tabs, or any page
-      outside those two sites.</p>
+      you. It does not read form fields, keystrokes, or other tabs. If you click wallet import in
+      Scout's popup, the popup may ask the browser to read copied wallet JSON from your clipboard
+      to fill the import field. That JSON stays on your device unless you choose to export it.</p>
 
       <h2>What Scout never does</h2>
       <ul>
@@ -162,8 +171,8 @@
           <tbody>
             <tr><td><code>storage</code></td><td>To keep your settings and remembered panel state on your device</td></tr>
             <tr><td><code>activeTab</code></td><td>To know which page you are on when you open the popup</td></tr>
-            <tr><td><code>scripting</code></td><td>To place the popup and row highlighting on Axiom and GMGN pages</td></tr>
-            <tr><td>Access to <code>axiom.trade</code>, <code>gmgn.ai</code></td><td>The two sites Scout decorates</td></tr>
+            <tr><td><code>scripting</code></td><td>To place research panels and row highlighting on supported trading pages</td></tr>
+            <tr><td>Access to <code>axiom.trade</code>, <code>gmgn.ai</code>, <code>trade.padre.gg</code></td><td>The three sites Scout decorates</td></tr>
             <tr><td>Access to the five market-data APIs above</td><td>To fetch the public data shown in the popup</td></tr>
           </tbody>
         </table>
@@ -195,7 +204,7 @@
   </div>
   <div class="shell footer-bottom">
     <p>&copy; Scout &middot; scoutai.trade</p>
-    <p>Scout is not affiliated with Axiom, GMGN, or any of the data providers listed above. Nothing Scout shows is financial advice.</p>
+    <p>Scout is not affiliated with Axiom, GMGN, Padre, or any of the data providers listed above. Nothing Scout shows is financial advice.</p>
   </div>
 </footer>
 
