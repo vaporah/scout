@@ -1,6 +1,5 @@
 import { mintCandidates, mintFromAxiomUrl } from './axiomMint.js';
 import { attentionSignals } from './attention.js';
-import { formatTokenTags, tokenTags, type TokenCategory } from './categories.js';
 import { coinIdentity, coinIdentityCounts, loadCoinHistory, type CoinObservation } from './coinHistory.js';
 import { mintPattern } from './dex.js';
 import { type ScanResponse } from './messages.js';
@@ -14,7 +13,6 @@ import { signalClass } from './ui.js';
 import { savePulseStatus } from './pulseStatus.js';
 import { extractRowLabels, formatPulseLabels, stageFromHeading, stageLabel, type PulseLabels } from './pulseLabels.js';
 import { createPulseTooltipHost } from './pulseTooltipHost.js';
-import { setPulseRowFlow } from './pulseRowFlow.js';
 import { readRowReadings, type RowReadings } from './rowReadings.js';
 import { loadIntegrationPrefs, watchIntegrationPrefs } from './integrationPrefs.js';
 
@@ -125,23 +123,29 @@ function directMints(candidate: Element, base: string): Set<string> {
   return mints;
 }
 
-function localMints(element: Element, base: string): Set<string> {
+type MintCache = WeakMap<Element, Set<string>>;
+type PulseRegion = { element: Element; stage: Stage };
+
+function localMints(element: Element, base: string, cache?: MintCache): Set<string> {
+  const cached = cache?.get(element);
+  if (cached) return cached;
   const mints = mintCandidates(element, base);
   for (const candidate of Array.from(element.querySelectorAll(identitySelector))) {
     for (const mint of directMints(candidate, base)) mints.add(mint);
     if (mints.size > 1) break;
   }
+  cache?.set(element, mints);
   return mints;
 }
 
 /** Only visible, complete, row-local mint identifiers can identify a Pulse card. */
-export function mintFromVisiblePulseRow(row: Element, base = 'https://axiom.trade/'): string | null {
+export function mintFromVisiblePulseRow(row: Element, base = 'https://axiom.trade/', cache?: MintCache): string | null {
   if (isHidden(row) || !inViewport(row)) return null;
-  const mints = localMints(row, base);
+  const mints = localMints(row, base, cache);
   return mints.size === 1 ? [...mints][0] ?? null : null;
 }
 
-function pulseRegions(doc: Document): { element: Element; stage: Stage }[] {
+function pulseRegions(doc: Document, cache?: MintCache): PulseRegion[] {
   const root = doc.body;
   if (!root) return [];
   const walker = doc.createTreeWalker(root, 4); // NodeFilter.SHOW_TEXT
@@ -156,7 +160,7 @@ function pulseRegions(doc: Document): { element: Element; stage: Stage }[] {
     let ancestor = heading.parentElement;
     while (ancestor && ancestor !== root) {
       if (ancestor.querySelector(semanticCardSelector) || ancestor.querySelector('img') && quickBuyCount(ancestor) > 0
-        || ancestor.querySelector(identitySelector) && localMints(ancestor, doc.baseURI).size > 0) {
+        || ancestor.querySelector(identitySelector) && localMints(ancestor, doc.baseURI, cache).size > 0) {
         if (!regions.some(region => region.element === ancestor)) regions.push({ element: ancestor, stage });
         break;
       }
@@ -166,13 +170,13 @@ function pulseRegions(doc: Document): { element: Element; stage: Stage }[] {
   return regions;
 }
 
-function rowForIdentity(identity: Element, region: Element, base: string): HTMLElement | null {
-  const mintSet = localMints(identity, base);
+function rowForIdentity(identity: Element, region: Element, base: string, cache: MintCache): HTMLElement | null {
+  const mintSet = localMints(identity, base, cache);
   if (mintSet.size !== 1) return null;
   const mint = [...mintSet][0];
   if (!mint) return null;
   const marked = identity.closest(rowSelector);
-  if (marked && region.contains(marked) && localMints(marked, base).size !== 1) return null;
+  if (marked && region.contains(marked) && localMints(marked, base, cache).size !== 1) return null;
 
   // Climb to the LARGEST ancestor that still contains exactly this one mint, so
   // the highlight fills the whole card rather than an inner fragment.
@@ -181,18 +185,23 @@ function rowForIdentity(identity: Element, region: Element, base: string): HTMLE
   let bestArea = -1;
   let depth = 0;
   while (current && current !== region && depth++ < 16) {
-    const mints = localMints(current, base);
+    const mints = localMints(current, base, cache);
     if (mints.size !== 1 || !mints.has(mint) || containsHeading(current)) break;
     const rect = current.getBoundingClientRect();
     const layoutUnknown = rect.width === 0 && rect.height === 0;
-    const sized = layoutUnknown || rect.height <= 300 && rect.height >= 24 && rect.width >= 120;
+    // Never decorate a page/column shell. A shell can contain one visible mint
+    // during loading, which previously made the full-page ::after tint appear
+    // as a white screen on recycled Pulse layouts.
+    const viewportWidth = current.ownerDocument.defaultView?.innerWidth ?? 0;
+    const shellSized = !layoutUnknown && viewportWidth > 0 && rect.width > viewportWidth * .86;
+    const sized = !shellSized && (layoutUnknown || rect.height <= 300 && rect.height >= 24 && rect.width >= 120);
     if (sized) {
       const area = layoutUnknown ? 1 : rect.width * rect.height;
       if (area >= bestArea) { bestArea = area; best = current; }
     }
     const parent: Element | null = current.parentElement;
     if (!parent || parent === region || containsHeading(parent)) break;
-    if (localMints(parent, base).size > 1) {
+    if (localMints(parent, base, cache).size > 1) {
       // A wrapper holding several coins is not one row. Only a whole-card
       // identity with real dimensions may be accepted.
       if (best === identity && !marked) {
@@ -205,14 +214,14 @@ function rowForIdentity(identity: Element, region: Element, base: string): HTMLE
   }
   if (!best) return null;
   // An explicit row marker wins when it still contains precisely this mint.
-  if (marked && region.contains(marked) && localMints(marked, base).size === 1 && !containsHeading(marked)) best = marked;
+  if (marked && region.contains(marked) && localMints(marked, base, cache).size === 1 && !containsHeading(marked)) best = marked;
   return best instanceof (identity.ownerDocument.defaultView?.HTMLElement ?? HTMLElement) ? best as HTMLElement : null;
 }
 
 /** Returns cards in column-interleaved order so one capped batch covers all three stages. */
-export function collectPulseRows(doc: Document): PulseRow[] {
+export function collectPulseRows(doc: Document, cache: MintCache = new WeakMap(), knownRegions?: PulseRegion[]): PulseRow[] {
   if (!isPulsePage(doc)) return [];
-  const regions = pulseRegions(doc);
+  const regions = knownRegions ?? pulseRegions(doc, cache);
   const columns: PulseRow[][] = [];
   const seen = new Set<HTMLElement>();
   for (const region of regions) {
@@ -220,9 +229,9 @@ export function collectPulseRows(doc: Document): PulseRow[] {
     for (const identity of Array.from(region.element.querySelectorAll(identitySelector))) {
       if (directMints(identity, doc.baseURI).size === 0) continue;
       if (isHidden(identity) || !inViewport(identity)) continue;
-      const row = rowForIdentity(identity, region.element, doc.baseURI);
+      const row = rowForIdentity(identity, region.element, doc.baseURI, cache);
       if (!row || seen.has(row)) continue;
-      const mint = mintFromVisiblePulseRow(row, doc.baseURI);
+      const mint = mintFromVisiblePulseRow(row, doc.baseURI, cache);
       if (!mint) continue;
       seen.add(row);
       rows.push({ element: row, mint, stage: region.stage });
@@ -255,8 +264,10 @@ function visualRowFromImage(image: Element, region: Element): HTMLElement | null
 /** Includes unidentifiable coins so they can receive an explicit UNKNOWN colour. */
 export function collectAllPulseRows(doc: Document): VisiblePulseRow[] {
   if (!isAxiomPage(doc)) return [];
-  const rows: VisiblePulseRow[] = isPulsePage(doc)
-    ? collectPulseRows(doc).map(row => ({ ...row, labels: extractRowLabels(row.element), readings: readRowReadings(row.element) }))
+  const mintCache: MintCache = new WeakMap();
+  const regions = isPulsePage(doc) ? pulseRegions(doc, mintCache) : [];
+  const rows: VisiblePulseRow[] = regions.length
+    ? collectPulseRows(doc, mintCache, regions).map(row => ({ ...row, labels: extractRowLabels(row.element), readings: readRowReadings(row.element) }))
     : [];
   const seen = new Set(rows.map(row => row.element));
   // Match GMGN's compact top-token highlighting. Only real Axiom token links in
@@ -269,12 +280,12 @@ export function collectAllPulseRows(doc: Document): VisiblePulseRow[] {
     seen.add(row);
     rows.push({ element: row, mint, readings: readRowReadings(row) });
   }
-  for (const region of isPulsePage(doc) ? pulseRegions(doc) : []) {
+  for (const region of regions) {
     for (const candidate of Array.from(region.element.querySelectorAll(rowSelector))) {
       if (candidate.querySelector(rowSelector) || containsHeading(candidate) || isHidden(candidate) || !inViewport(candidate)) continue;
       const row = candidate instanceof (doc.defaultView?.HTMLElement ?? HTMLElement) ? candidate as HTMLElement : null;
       if (!row || seen.has(row)) continue;
-      const mint = mintFromVisiblePulseRow(row, doc.baseURI);
+      const mint = mintFromVisiblePulseRow(row, doc.baseURI, mintCache);
       const explicitCard = row.matches('article, [data-testid*="token-card"], [data-testid*="pulse-row"], [role="row"]');
       if (!mint && !explicitCard && !looksLikeCoinCard(row)) continue;
       seen.add(row);
@@ -285,7 +296,7 @@ export function collectAllPulseRows(doc: Document): VisiblePulseRow[] {
       const row = visualRowFromImage(image, region.element);
       if (!row || seen.has(row) || Array.from(seen).some(other => other.contains(row) || row.contains(other))) continue;
       seen.add(row);
-      rows.push({ element: row, mint: mintFromVisiblePulseRow(row, doc.baseURI), stage: region.stage, labels: extractRowLabels(row), readings: readRowReadings(row) });
+      rows.push({ element: row, mint: mintFromVisiblePulseRow(row, doc.baseURI, mintCache), stage: region.stage, labels: extractRowLabels(row), readings: readRowReadings(row) });
     }
   }
   return rows;
@@ -347,27 +358,6 @@ function setBadge(row: HTMLElement, kind: 'green' | 'amber' | 'red' | 'gray' | '
   if (badge.textContent !== text) badge.textContent = text;
   if (badge.getAttribute('title') !== explanation) badge.setAttribute('title', explanation);
   if (!badge.parentElement) row.append(badge);
-}
-
-/** Colored platform / category tags (pump.fun, Raydium, Charity, ...). */
-function setTags(row: HTMLElement, tags: TokenCategory[]): void {
-  const existing = row.querySelector(':scope > .scout-pulse-tags');
-  if (!tags.length) { existing?.remove(); return; }
-  const signature = tags.slice(0, 3).map(tag => `${tag.id}:${tag.label}:${tag.color}`).join('|');
-  if (existing?.getAttribute('data-scout-signature') === signature) return;
-  const container = existing instanceof (row.ownerDocument.defaultView?.HTMLElement ?? HTMLElement)
-    ? existing as HTMLElement
-    : row.ownerDocument.createElement('div');
-  container.className = 'scout-pulse-tags';
-  container.setAttribute('data-scout-signature', signature);
-  container.replaceChildren(...tags.slice(0, 3).map(tag => {
-    const chip = row.ownerDocument.createElement('span');
-    chip.className = 'scout-pulse-tag';
-    chip.textContent = tag.label;
-    chip.style.setProperty('--scout-tag', tag.color);
-    return chip;
-  }));
-  if (!container.parentElement) row.append(container);
 }
 
 function pageInfoSuffix(row: Pick<VisiblePulseRow, 'stage' | 'labels'>): string {
@@ -483,33 +473,25 @@ export function createAxiomPulseOverlay(options: OverlayOptions = {}) {
     const historyMints = new Set(historyRecords.map(record => record.mint));
     for (const row of rows) {
       const assessment = row.mint ? byMint.get(row.mint) : undefined;
-      const compactTop = row.element.classList.contains('scout-pulse-watchlist');
-      setPulseRowFlow(row.element, compactTop ? null : assessment?.token ?? null);
+      row.element.querySelector(':scope > .scout-pulse-flow')?.remove();
+      row.element.querySelector(':scope > .scout-pulse-tags')?.remove();
       const narratives = assessment ? narrativeTags(assessment.token) : [];
       const attention = assessment ? attentionSignals(assessment.token, assessment.analytics) : [];
-      const tags = assessment ? tokenTags(assessment.token) : [];
       const copies = assessment ? Math.max(0, (historyCounts.get(coinIdentity(assessment.token)) ?? 0)
         - (historyMints.has(assessment.token.mint) ? 1 : 0)) : 0;
       const insiderSelling = assessment?.token.insiderFlow?.status === 'selling' || assessment?.token.insiderFlow?.status === 'exit';
-      // A neutral assessment intentionally leaves the host row alone. Platform/category
-      // chips on every unresolved coin recreated the same visual noise as colouring
-      // every row, so they are reserved for an actionable Scout signal.
-      const actionable = assessment ? badgeStyle(assessment, settings) !== 'gray' : false;
-      setTags(row.element, compactTop ? [] : actionable ? tags : []);
-      // The violet buzz ring is for narrative/volume; category tags are shown as chips.
       const buzz = [
         ...narratives.map(n => `Narrative ${n.tag}`),
         ...attention.map(s => s.id === 'volume' ? 'High volume' : 'Broad buying'),
         ...(copies > 0 ? [`Copycat · ${copies} seen`] : []),
         ...(insiderSelling ? ['Insiders selling'] : [])
       ];
-      const categoryText = actionable ? formatTokenTags(tags) : '';
       row.element.classList.toggle('scout-pulse-buzz', buzz.length > 0);
       row.element.classList.toggle('scout-pulse-copycat', copies > 0);
       row.element.classList.toggle('scout-pulse-insider', insiderSelling);
       if (buzz.length) row.element.dataset.scoutBuzz = buzz.join(',');
       else delete row.element.dataset.scoutBuzz;
-      if (assessment) addBadge(row.element, assessment, settings, row, categoryText ? [...buzz, categoryText] : buzz);
+      if (assessment) addBadge(row.element, assessment, settings, row, buzz);
       else addFallbackBadge(row.element, row.mint, row.mint ? attemptedMints.has(row.mint) : true, row);
     }
     tooltip.update();

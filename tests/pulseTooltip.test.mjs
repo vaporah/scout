@@ -47,6 +47,24 @@ test('tooltip gives an exact mint and actionable evidence without rendering untr
   } finally { dom.window.close(); }
 });
 
+test('assessed tooltip opens with a concise snapshot and preserves expanded research on refresh', async () => {
+  const now = Date.now();
+  const assessment = await example(now);
+  const dom = new JSDOM('<div id="tip"></div>');
+  try {
+    const tip = dom.window.document.getElementById('tip');
+    renderPulseTooltip(tip, assessment, mint, 'assessed', now);
+    assert.equal(tip.querySelectorAll('.scout-pulse-snapshot-cell').length, 4);
+    const research = tip.querySelector('.scout-pulse-research');
+    assert.equal(research.open, false);
+    assert.equal(research.querySelector('summary')?.textContent, 'Full research');
+    research.open = true;
+    assessment.token.priceUsd = (assessment.token.priceUsd ?? 0) + 1;
+    renderPulseTooltip(tip, assessment, mint, 'assessed', now + 1);
+    assert.equal(tip.querySelector('.scout-pulse-research')?.open, true);
+  } finally { dom.window.close(); }
+});
+
 test('tooltip shows the exact SOL-side reserve when the pool source publishes it', async () => {
   const now = Date.now();
   const assessment = await example(now);
@@ -166,6 +184,6 @@ test('short mode hides the detail sections and an identical refresh never rebuil
     assert.match(tip.textContent, /Assessment/);
     assert.match(tip.textContent, /Identity/);
     assert.match(tip.textContent, /Details hidden/);
-    assert.match([...tip.querySelectorAll('.scout-risk-verdict')].map(node => node.textContent).join(' '), /Dev.*Volume.*Vamp/);
+    assert.match([...tip.querySelectorAll('.scout-risk-verdict')].map(node => node.textContent).join(' '), /Dev.*Volume.*Same-name/);
   } finally { dom.window.close(); }
 });

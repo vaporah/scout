@@ -155,6 +155,12 @@ export interface Analytics {
   buyers5m: number | null; sellers5m: number | null; buyerGrowth: number | null;
   volumeAcceleration: number | null; repeatBuyers: number; netPressure: number | null;
   suspiciousConcentration: boolean;
+  chartIntegrity: ChartIntegrity;
+}
+export interface ChartIntegrity {
+  status: 'clean' | 'degraded' | 'suspicious' | 'unknown';
+  score: number;
+  flags: string[];
 }
 export interface Assessment {
   token: Token; analytics: Analytics; score: number; status: Status; confidence: Confidence;

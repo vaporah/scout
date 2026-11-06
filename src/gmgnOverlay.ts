@@ -1,9 +1,7 @@
 import { mintPattern } from './dex.js';
-import { formatTokenTags, tokenTags, type TokenCategory } from './categories.js';
 import { coinIdentity, coinIdentityCounts, loadCoinHistory, type CoinObservation } from './coinHistory.js';
 import { isGmgnTokenPage, mintFromGmgnUrl } from './gmgnMint.js';
 import { createPulseTooltipHost } from './pulseTooltipHost.js';
-import { setPulseRowFlow } from './pulseRowFlow.js';
 import { requestAssessments } from './scanClient.js';
 import { applyPulseSignals, type PulseRow } from './pulseRows.js';
 import { defaults, validSettings } from './settings.js';
@@ -65,7 +63,9 @@ function inViewport(element: Element): boolean {
   return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < view.innerHeight;
 }
 
-function linkedMints(element: Element): Set<string> {
+function linkedMints(element: Element, cache: WeakMap<Element, Set<string>>): Set<string> {
+  const cached = cache.get(element);
+  if (cached) return cached;
   const mints = new Set<string>();
   const own = mintFromGmgnUrl(element.getAttribute('href') ?? '');
   if (own) mints.add(own);
@@ -73,6 +73,7 @@ function linkedMints(element: Element): Set<string> {
     const mint = mintFromGmgnUrl(link.getAttribute('href') ?? '');
     if (mint) mints.add(mint);
   }
+  cache.set(element, mints);
   return mints;
 }
 
@@ -82,12 +83,12 @@ function looksLikeRow(element: Element): boolean {
   return Array.from(element.querySelectorAll('button')).some(button => /\b(?:buy|sell|trade)\b/i.test(button.textContent ?? ''));
 }
 
-function rowContainer(identity: Element): HTMLElement | null {
+function rowContainer(identity: Element, mintCache: WeakMap<Element, Set<string>>): HTMLElement | null {
   const view = identity.ownerDocument.defaultView;
   let current: Element | null = identity;
   let candidate: HTMLElement | null = null;
   while (current && current !== identity.ownerDocument.body) {
-    if (linkedMints(current).size > 1) break; // a wrapper containing several tokens is not one row
+    if (linkedMints(current, mintCache).size > 1) break; // a wrapper containing several tokens is not one row
     const rect = current.getBoundingClientRect();
     const sized = rect.width === 0 && rect.height === 0 || rect.height >= 28 && rect.height <= 320 && rect.width >= 140;
     if (sized) candidate = current as HTMLElement;
@@ -106,13 +107,16 @@ export function collectGmgnRows(doc: Document): PulseRow[] {
   const base = 'https://gmgn.ai/';
   const rows: PulseRow[] = [];
   const seen = new Set<string>();
+  // A parent can be visited for several links in the same pass. Never carry this
+  // cache across passes because GMGN reuses cards and changes their links.
+  const mintCache = new WeakMap<Element, Set<string>>();
   // GMGN currently renders Trenches cards as clickable div[href] elements.
   // Older layouts and the compact table use anchors, so accept any href-bearing
   // element while keeping the same exact-host, exact-mint URL validation.
   for (const identity of Array.from(doc.querySelectorAll('[href]'))) {
     const mint = mintFromGmgnUrl(identity.getAttribute('href') ?? '', base);
     if (!mint || seen.has(mint) || isHidden(identity) || !inViewport(identity)) continue;
-    const row = rowContainer(identity);
+    const row = rowContainer(identity, mintCache);
     if (!row) continue;
     seen.add(mint);
     rows.push({ element: row, mint });
@@ -125,7 +129,7 @@ function setBadge(row: HTMLElement, kind: 'green' | 'amber' | 'red' | 'gray' | '
   const badge = row.querySelector(':scope > .scout-pulse-badge') ?? row.ownerDocument.createElement('span');
   badge.className = `scout-pulse-badge scout-pulse-badge--${kind}`;
   if (badge.textContent !== text) badge.textContent = text;
-  badge.setAttribute('title', title);
+  if (badge.getAttribute('title') !== title) badge.setAttribute('title', title);
   if (!badge.parentElement) row.append(badge);
 }
 
@@ -143,33 +147,13 @@ function badgeFor(a: Assessment, settings: Settings): { kind: 'green' | 'amber' 
 }
 
 function clearRow(row: HTMLElement): void {
-  row.classList.remove(...colouredClasses, 'scout-pulse-row', 'scout-pulse-hot');
+  row.classList.remove(...colouredClasses, 'scout-pulse-row', 'scout-pulse-hot', 'scout-pulse-copycat', 'scout-pulse-insider');
   row.removeAttribute('data-scout-mint');
   row.removeAttribute('data-scout-status');
   row.removeAttribute('data-scout-hot');
   row.querySelectorAll(':scope > .scout-pulse-badge').forEach(badge => badge.remove());
   row.querySelectorAll(':scope > .scout-pulse-tags').forEach(tags => tags.remove());
   row.querySelectorAll(':scope > .scout-pulse-flow').forEach(flow => flow.remove());
-}
-
-function setTags(row: HTMLElement, tags: TokenCategory[]): void {
-  const existing = row.querySelector(':scope > .scout-pulse-tags');
-  if (!tags.length) { existing?.remove(); return; }
-  const signature = tags.slice(0, 3).map(tag => `${tag.id}:${tag.label}:${tag.color}`).join('|');
-  if (existing?.getAttribute('data-scout-signature') === signature) return;
-  const container = existing instanceof (row.ownerDocument.defaultView?.HTMLElement ?? HTMLElement)
-    ? existing as HTMLElement
-    : row.ownerDocument.createElement('div');
-  container.className = 'scout-pulse-tags';
-  container.setAttribute('data-scout-signature', signature);
-  container.replaceChildren(...tags.slice(0, 3).map(tag => {
-    const chip = row.ownerDocument.createElement('span');
-    chip.className = 'scout-pulse-tag';
-    chip.textContent = tag.label;
-    chip.style.setProperty('--scout-tag', tag.color);
-    return chip;
-  }));
-  if (!container.parentElement) row.append(container);
 }
 
 function validAssessment(input: unknown, now: number): input is Assessment {
@@ -202,6 +186,8 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
   let rows: PulseRow[] = [];
   let previousRows = new Set<HTMLElement>();
   let assessments: Assessment[] = [];
+  // Keep fresh exact-mint results across GMGN's list -> chart -> list navigation.
+  const recentAssessments = new Map<string, Assessment>();
   let settings = defaults;
   const attempted = new Set<string>();
   let historyRecords: CoinObservation[] = [];
@@ -239,20 +225,16 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     const historyMints = new Set(historyRecords.map(record => record.mint));
     for (const row of rows) {
       const assessment = byMint.get(row.mint);
-      setPulseRowFlow(row.element, assessment?.token ?? null);
-      const tags = assessment ? tokenTags(assessment.token) : [];
+      row.element.querySelector(':scope > .scout-pulse-flow')?.remove();
+      row.element.querySelector(':scope > .scout-pulse-tags')?.remove();
       const copies = assessment ? Math.max(0, (historyCounts.get(coinIdentity(assessment.token)) ?? 0)
         - (historyMints.has(assessment.token.mint) ? 1 : 0)) : 0;
       const insiderSelling = assessment?.token.insiderFlow?.status === 'selling' || assessment?.token.insiderFlow?.status === 'exit';
-      const actionable = assessment ? badgeFor(assessment, settings).kind !== 'gray' : false;
-      setTags(row.element, actionable ? tags : []);
-      const categoryText = actionable ? formatTokenTags(tags) : '';
       if (assessment) {
         const badge = badgeFor(assessment, settings);
         row.element.classList.toggle('scout-pulse-copycat', copies > 0);
         row.element.classList.toggle('scout-pulse-insider', insiderSelling);
-        const context = [categoryText, copies > 0 ? `Copycat · ${copies} seen` : '', insiderSelling ? 'Insiders selling' : ''].filter(Boolean).join(' · ');
-        setBadge(row.element, badge.kind, badge.text, context ? `${badge.title} · ${context}` : badge.title);
+        setBadge(row.element, badge.kind, badge.text, badge.title);
       } else {
         row.element.classList.remove(...colouredClasses, 'scout-pulse-hot', 'scout-pulse-copycat', 'scout-pulse-insider');
         row.element.classList.add(attempted.has(row.mint) ? 'scout-pulse-gray' : 'scout-pulse-neutral');
@@ -277,14 +259,17 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
       for (const row of previousRows) clearRow(row);
       previousRows.clear();
       rows = [];
-      assessments = [];
       tooltip.update();
       return;
     }
     rows = collectRows(doc);
     const visible = new Set(rows.map(row => row.mint));
+    const now = Date.now();
+    for (const [mint, assessment] of recentAssessments) {
+      if (!validAssessment(assessment, now)) recentAssessments.delete(mint);
+    }
     for (const mint of attempted) if (!visible.has(mint)) attempted.delete(mint);
-    assessments = assessments.filter(a => visible.has(a.token.mint));
+    assessments = [...recentAssessments.values()].filter(a => visible.has(a.token.mint));
     render();
     void maybeRequest();
   }
@@ -309,9 +294,12 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
       const returned = Array.isArray(response?.assessments)
         ? response.assessments.filter(a => validAssessment(a, Date.now()) && batch.includes(a.token.mint)) : [];
       assessments = assessments.filter(a => !batch.includes(a.token.mint)).concat(returned);
+      for (const mint of batch) recentAssessments.delete(mint);
+      for (const assessment of returned) recentAssessments.set(assessment.token.mint, assessment);
       settings = validSettings(response?.settings);
     } catch {
-      assessments = assessments.filter(a => !batch.includes(a.token.mint));
+      // A temporary network failure is not evidence that a fresh verdict vanished.
+      assessments = assessments.filter(a => validAssessment(a, Date.now()));
     } finally {
       for (const mint of batch) attempted.add(mint);
       inFlight = false;
@@ -340,6 +328,11 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     reconcile();
   }
 
+  function onRouteChange(): void {
+    lastRequestAt = 0;
+    schedule();
+  }
+
   function start(): void {
     if (active || !doc.body) return;
     active = true;
@@ -365,14 +358,14 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
       if (mutations.every(scoutOwnedMutation)) return;
       const path = view?.location.pathname ?? '';
       const routeChanged = path !== lastPath;
-      if (routeChanged) lastPath = path;
+      if (routeChanged) { lastPath = path; lastRequestAt = 0; }
       // The token-page monitor owns chart pages. Live trades and holder tables mutate
       // constantly there; none of those changes can create a Trenches row.
       if (!routeChanged && isTokenPage(view?.location.href ?? doc.URL)) return;
       if (routeChanged || tokenRowsChanged(mutations, doc)) schedule();
     });
     observer.observe(doc.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['href', 'data-mint', 'data-token-mint', 'data-token-address', 'hidden', 'aria-hidden'] });
-    view?.addEventListener('popstate', schedule);
+    view?.addEventListener('popstate', onRouteChange);
     doc.addEventListener('visibilitychange', onResume);
     heartbeat = setInterval(refreshEvidence, fixedIntervalMs ?? scanIntervalMs());
     reconcile();
@@ -385,7 +378,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     observer = null;
     if (timer !== null) clearTimeout(timer);
     if (heartbeat !== null) clearInterval(heartbeat);
-    doc.defaultView?.removeEventListener('popstate', schedule);
+    doc.defaultView?.removeEventListener('popstate', onRouteChange);
     doc.removeEventListener('visibilitychange', onResume);
     timer = heartbeat = null;
     unwatchPrefs?.();
@@ -394,6 +387,7 @@ export function createGmgnOverlay(options: GmgnOverlayOptions = {}) {
     previousRows.clear();
     rows = [];
     assessments = [];
+    recentAssessments.clear();
     tooltip.detach();
   }
 

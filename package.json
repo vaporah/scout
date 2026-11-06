@@ -1,6 +1,6 @@
 {
   "name": "scout",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "private": true,
   "license": "MIT",
   "repository": {
@@ -18,7 +18,8 @@
     "release:minor": "node scripts/release.mjs minor && npm run build:compile",
     "release:major": "node scripts/release.mjs major && npm run build:compile",
     "pack": "npm run build && node scripts/pack.mjs",
-    "deploy:site": "node scripts/deploy-site.mjs"
+    "deploy:site": "node scripts/deploy-site.mjs",
+    "site:preview": "node scripts/serve-site.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",

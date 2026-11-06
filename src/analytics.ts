@@ -1,4 +1,15 @@
-import type { Analytics, Token } from './types.js';
+import type { Analytics, ChartIntegrity, Token } from './types.js';
+export function chartIntegrity(token: Token, volume5m: number, tradeCount: number, walletConcentration: number): ChartIntegrity {
+  const flags: string[] = [];
+  if (volume5m <= 0 && tradeCount === 0) return { status: 'unknown', score: 0, flags: ['No chart activity to validate'] };
+  const liquidity = token.liquidityUsd;
+  if (liquidity !== null && volume5m > liquidity * 20 && tradeCount < 8) flags.push('Reported volume is extreme for the number of observed trades');
+  if (liquidity !== null && token.priceChange5mPct !== null && token.priceChange5mPct >= 30 && volume5m < Math.max(1000, liquidity * .05)) flags.push('Price spike is not supported by meaningful pool turnover');
+  if (walletConcentration >= .65 && tradeCount >= 6) flags.push('One wallet supplies most observed chart volume');
+  if (token.liquidityChangePct !== null && token.liquidityChangePct <= -25 && token.priceChange5mPct !== null && token.priceChange5mPct >= 10) flags.push('Price is rising while liquidity is leaving the pool');
+  const status = flags.length >= 2 ? 'suspicious' : flags.length === 1 ? 'degraded' : 'clean';
+  return { status, score: Math.max(0, 1 - flags.length * .35), flags };
+}
 export function analyze(token: Token, now: number): Analytics {
   if (token.marketSnapshot) {
     const s = token.marketSnapshot;
@@ -7,7 +18,8 @@ export function analyze(token: Token, now: number): Analytics {
       buys5m: s.buys5m, sells5m: s.sells5m, buyVolume5m: null, sellVolume5m: null,
       buyers5m: s.buyers5m, sellers5m: s.sellers5m,
       buyerGrowth: null, volumeAcceleration: null, repeatBuyers: 0, netPressure: null,
-      suspiciousConcentration: false
+      suspiciousConcentration: false,
+      chartIntegrity: chartIntegrity(token, s.volume5m, 0, 0)
     };
   }
   const recent = (ms: number) => token.trades.filter(t => t.at <= now && t.at >= now - ms);
@@ -23,6 +35,7 @@ export function analyze(token: Token, now: number): Analytics {
   const currentBuyerCount = new Set(m1.filter(t => t.side === 'buy').map(t => t.wallet)).size;
   const previousBuyerCount = new Set(previous.filter(t => t.side === 'buy').map(t => t.wallet)).size;
   const previousVolume = sum(previous);
+  const chart = chartIntegrity(token, total, m5.length, total ? maxWallet / total : 0);
   return {
     volume30s: sum(recent(30_000)), volume1m: sum(m1), volume5m: total, volume15m: sum(recent(900_000)),
     buys5m: buyers.length, sells5m: sellers.length, buyVolume5m: buyVol, sellVolume5m: sellVol,
@@ -31,7 +44,7 @@ export function analyze(token: Token, now: number): Analytics {
     volumeAcceleration: previousVolume ? sum(m1) / previousVolume : null,
     repeatBuyers: [...buyerCounts.values()].filter(n => n > 1).length,
     netPressure: total ? (buyVol - sellVol) / total : null,
-    suspiciousConcentration: total > 0 && (maxWallet / total > 0.45 || (m5.length >= 8 && walletVolume.size <= 2))
+    suspiciousConcentration: total > 0 && (maxWallet / total > 0.45 || (m5.length >= 8 && walletVolume.size <= 2)), chartIntegrity: chart
   };
 }
 export function holderConcentration(token: Token, top = 10): number | null {

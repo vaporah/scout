@@ -217,7 +217,7 @@ export function renderPulseTooltip(
       verdictChip(doc, 'Volume', volume.level, volume.tone),
       verdictChip(doc, 'Insiders', insiderValue, insiderTone),
       verdictChip(doc, 'Trap', trap.verdict, trapTone),
-      verdictChip(doc, 'Vamp', copies > 0 ? `\u00d7${copies} copies` : 'unique', copies > 0 ? 'orange' : 'green'),
+      verdictChip(doc, 'Same-name', copies > 0 ? `${copies} seen` : 'none seen', copies > 0 ? 'orange' : 'neutral'),
       verdictChip(doc, 'SOL pool', solPool.short, 'pool'),
       verdictChip(doc, '5m flow', solFlow.short, 'pool')
     );
@@ -256,6 +256,37 @@ export function renderPulseTooltip(
     renderIfChanged(container, `short|${state}|${mint ?? ''}|${root.textContent ?? ''}`, () => root);
     return;
   }
+
+  // The first screen is a decision snapshot. The complete audit stays one click away.
+  if (current) {
+    const snapshot = doc.createElement('div');
+    snapshot.className = 'scout-pulse-snapshot';
+    const facts: [string, string][] = [
+      ['Liquidity', usd(current.token.liquidityUsd)],
+      ['5m volume', usd(current.analytics.volume5m)],
+      ['Top 10', current.concentrationPct === null ? 'Unknown' : `${current.concentrationPct.toFixed(1)}%`],
+      ['Coverage', `${current.dataCompletenessPct}%`]
+    ];
+    for (const [label, value] of facts) {
+      const cell = doc.createElement('div');
+      cell.className = 'scout-pulse-snapshot-cell';
+      const name = doc.createElement('span');
+      name.textContent = label;
+      const number = doc.createElement('strong');
+      number.textContent = value;
+      cell.append(name, number);
+      snapshot.append(cell);
+    }
+    root.append(snapshot);
+    const lead = current.critical[0] ?? current.warnings[0] ?? current.positives[0] ?? current.missing[0];
+    if (lead) {
+      const reason = doc.createElement('p');
+      reason.className = 'scout-pulse-snapshot-reason';
+      reason.textContent = lead;
+      root.append(reason);
+    }
+  }
+  const detailStart = root.childElementCount;
 
   if (current) {
     const t = current.token;
@@ -366,6 +397,21 @@ export function renderPulseTooltip(
     heading(root, 'Identity');
     detail(root, 'Mint', mint);
     if (current) detail(root, 'Source', current.token.provider || 'Unknown');
+  }
+
+  if (current && root.childElementCount > detailStart) {
+    const disclosure = doc.createElement('details');
+    disclosure.className = 'scout-pulse-research';
+    disclosure.open = container.querySelector<HTMLDetailsElement>('.scout-pulse-research')?.open ?? false;
+    const summary = doc.createElement('summary');
+    summary.textContent = 'Full research';
+    disclosure.append(summary);
+    while (root.children.length > detailStart) {
+      const section = root.children[detailStart];
+      if (!section) break;
+      disclosure.append(section);
+    }
+    root.append(disclosure);
   }
 
   bindCopyButtons(root);

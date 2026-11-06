@@ -108,7 +108,7 @@ test('hovering a Pulse card opens the shared popup and leaving it closes the pop
     const document_ = dom.window.document;
     const row = document_.querySelector('#row');
     await waitFor(() => row.classList.contains('scout-pulse-green'), 'the row to be assessed before hovering');
-    assert.equal(row.querySelector('.scout-pulse-flow')?.textContent, '5m +5.25 SOL', 'Axiom Pulse shows flow directly on the card');
+    assert.equal(row.querySelector('.scout-pulse-flow'), null, 'Axiom Pulse keeps flow in the hover research panel');
     const tip = document_.querySelector('.scout-pulse-tooltip');
     assert.ok(tip, 'the hover popup the GMGN overlay shares is created here too');
     assert.equal(tip.classList.contains('is-visible'), false);

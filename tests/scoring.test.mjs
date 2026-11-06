@@ -170,3 +170,21 @@ test('a deep pool with ordinary volume is not credited with turnover it never ha
   assert.equal(calm.positives.some(reason => reason.includes('pool liquidity')), false);
   assert.ok(calm.components.momentum < hot.components.momentum, 'turnover is what separates the two, and the calm pool does not earn it');
 });
+
+test('chart integrity flags a price spike without supporting turnover', () => {
+  const now = Date.now();
+  const token = freshPool(now, { priceChange5mPct: 65, marketSnapshot: { volume5m: 500, buys5m: 8, sells5m: 1, buyers5m: 6, sellers5m: 1 } });
+  const result = assess(token, defaults, now);
+  assert.equal(result.analytics.chartIntegrity.status, 'degraded');
+  assert.ok(result.warnings.some(reason => /not supported by meaningful pool turnover/.test(reason)));
+});
+
+test('chart integrity disqualifies a multi-signal deceptive chart pattern', () => {
+  const now = Date.now();
+  const trades = Array.from({ length: 10 }, (_, i) => ({ at: now - i * 20_000, side: i < 8 ? 'buy' : 'sell', usd: 100, wallet: 'dominant-wallet', priceUsd: .001 }));
+  const token = freshPool(now, { trades, priceChange5mPct: 20, liquidityChangePct: -30, marketSnapshot: null });
+  const result = assess(token, defaults, now);
+  assert.equal(result.analytics.chartIntegrity.status, 'suspicious');
+  assert.equal(result.status, 'DISQUALIFIED');
+  assert.ok(result.critical.some(reason => reason.startsWith('CHART INTEGRITY:')));
+});

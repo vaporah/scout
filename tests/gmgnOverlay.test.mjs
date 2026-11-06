@@ -57,6 +57,15 @@ test('GMGN row discovery supports the current clickable Trenches card', () => {
   } finally { dom.window.close(); }
 });
 
+test('GMGN mint lookup never reuses a previous scan pass for a recycled card', () => {
+  const dom = page(`<main><div id="card" href="/sol/token/${mint}"><img src="x"><button>Buy</button></div></main>`);
+  try {
+    assert.deepEqual(collectGmgnRows(dom.window.document).map(row => row.mint), [mint]);
+    dom.window.document.getElementById('card').setAttribute('href', `/sol/token/${other}`);
+    assert.deepEqual(collectGmgnRows(dom.window.document).map(row => row.mint), [other]);
+  } finally { dom.window.close(); }
+});
+
 test('GMGN list discovery stays idle on a token chart route', () => {
   const mint = '11111111111111111111111111111111';
   const dom = new JSDOM(`<div href="/sol/token/${mint}"><img src="/coin.png"><button>Buy</button></div>`, {
@@ -89,6 +98,37 @@ test('GMGN overlay paints a verified exact match and clears a removed row', asyn
   } finally { overlay.stop(); dom.window.close(); }
 });
 
+test('GMGN restores a fresh exact-mint highlight immediately after returning from a coin', async () => {
+  const dom = page(`<main id="list"><div id="row"><a href="/sol/token/${mint}">Coin</a><img src="x"><button>Buy</button></div></main>`);
+  const now = Date.now();
+  const [sample] = await fetchTokens('demo', now);
+  const [top] = assessTokens([{ ...sample, mint, provider: 'Verified fixture' }], defaults, now);
+  let requests = 0;
+  const overlay = createGmgnOverlay({
+    document: dom.window.document,
+    request: async () => {
+      requests++;
+      if (requests === 1) return { assessments: [top], settings: defaults };
+      return new Promise(() => {}); // the return-trip refresh is still in flight
+    },
+    debounceMs: 0, intervalMs: 15_000
+  });
+  try {
+    overlay.start();
+    await waitFor(() => dom.window.document.querySelector('#row')?.classList.contains('scout-pulse-green'), 'initial highlight');
+    dom.window.history.pushState({}, '', `/sol/token/${mint}`);
+    dom.window.document.querySelector('#list').replaceChildren();
+    dom.window.dispatchEvent(new dom.window.PopStateEvent('popstate'));
+    await waitFor(() => dom.window.document.querySelector('.scout-pulse-row') === null, 'chart route to clear list decoration');
+
+    dom.window.history.pushState({}, '', '/sol/trenches');
+    dom.window.document.querySelector('#list').innerHTML = `<div id="returned"><a href="/sol/token/${mint}">Coin</a><img src="x"><button>Buy</button></div>`;
+    dom.window.dispatchEvent(new dom.window.PopStateEvent('popstate'));
+    await waitFor(() => dom.window.document.querySelector('#returned')?.classList.contains('scout-pulse-green'), 'cached highlight before the refresh returns');
+    assert.equal(dom.window.document.querySelector('#returned')?.dataset.scoutMint, mint);
+  } finally { overlay.stop(); dom.window.close(); }
+});
+
 test('GMGN rows open the same hover popup Axiom Pulse has, badge and all', async () => {
   const dom = page(`<main><div id="row"><a href="/sol/token/${mint}">Coin</a><img src="x"><button>Buy</button></div></main>`);
   const now = Date.now();
@@ -106,7 +146,7 @@ test('GMGN rows open the same hover popup Axiom Pulse has, badge and all', async
     const document_ = dom.window.document;
     const row = document_.querySelector('#row');
     await waitFor(() => row.classList.contains('scout-pulse-green'), 'the row to be assessed before hovering');
-    assert.equal(row.querySelector('.scout-pulse-flow')?.textContent, '5m -2.5 SOL');
+    assert.equal(row.querySelector('.scout-pulse-flow'), null, 'flow stays in the research popup, not on the card');
     const tip = document_.querySelector('.scout-pulse-tooltip');
     assert.ok(tip, 'the hover popup is created for GMGN too');
     assert.equal(tip.classList.contains('is-visible'), false, 'and stays hidden until a row is hovered');

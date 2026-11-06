@@ -1,75 +1,47 @@
 /* Scout only decorates rows resolved to one full Solana mint. */
 .scout-pulse-row { position: relative; }
-.scout-pulse-green {
-  background: rgba(62, 220, 133, .08) !important;
-  box-shadow: inset 3px 0 0 #3edc85 !important;
-}
-.scout-pulse-amber {
-  background: rgba(250, 204, 75, .08) !important;
-  box-shadow: inset 3px 0 0 #facc4b !important;
-}
-.scout-pulse-red {
-  background: rgba(255, 76, 99, .09) !important;
-  box-shadow: inset 3px 0 0 #ff4c63 !important;
-}
-/* Every exact-mint match gets a quiet white rail. Verdict colors replace it only when
-   Scout has enough evidence for a green, yellow, or red state. */
-.scout-pulse-neutral {
-  background: rgba(255, 255, 255, .025) !important;
-  box-shadow: inset 3px 0 0 rgba(255, 255, 255, .72) !important;
-}
-.scout-pulse-gray {
-  background: rgba(255, 255, 255, .025) !important;
-  box-shadow: inset 3px 0 0 rgba(255, 255, 255, .72) !important;
-}
-/* Activity without a quality verdict is caution yellow, never a separate blue state. */
-.scout-pulse-run {
-  background: rgba(250, 204, 75, .08) !important;
-  box-shadow: inset 3px 0 0 #facc4b !important;
-}
-/* Narrative and attention remain available in the tooltip; they do not recolour rows. */
+.scout-pulse-row { contain: layout paint; isolation: isolate; }
+/* A restrained full-card read on every scanned row, including unknowns. */
 .scout-pulse-buzz { outline: none !important; }
-.scout-pulse-copycat { box-shadow: inset 3px 0 0 #f59e0b !important; }
-.scout-pulse-insider { box-shadow: inset 3px 0 0 #ff4c63, inset 0 0 0 1px rgba(255, 76, 99, .16) !important; }
-
-/*
- * Hot coin: a top-tier verdict, a crowd of buyers, and heavy volume. This is meant
- * to be the brightest thing on the page, so the row goes from a muted wash to a
- * near-solid one and a halo breathes over it. The halo is a pseudo-element because
- * the row's own background/box-shadow are !important, and !important wins over an
- * animation in the cascade, so animating them directly would do nothing at all.
- */
-.scout-pulse-green.scout-pulse-hot {
-  --scout-launch: rgba(105, 255, 173, .92);
-  --scout-launch-glow: rgba(62, 220, 133, .72);
-  --scout-launch-soft: rgba(62, 220, 133, .42);
-  background: rgba(62, 220, 133, .24) !important;
-  box-shadow: inset 4px 0 0 #69ffad, inset 0 0 18px rgba(62, 220, 133, .18) !important;
-}
-.scout-pulse-amber.scout-pulse-hot {
-  --scout-launch: rgba(255, 224, 114, .94);
-  --scout-launch-glow: rgba(250, 204, 75, .7);
-  --scout-launch-soft: rgba(250, 204, 75, .4);
-  background: rgba(250, 204, 75, .22) !important;
-  box-shadow: inset 4px 0 0 #ffe072, inset 0 0 18px rgba(250, 204, 75, .16) !important;
-}
-/* Reserved for verified New Pairs that are turning over their pool with broad buying. */
-.scout-pulse-row.scout-pulse-hot { outline: 1px solid var(--scout-launch) !important; outline-offset: -1px; }
-.scout-pulse-row.scout-pulse-hot::after {
+.scout-pulse-row:is(.scout-pulse-green, .scout-pulse-amber, .scout-pulse-run, .scout-pulse-red, .scout-pulse-neutral, .scout-pulse-gray)::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: 4;
-  border: 2px solid var(--scout-launch);
+  border: 1px solid var(--scout-card-edge);
   border-radius: inherit;
-  box-shadow: 0 0 10px var(--scout-launch-glow), 0 0 24px var(--scout-launch-soft);
+  background: var(--scout-card-tint);
   pointer-events: none;
-  animation: scout-launching 900ms ease-in-out infinite alternate;
 }
-@keyframes scout-launching {
-  from { opacity: .48; }
-  to { opacity: 1; }
+.scout-pulse-row.scout-pulse-green {
+  --scout-card-edge: rgba(91, 239, 158, .38);
+  --scout-card-tint: rgba(48, 196, 126, .075);
 }
+.scout-pulse-row:is(.scout-pulse-amber, .scout-pulse-run) {
+  --scout-card-edge: rgba(230, 190, 88, .42);
+  --scout-card-tint: rgba(180, 139, 45, .095);
+}
+.scout-pulse-row.scout-pulse-red {
+  --scout-card-edge: rgba(255, 110, 130, .4);
+  --scout-card-tint: rgba(200, 70, 90, .075);
+}
+.scout-pulse-row.scout-pulse-neutral {
+  --scout-card-edge: rgba(225, 232, 241, .25);
+  --scout-card-tint: rgba(225, 232, 241, .035);
+}
+.scout-pulse-row.scout-pulse-gray {
+  --scout-card-edge: rgba(225, 232, 241, .17);
+  --scout-card-tint: rgba(225, 232, 241, .02);
+}
+/* Buy activity should be a quiet edge cue, never a flashing/full-card repaint. */
+.scout-pulse-hot { animation: none !important; box-shadow: inset 3px 0 0 rgba(120, 176, 222, .65) !important; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+/* Card edge and fill always agree with Scout's assessment. Copycat and insider
+   context stays in the research panel rather than creating a mixed-color verdict. */
+/* The full-card outline replaces the old thick left rail. */
+.scout-pulse-row > .scout-pulse-badge { display: none; }
 /* Colored platform / category chips (pump.fun, Raydium, Charity, ...). */
 .scout-pulse-tags { position: absolute; top: 2px; right: 2px; display: flex; gap: 3px; z-index: 6; pointer-events: none; }
 .scout-pulse-tag {
@@ -250,3 +222,19 @@ html:not([data-scout-coin-page]) .scout-pulse-tooltip.is-visible { display: flex
 .scout-pulse-tooltip-ca-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .scout-pulse-tooltip-ca .copy-ca { flex: 0 0 auto; margin-left: auto; padding: 3px 7px; font-size: 9px; }
 .scout-pulse-tooltip-loading { margin: 0 0 9px; color: #aeb1b8; font-size: 10px; }
+
+/* Quick-read research surface. Full source details remain available on demand. */
+.scout-pulse-tooltip { border: 1px solid rgba(159, 179, 211, .22); background: linear-gradient(145deg, #1d232c, #15191f 54%, #13161b); box-shadow: 0 24px 64px rgba(0, 0, 0, .52), 0 1px 0 rgba(255, 255, 255, .09) inset; }
+.scout-pulse-tooltip-bar { background: rgba(139, 174, 220, .045); }
+.scout-pulse-tooltip .scout-pulse-tooltip-heading { font-size: 14px; letter-spacing: .025em; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chips { gap: 4px; margin-bottom: 10px; }
+.scout-pulse-tooltip .scout-pulse-tooltip-chip { font-size: 9px; padding: 2px 6px; }
+.scout-pulse-snapshot { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .1); border-radius: 10px; background: rgba(255, 255, 255, .09); margin: 10px 0 0; }
+.scout-pulse-snapshot-cell { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 9px 10px; background: #1b2129; }
+.scout-pulse-snapshot-cell span { color: #a4afbe; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.scout-pulse-snapshot-cell strong { color: #f2f6fb; font: 700 14px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scout-pulse-snapshot-reason { margin: 9px 0 0; padding: 8px 10px; border-left: 2px solid #829fbd; border-radius: 0 7px 7px 0; background: rgba(130, 159, 189, .08); color: #dbe4ef; font-size: 11px; line-height: 1.4; }
+.scout-pulse-research { margin-top: 12px; border-top: 1px solid rgba(255, 255, 255, .11); }
+.scout-pulse-research > summary { cursor: pointer; padding: 10px 2px; color: #b9c9db; font-size: 11px; font-weight: 700; letter-spacing: .03em; }
+.scout-pulse-research > summary:hover { color: #fff; }
+.scout-pulse-research[open] > summary { color: #e8f2ff; }

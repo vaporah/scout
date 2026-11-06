@@ -1,7 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.9.5
 
+- Refined Axiom and GMGN scanner highlights to use one subdued, full-card color per assessment, including a subtle white state for incomplete evidence.
+- Simplified row cards and the hover research panel while keeping detailed market, risk, and source evidence available on demand.
+- Preserved fresh GMGN highlights when returning from a coin page and refreshed them in the background.
+- Reduced repeated DOM mint lookups during scanner refreshes and removed card-rendering work for hidden category and flow chips.
+- Updated the development-only HTTP dependency to a patched version after the security audit.
 - Added a plain-language Scout read that combines demand, execution quality, risk, and evidence coverage without treating missing data as safe.
 - Added exact-mint social metadata for claimed X, Telegram, website, and direct launch-post links.
 - Added clear paid-promotion labeling for active DEX Screener boosts, kept separate from organic interest and the safety score.

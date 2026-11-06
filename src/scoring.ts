@@ -65,6 +65,11 @@ export function assess(token: Token, settings: Settings, now: number): Assessmen
   if (quality?.botDegenPct !== null && quality?.botDegenPct !== undefined && quality.botDegenPct >= 50) warnings.push(`${quality.botDegenPct.toFixed(1)}% of supply is held by wallets flagged as bots / degen traders`);
   if (quality?.freshWalletPct !== null && quality?.freshWalletPct !== undefined && quality.freshWalletPct >= 60) warnings.push(`${quality.freshWalletPct.toFixed(1)}% of supply is held by fresh wallets`);
   if (a.suspiciousConcentration) warnings.push('Trading volume is concentrated in very few wallets');
+  if (a.chartIntegrity.status === 'suspicious') {
+    critical.push(`CHART INTEGRITY: ${a.chartIntegrity.flags.join('; ')}`);
+  } else if (a.chartIntegrity.status === 'degraded') {
+    warnings.push(`Chart integrity caution: ${a.chartIntegrity.flags[0]}`);
+  }
   if (a.volume5m === 0) missing.push('Recent trade observations');
   if (a.buyerGrowth === null) missing.push('Buyer-growth baseline');
   if (a.volumeAcceleration === null) missing.push('Volume-acceleration baseline');
@@ -92,7 +97,7 @@ export function assess(token: Token, settings: Settings, now: number): Assessmen
   // Smooth 0..1 curve: no cliff at the threshold, and extreme turnover keeps adding
   // a little instead of flattening out completely.
   const intensity = turnover === null ? 0 : turnover / (turnover + 1);
-  const momentum = scaled((momentumEvidence ? .2 : 0) + (token.marketSnapshot && buyCountLead ? .2 : 0) + (buyPressure * .2) + (intensity * .25) + (a.netPressure !== null && a.netPressure > .15 ? .15 : 0) + (a.buyerGrowth !== null && a.buyerGrowth > .2 ? .15 : 0) + (a.volumeAcceleration !== null && a.volumeAcceleration > 1.3 ? .1 : 0) - (a.suspiciousConcentration ? .5 : 0), w.momentum);
+  const momentum = scaled((momentumEvidence ? .2 : 0) + (token.marketSnapshot && buyCountLead ? .2 : 0) + (buyPressure * .2) + (intensity * .25) + (a.netPressure !== null && a.netPressure > .15 ? .15 : 0) + (a.buyerGrowth !== null && a.buyerGrowth > .2 ? .15 : 0) + (a.volumeAcceleration !== null && a.volumeAcceleration > 1.3 ? .1 : 0) - (a.suspiciousConcentration ? .5 : 0) - (a.chartIntegrity.status === 'degraded' ? .2 : 0) - (a.chartIntegrity.status === 'suspicious' ? .6 : 0), w.momentum);
   const liquidity = scaled((liquidityOK ? .6 : 0) + (slippageOK ? .25 : 0) + (token.liquidityChangePct !== null && token.liquidityChangePct >= 0 ? .15 : 0), w.liquidity);
   const developer = scaled(dev.source === 'unknown' ? 0 : (farmer ? .1 : .7) + (dev.linkedSales === 0 ? .3 : 0), w.developer);
   const price = scaled(token.priceChange5mPct === null ? 0 : token.priceChange5mPct > 1 && token.priceChange5mPct < 45 ? .75 : token.priceChange5mPct >= 45 ? .2 : .35, w.price);
